@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <meta
+      content="width=device-width,initial-scale=1,user-scalable=no"
+      name="viewport"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <meta name="format-detection" content="telephone=no,address=no" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>Hotel App Debug</title>
+    <script>
+      console.log("✅ [HTML] Template loaded. Bootstrapping...");
+      window.onerror = function (msg, url, line) {
+        console.error("❌ [Global Error] " + msg + "\n" + url + ":" + line);
+        document.getElementById("debug-error").innerText = "JS Error: " + msg;
+        document.getElementById("debug-error").style.display = "block";
+      };
+      window.onload = function () {
+        console.log("✅ [HTML] Window loaded event");
+        if (!document.getElementById("app")) {
+          console.error("❌ [HTML] FATAL: #app element missing!");
+        }
+      };
+    </script>
+    <%= htmlWebpackPlugin.tags.headTags %>
+  </head>
+  <body style="margin: 0; background: #eee">
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+
+    <!-- 调试指示器：如果这行一直显示，说明 React 没挂载 -->
+    <div
+      id="debug-status"
+      style="
+        padding: 20px;
+        text-align: center;
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+      "
+    >
+      <h3>⚠️ HTML Loaded. Waiting for React...</h3>
+      <p>如果长时间看到此消息，说明 JS 加载失败或 React 挂载失败。</p>
+      <p>请按 F12 查看 Console 错误。</p>
+    </div>
+
+    <div
+      id="debug-error"
+      style="
+        display: none;
+        padding: 20px;
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        margin-top: 10px;
+      "
+    ></div>
+
+    <div id="app"></div>
+
+    <%= htmlWebpackPlugin.tags.bodyTags %>
+  </body>
+</html>

@@ -1,0 +1,47 @@
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #fa2c19 0%, #ff6034 100%);
+  padding: 40px 20px;
+}
+
+.logo-area {
+  text-align: center;
+  padding: 60px 0 40px;
+  
+  .app-name {
+    display: block;
+    font-size: 32px;
+    font-weight: bold;
+    color: #fff;
+  }
+  
+  .app-slogan {
+    display: block;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 8px;
+  }
+}
+
+.login-form {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  
+  .btn-area {
+    margin-top: 30px;
+  }
+  
+  .register-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #fa2c19;
+    font-size: 14px;
+  }
+  
+  .test-btn {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px dashed #eee;
+  }
+}

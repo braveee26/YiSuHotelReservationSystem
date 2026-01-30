@@ -1,0 +1,46 @@
+
+.hotel-list-page {
+    .filter-bar {
+        display: flex;
+        justify-content: space-around;
+        padding: 10px;
+        background: white;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .list-container {
+        padding: 10px;
+        
+        .hotel-card {
+            background: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            
+            .card-image {
+                width: 100px;
+                height: 100px;
+                background-color: #eee;
+                border-radius: 4px;
+            }
+            
+            .card-info {
+                margin-left: 10px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                
+                .hotel-name {
+                    font-weight: bold;
+                }
+                
+                .hotel-price {
+                    color: #fa2c19;
+                    font-size: 16px;
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+}

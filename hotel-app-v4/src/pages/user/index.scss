@@ -1,0 +1,16 @@
+
+.user-page {
+    .user-header {
+        background-color: #fa2c19; // JD Red
+        padding: 30px 20px;
+        display: flex;
+        align-items: center;
+        color: white;
+        
+        .user-name {
+            margin-left: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    }
+}
