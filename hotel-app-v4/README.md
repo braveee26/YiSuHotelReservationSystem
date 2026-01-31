@@ -108,11 +108,151 @@ hotel-app-v4/
 
 ---
 
-## 可用脚本
+## 常用命令速查
+
+### 开发相关
 
 ```bash
 npm run dev:h5      # H5 开发模式
 npm run dev:weapp   # 微信小程序开发模式
+```
+
+### 构建相关
+
+```bash
 npm run build:h5    # H5 生产构建
 npm run build:weapp # 微信小程序生产构建
 ```
+
+### Android 相关
+
+```bash
+npx cap sync        # 同步 Web 资源到 Android 项目
+npx cap open android # 打开 Android Studio
+npx cap run android  # 直接运行到模拟器/真机
+```
+
+---
+
+# Android 端环境配置与运行避坑指南
+
+本文档总结了在 Windows 环境下运行本项目 Android 端时可能遇到的常见问题及解决方案。请务必按照以下步骤配置，以避免环境报错。
+
+## 1. 基础运行步骤
+
+⚠️ **重要提示**：所有终端命令必须在项目根目录（`hotel-app-v4`）执行，不要进入 `android` 目录执行命令。
+
+1. **安装依赖**：
+
+   ```bash
+   npm install
+   ```
+
+2. **构建 Web 资源**：
+
+   ```bash
+   npm run build:h5
+   ```
+
+3. **同步资源到 Android**：
+
+   ```bash
+   npx cap sync
+   ```
+
+4. **打开 Android Studio**：
+
+   ```bash
+   npx cap open android
+   ```
+
+## 2. 关键配置文件修改（已经做好了）
+
+由于国内网络环境和依赖版本冲突问题，必须修改 `android/build.gradle` 文件。
+
+**文件路径**：`android/build.gradle` (项目级 Gradle 文件，非 app 级)
+
+请用以下代码完全替换该文件内容：
+
+```gradle
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        // 【新增】阿里云镜像加速（解决下载 Gradle 卡死/超时问题）
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
+
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.7.2'
+        classpath 'com.google.gms:google-services:4.4.2'
+    }
+}
+
+apply from: "variables.gradle"
+
+allprojects {
+    repositories {
+        // 【新增】阿里云镜像加速
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
+
+        google()
+        mavenCentral()
+    }
+
+    // 【新增】强制解决 Kotlin 版本冲突的核心代码
+    // 解决 "Duplicate class kotlin.collections.jdk8..." 报错
+    configurations.all {
+        resolutionStrategy {
+            force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22'
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+```
+
+## 3. 解决中文路径报错（已经做好了）
+
+如果你的项目路径包含中文字符（例如：`D:\作业\实训`），Gradle 可能会报错。
+
+**解决方案：**
+
+1. 打开 `android/gradle.properties` 文件。
+2. 在文件末尾添加以下代码：
+
+```properties
+android.overridePathCheck=true
+```
+
+## 4. 模拟器选择（解决白屏/语法报错）
+
+**问题描述**：如果启动 APP 后显示白屏，并报错 `Uncaught SyntaxError: Unexpected token =`。
+
+**原因**：旧版模拟器（如 Pixel 4 / API 30）的 WebView 内核版本过低，不支持新版 JS 语法。
+
+**解决方案**：
+
+1. 在 Android Studio 的设备管理器 (Device Manager) 中点击 **Create Device**。
+2. 选择任意设备（推荐 Pixel 7 或 8）。
+3. **关键步骤**：在 System Image 选择界面，务必下载并选择 **API 34** 或 **API 35** (Android 14/15)。
+4. 使用这个新创建的模拟器运行项目即可。
+
+## 5. 其他常见问题 QA
+
+**Q: Gradle Sync 进度条一直卡住或下载失败？**
+A: 请确保已经配置了第 2 步中的阿里云镜像。如果依然卡住，尝试点击 Android Studio 右侧的 Gradle 面板，右键项目选择 **Reload Gradle Project**。
+
+**Q: Android Studio 提示 Windows Defender 警告？**
+A: 强烈建议点击弹窗中的 **Automatically** 或 **Exclude folders**。这会自动将项目目录加入杀毒软件白名单，显著提升编译速度。
+
+**Q: 运行显示 Timeout waiting for lock？**
+A: 這是 Gradle 进程锁死。去 `C:\Users\你的用户名\.gradle\wrapper\dists` 下删除对应的 Gradle 版本文件夹，然后重启 Android Studio 让它重新下载。

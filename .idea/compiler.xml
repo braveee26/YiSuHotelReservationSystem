@@ -7,9 +7,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="D:/maven/mvn_resp/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
+          <entry name="$PROJECT_DIR$/../../../../../maven/mvn_resp/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
         </processorPath>
-        <module name="YiSuSystem" />
       </profile>
     </annotationProcessing>
   </component>

@@ -49,7 +49,7 @@ const config = {
         }
     },
     h5: {
-        publicPath: '/',
+        publicPath: './',
         staticDirectory: 'static',
         router: {
             mode: 'hash', // 强制 Hash 模式
