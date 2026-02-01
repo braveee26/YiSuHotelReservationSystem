@@ -2,14 +2,34 @@ export default {
   pages: [
     'pages/auth/login/index',
     'pages/home/index',
-    'pages/order/index',
     'pages/user/index',
-    'pages/hotel/list/index',
-    'pages/hotel/detail/index',
-    'pages/hotel/booking/index',
+    'pages/order/index',
     'pages/auth/register/index',
-    'pages/user/contacts/index',
-    'pages/user/settings/index'
+  ],
+  subPackages: [
+    {
+      root: 'pages/hotel',
+      pages: [
+        'list/index',
+        'detail/index',
+        'booking/index'
+      ]
+    },
+    {
+      root: 'pages/sub-main',
+      pages: [
+        'favorites/index',
+        'messages/index',
+        'reviews/index'
+      ]
+    },
+    {
+      root: 'pages/sub-user',
+      pages: [
+        'contacts/index',
+        'settings/index'
+      ]
+    }
   ],
   /* Custom TabBar Implementation - Disabling native config
   tabBar: {

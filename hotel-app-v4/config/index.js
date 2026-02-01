@@ -27,6 +27,38 @@ const config = {
         enable: false // 暂时关闭缓存以避免旧缓存干扰
     },
     mini: {
+        webpackChain(chain) {
+            chain.merge({
+                optimization: {
+                    splitChunks: {
+                        chunks: 'all',
+                        maxInitialRequests: Infinity,
+                        minSize: 0,
+                        cacheGroups: {
+                            taroify: {
+                                name: 'taroify',
+                                test: /[\/]node_modules[\/]@taroify[\/]/,
+                                priority: 100,
+                            },
+                            taro: {
+                                name: 'taro',
+                                test: /[\/]node_modules[\/]@tarojs[\/]/,
+                                priority: 90,
+                            },
+                            common: {
+                                name: 'common',
+                                test: /[\/]node_modules[\/]/,
+                                priority: 50,
+                                minChunks: 2,
+                            },
+                        },
+                    },
+                },
+            })
+        },
+        optimizeMainPackage: {
+            enable: true,
+        },
         postcss: {
             pxtransform: {
                 enable: true,
@@ -55,7 +87,7 @@ const config = {
             mode: 'hash', // 强制 Hash 模式
         },
         devServer: {
-            hot: true, // 重新启用 HMR，解决 $RefreshReg$ 报错
+            hot: true, // 重新启用 HMR
             host: '0.0.0.0',
             port: 10086
         },

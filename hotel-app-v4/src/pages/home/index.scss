@@ -1,52 +1,63 @@
-
 .home-page {
-  padding: 10px;
+  background-color: #f7f8fa;
+  min-height: 100vh;
+  position: relative;
+}
+
+.scroll-content {
+  padding-bottom: constant(safe-area-inset-bottom); /* iOS 11.0 */
+  padding-bottom: env(safe-area-inset-bottom); /* iOS 11.2 */
+}
+
+.section-container {
+  padding: 0 32rpx;
+  margin-top: 48rpx;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
   
-  .search-bar-container {
-    .search-input {
-      width: 100%;
-      height: 40px;
-      padding: 0 15px;
-      background: #fff;
-      border-radius: 20px;
-      font-size: 14px;
+  .icon {
+    font-size: 40rpx;
+    margin-right: 16rpx;
+  }
+  
+  .title {
+    font-size: 34rpx;
+    font-weight: 600;
+    color: #333;
+  }
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  
+  .hot-tag {
+    padding: 12rpx 24rpx;
+    background: #fff;
+    border: 2rpx solid #b7cfdc;
+    color: #385e72;
+    border-radius: 32rpx;
+    font-size: 24rpx;
+    transition: all 0.2s ease;
+    
+    &:active {
+      background: #d9e4ec;
+    }
+    
+    &.active {
+      background: #385e72;
+      color: #fff;
+      border-color: #385e72;
     }
   }
-  
-  .banner-container {
-      margin-top: 10px;
-      height: 150px;
-      border-radius: 8px;
-      overflow: hidden;
-      
-      .banner-item {
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-size: 20px;
-      }
-  }
+}
 
-  .date-picker-trigger {
-      background: white;
-      padding: 15px;
-      margin: 15px 0;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  }
-
-  .hot-hotels {
-      margin-top: 20px;
-      .section-title {
-          font-size: 18px;
-          font-weight: bold;
-          margin-bottom: 10px;
-          display: block;
-      }
-  }
+.hotel-list {
+  display: flex;
+  flex-direction: column;
 }

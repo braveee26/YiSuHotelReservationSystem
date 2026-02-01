@@ -256,3 +256,100 @@ A: 强烈建议点击弹窗中的 **Automatically** 或 **Exclude folders**。�
 
 **Q: 运行显示 Timeout waiting for lock？**
 A: 這是 Gradle 进程锁死。去 `C:\Users\你的用户名\.gradle\wrapper\dists` 下删除对应的 Gradle 版本文件夹，然后重启 Android Studio 让它重新下载。
+
+---
+
+## 项目开发文档补充 (2026-02-01)
+
+### 1. 页面 URL 地址
+
+根据 `src/app.config.js` 配置，当前项目包含以下页面路由：
+
+**主包页面：**
+
+- `/pages/home/index` - 首页
+- `/pages/user/index` - 个人中心
+- `/pages/order/index` - 订单页
+- `/pages/auth/login/index` - 登录页
+- `/pages/auth/register/index` - 注册页
+
+**分包页面 (SubPackages)：**
+
+- `pages/hotel` (酒店相关):
+  - `/pages/hotel/list/index` - 酒店列表
+  - `/pages/hotel/detail/index` - 酒店详情
+  - `/pages/hotel/booking/index` - 酒店预订
+
+- `pages/sub-main` (主要功能子页):
+  - `/pages/sub-main/favorites/index` - 收藏页
+  - `/pages/sub-main/messages/index` - 消息中心
+  - `/pages/sub-main/reviews/index` - 点评页
+
+- `pages/sub-user` (用户相关子页):
+  - `/pages/sub-user/contacts/index` - 常用入住人
+  - `/pages/sub-user/settings/index` - 设置页
+
+### 2. 图标引入方式
+
+本项目采用了混合图标引入策略：
+
+1.  **底部导航栏图标 (TabBar)**：
+    - 采用 **本地图片资源** 方式引入。
+    - 路径：`src/assets/tab/`
+    - 命名规范：`tab-{name}.png` (未选中) 和 `tab-{name}-active.png` (选中)。
+    - 在 `src/components/TabBar/index.jsx` 中直接 `import` 使用。
+
+2.  **通用 UI 图标**：
+    - 使用 **@taroify/icons** 组件库。
+    - 引入方式：`import { IconName } from '@taroify/icons'`
+    - 注意：已移除 babel-plugin-import 配置，直接使用具名导入即可支持 Tree-shaking。
+
+### 3. 可复用组件
+
+目前项目中封装了以下主要可复用组件：
+
+#### HotelCard (酒店卡片)
+
+展示酒店基本信息的通用卡片组件，用于首页推荐、收藏列表、酒店列表等。
+
+- **路径**：`src/components/HotelCard.jsx`
+- **使用示例**：
+
+```jsx
+import HotelCard from "@/components/HotelCard";
+
+<HotelCard
+  hotel={{
+    id: 1,
+    name: "酒店名称",
+    image: "图片URL",
+    stars: 5,
+    rating: 4.8,
+    reviews: 100,
+    price: 800,
+    tags: ["标签1", "标签2"],
+    distance: "距离文本",
+    badges: ["推荐"],
+  }}
+  onClick={() => handleClick(1)}
+/>;
+```
+
+#### TabBar (自定义底部导航)
+
+替代原生 TabBar，支持更灵活的样式定制和图标控制。
+
+- **路径**：`src/components/TabBar/index.jsx`
+- **使用示例**：
+
+```jsx
+import TabBar from "@/components/TabBar";
+
+// current 为当前 tab 的索引 (0-4)
+<TabBar current={0} />;
+```
+
+#### 其他组件 (开发中)
+
+- `CitySelector` (src/components/CitySelector): 城市选择器组件（结构已创建，待完善）
+- `PriceDisplay` (src/components/PriceDisplay): 价格展示组件（结构已创建，待完善）

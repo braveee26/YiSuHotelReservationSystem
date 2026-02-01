@@ -3,13 +3,17 @@ import { View, Image, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import './index.scss'
 
-// 导入图标
-import homeIcon from '../../assets/tab-home.png'
-import homeActiveIcon from '../../assets/tab-home-active.png'
-import orderIcon from '../../assets/tab-order.png'
-import orderActiveIcon from '../../assets/tab-order-active.png'
-import userIcon from '../../assets/tab-user.png'
-import userActiveIcon from '../../assets/tab-user-active.png'
+// 导入新图标
+import homeIcon from '../../assets/tab/tab-home.png'
+import homeActiveIcon from '../../assets/tab/tab-home-active.png'
+import likeIcon from '../../assets/tab/tab-like.png'
+import likeActiveIcon from '../../assets/tab/tab-like-active.png'
+import messageIcon from '../../assets/tab/tab-message.png'
+import messageActiveIcon from '../../assets/tab/tab-message-active.png'
+import reviewIcon from '../../assets/tab/tab-review.png'
+import reviewActiveIcon from '../../assets/tab/tab-review-active.png'
+import userIcon from '../../assets/tab/tab-user.png'
+import userActiveIcon from '../../assets/tab/tab-user-active.png'
 
 const TabBar = ({ current }) => {
   const tabs = [
@@ -21,18 +25,32 @@ const TabBar = ({ current }) => {
       index: 0
     },
     {
-      pagePath: '/pages/order/index',
-      text: '订单',
-      icon: orderIcon,
-      selectedIcon: orderActiveIcon,
+      pagePath: '/pages/sub-main/favorites/index',
+      text: '收藏',
+      icon: likeIcon,
+      selectedIcon: likeActiveIcon,
       index: 1
+    },
+    {
+      pagePath: '/pages/sub-main/messages/index',
+      text: '消息',
+      icon: messageIcon,
+      selectedIcon: messageActiveIcon,
+      index: 2
+    },
+    {
+      pagePath: '/pages/sub-main/reviews/index',
+      text: '点评',
+      icon: reviewIcon,
+      selectedIcon: reviewActiveIcon,
+      index: 3
     },
     {
       pagePath: '/pages/user/index',
       text: '我的',
       icon: userIcon,
       selectedIcon: userActiveIcon,
-      index: 2
+      index: 4
     }
   ]
 

@@ -6,5 +6,17 @@ module.exports = {
       framework: 'react',
       ts: false // 项目使用 JSX，关闭 TS 模式以免误判
     }]
-  ]
+  ],
+  plugins: [
+    [
+      'import',
+      {
+        libraryName: '@taroify/core',
+        libraryDirectory: '',
+        style: true,
+      },
+      '@taroify/core',
+    ],
+
+  ],
 }
