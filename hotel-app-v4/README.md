@@ -295,25 +295,26 @@ A: 這是 Gradle 进程锁死。去 `C:\Users\你的用户名\.gradle\wrapper\di
 
 1.  **底部导航栏图标 (TabBar)**：
     - 采用 **本地图片资源** 方式引入。
-    - 路径：`src/assets/tab/`
-    - 命名规范：`tab-{name}.png` (未选中) 和 `tab-{name}-active.png` (选中)。
-    - 在 `src/components/TabBar/index.jsx` 中直接 `import` 使用。
+    -   采用 **本地图片资源** 方式引入。
+    -   路径：`src/assets/tab/`
+    -   命名规范：`tab-{name}.png` (未选中) 和 `tab-{name}-active.png` (选中)。
+    -   在 `src/components/TabBar/index.jsx` 中直接 `import` 使用。
 
 2.  **通用 UI 图标**：
-    - 使用 **@taroify/icons** 组件库。
-    - 引入方式：`import { IconName } from '@taroify/icons'`
-    - 注意：已移除 babel-plugin-import 配置，直接使用具名导入即可支持 Tree-shaking。
+    -   通过 **@taroify/icons** 组件库。
+    -   引入方式：`import { IconName } from '@taroify/icons'`
+    -   注意：已移除 babel-plugin-import 配置，直接使用具名导入即可支持 Tree-shaking。
 
-### 3. 可复用组件
+### 3. 可复用组件与视觉升级
 
-目前项目中封装了以下主要可复用组件：
+目前项目中封装了以下主要可复用组件，并对核心界面进行了视觉升级：
 
 #### HotelCard (酒店卡片)
 
 展示酒店基本信息的通用卡片组件，用于首页推荐、收藏列表、酒店列表等。
 
-- **路径**：`src/components/HotelCard.jsx`
-- **使用示例**：
+-   **路径**：`src/components/HotelCard.jsx`
+-   **使用示例**：
 
 ```jsx
 import HotelCard from "@/components/HotelCard";
@@ -335,12 +336,29 @@ import HotelCard from "@/components/HotelCard";
 />;
 ```
 
+#### OrderCard (订单卡片 - User Page 专用)
+
+个人中心订单选项卡内的高级订单卡片，支持多种筛选状态。
+
+-   **路径**：`src/pages/user/index.jsx` (作为子组件实现)
+-   **视觉特性**：
+    -   采用模块化圆角设计，区分酒店基本信息与价格操作区。
+    -   支持 `待入住` 等不同状态的色彩提示。
+
+#### User Interface (个人中心视觉升级)
+
+对个人中心进行了全方位的视觉美化：
+
+-   **玻璃拟态 (Glassmorphism)**：用户信息卡片采用毛玻璃背景。
+-   **动态渐变**：顶部背景采用 `linear-gradient` 渐变色，提升高端感。
+-   **平滑动画**：选项卡切换带指示条位移微动效。
+
 #### TabBar (自定义底部导航)
 
 替代原生 TabBar，支持更灵活的样式定制和图标控制。
 
-- **路径**：`src/components/TabBar/index.jsx`
-- **使用示例**：
+-   **路径**：`src/components/TabBar/index.jsx`
+-   **使用示例**：
 
 ```jsx
 import TabBar from "@/components/TabBar";
@@ -351,5 +369,20 @@ import TabBar from "@/components/TabBar";
 
 #### 其他组件 (开发中)
 
-- `CitySelector` (src/components/CitySelector): 城市选择器组件（结构已创建，待完善）
-- `PriceDisplay` (src/components/PriceDisplay): 价格展示组件（结构已创建，待完善）
+-   `CitySelector` (src/components/CitySelector): 城市选择器组件（结构已创建，待完善）
+-   `PriceDisplay` (src/components/PriceDisplay): 价格展示组件（结构已创建，待完善）
+
+---
+
+## 项目更新日志 (2026-02-04)
+
+### 个人中心 (User) 与 订单 (Order) 模块升级
+
+1.  **功能更新**：
+    -   **新增“订单”选项卡**：在个人中心集成订单管理，支持按“全部、待入住、待评价、历史订单、退款/售后”五大维度筛选。
+    -   **整合入口**：将常用入住人、个人信息与订单管理统一在四个选项卡中。
+
+2.  **视觉重构**：
+    -   重写 `pages/user/index.scss`，引入高端深蓝渐变色调。
+    -   优化 VIP 会员标识及用户头像展示。
+    -   订单列表采用全新的卡片样式，包含“联系酒店”与“再次预订”操作按钮。
