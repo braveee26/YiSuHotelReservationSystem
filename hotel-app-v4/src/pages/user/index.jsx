@@ -40,59 +40,92 @@ export default function User() {
     Taro.showToast({ title: '保存成功', icon: 'success' })
   }
 
-  const tabs = ['个人信息', '常用入住人', '设置']
+  const tabs = ['个人信息', '常用入住人', '订单', '设置']
+  const orderFilters = ['全部', '待入住', '待评价', '历史订单', '退款/售后']
+  const [activeOrderFilter, setActiveOrderFilter] = useState(0)
+
+  const mockOrders = [
+    {
+      id: 1,
+      hotelName: '宜宿精品酒店 (上海店)',
+      roomType: '豪华大床房',
+      date: '2024-02-15 至 2024-02-16',
+      price: 588,
+      status: '待入住',
+      image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?fit=crop&w=300&h=200'
+    },
+    {
+      id: 2,
+      hotelName: '宜宿度假村 (南京店)',
+      roomType: '湖景双人房',
+      date: '2024-01-10 至 2024-01-12',
+      price: 1280,
+      status: '历史订单',
+      image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?fit=crop&w=300&h=200'
+    }
+  ]
 
   return (
     <View className="user-page">
+       <View className="user-bg-gradient"></View>
+       
        {/* Header */}
        <View className="user-header">
-         <Text className="back-btn" onClick={() => Taro.navigateBack()}>‹</Text>
-         <Text className="header-title">我的</Text>
-         <View className="avatar-box">
-            <Text className="avatar-icon">👤</Text>
+         <View className="header-nav">
+           <Text className="back-btn" onClick={() => Taro.navigateBack()}>‹</Text>
+           <Text className="header-title">个人中心</Text>
+           <View className="placeholder"></View>
          </View>
-         <View className="user-info">
-            <Text className="name">{userInfo?.name || editForm.name}</Text>
-            <Text className="email">{userInfo?.email || editForm.email}</Text>
+         
+         <View className="user-profile-card">
+           <View className="avatar-box">
+              <Image className="avatar-img" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?fit=crop&w=100&h=100" />
+           </View>
+           <View className="user-info">
+              <Text className="name">{userInfo?.name || editForm.name}</Text>
+              <Text className="email">{userInfo?.email || editForm.email}</Text>
+           </View>
+           <View className="vip-tag">
+             <Text className="vip-text">尊享会员</Text>
+           </View>
          </View>
        </View>
 
        {/* Custom Tabs */}
-       <View className="tabs-wrapper">
+       <View className="tabs-container">
          <View className="custom-tabs">
            {tabs.map((tab, idx) => (
-             <Text 
+             <View 
                key={idx} 
                className={`tab-item ${activeTab === idx ? 'active' : ''}`}
                onClick={() => setActiveTab(idx)}
              >
-               {tab}
-             </Text>
+               <Text className="tab-text">{tab}</Text>
+               <View className="active-line"></View>
+             </View>
            ))}
          </View>
          
          <View className="tab-content">
            {activeTab === 0 && (
-             <View>
+             <View className="content-card">
                <View className="section-header">
-                 <Text className="title">个人信息</Text>
+                 <Text className="title">基本信息</Text>
                  {!isEditing ? (
-                   <Button className="action-btn" onClick={() => setIsEditing(true)}>编辑</Button>
+                   <View className="edit-trigger" onClick={() => setIsEditing(true)}>
+                     <Text>编辑资料</Text>
+                   </View>
                  ) : (
-                   <Button className="action-btn" onClick={handleSaveProfile}>保存</Button>
+                   <Button className="save-btn" onClick={handleSaveProfile}>确认保存</Button>
                  )}
-               </View>
-               
-               <View className="profile-avatar">
-                 <Text className="icon">👤</Text>
                </View>
                
                <View className="info-list">
                  <View className="info-item">
-                   <Text className="label">姓名</Text>
+                   <Text className="label">我的姓名</Text>
                    {isEditing ? (
                      <Input 
-                       className="input" 
+                       className="input-field" 
                        value={editForm.name} 
                        onInput={e => setEditForm({...editForm, name: e.detail.value})}
                      />
@@ -101,10 +134,10 @@ export default function User() {
                    )}
                  </View>
                  <View className="info-item">
-                   <Text className="label">邮箱</Text>
+                   <Text className="label">电子邮箱</Text>
                    {isEditing ? (
                      <Input 
-                       className="input" 
+                       className="input-field" 
                        value={editForm.email} 
                        onInput={e => setEditForm({...editForm, email: e.detail.value})}
                      />
@@ -113,11 +146,11 @@ export default function User() {
                    )}
                  </View>
                  <View className="info-item">
-                   <Text className="label">手机号</Text>
+                   <Text className="label">手机号码</Text>
                    <Text className="val">{editForm.phone}</Text> 
                  </View>
                  <View className="info-item">
-                   <Text className="label">性别</Text>
+                   <Text className="label">性别信息</Text>
                    <Text className="val">{editForm.gender}</Text>
                  </View>
                </View>
@@ -125,45 +158,100 @@ export default function User() {
            )}
            
            {activeTab === 1 && (
-             <View>
+             <View className="guest-section">
                <View className="guest-list">
                  {guests.map(guest => (
                    <View key={guest.id} className="guest-card">
-                     <View className="g-info">
-                       <Text className="g-name">{guest.name}</Text>
-                       <Text className="g-id">身份证: {guest.idCard}</Text>
-                       <Text className="g-phone">手机: {guest.phone}</Text>
+                     <View className="g-avatar">
+                       <Text>{guest.name.charAt(0)}</Text>
                      </View>
-                     <Button className="edit-btn" size="mini">编辑</Button>
+                     <View className="g-info">
+                       <View className="g-header">
+                         <Text className="g-name">{guest.name}</Text>
+                         <Text className="g-phone">{guest.phone}</Text>
+                       </View>
+                       <Text className="g-id">证件: {guest.idCard}</Text>
+                     </View>
+                     <View className="g-action">
+                       <Text className="edit-btn">编辑</Text>
+                     </View>
                    </View>
                  ))}
-                 <Button className="add-guest-btn">添加常用入住人</Button>
+                 <View className="add-guest-card">
+                   <Text className="plus">+</Text>
+                   <Text>新增常用入住人</Text>
+                 </View>
+               </View>
+             </View>
+           )}
+
+           {activeTab === 2 && (
+             <View className="order-section">
+               <View className="order-filters">
+                 {orderFilters.map((filter, index) => (
+                   <View 
+                    key={index} 
+                    className={`filter-item ${activeOrderFilter === index ? 'active' : ''}`}
+                    onClick={() => setActiveOrderFilter(index)}
+                   >
+                     <Text>{filter}</Text>
+                   </View>
+                 ))}
+               </View>
+               
+               <View className="order-list">
+                 {mockOrders.map(order => (
+                   <View key={order.id} className="order-card-new">
+                     <View className="order-card-header">
+                       <Text className="hotel-name">{order.hotelName}</Text>
+                       <Text className={`status ${order.status === '待入住' ? 'primary' : ''}`}>{order.status}</Text>
+                     </View>
+                     <View className="order-card-body">
+                       <Image className="hotel-img" src={order.image} mode="aspectFill" />
+                       <View className="order-details">
+                         <Text className="room-type">{order.roomType}</Text>
+                         <Text className="order-date">{order.date}</Text>
+                         <View className="price-box">
+                           <Text className="currency">¥</Text>
+                           <Text className="amount">{order.price}</Text>
+                         </View>
+                       </View>
+                     </View>
+                     <View className="order-card-footer">
+                        <View className="action-btn secondary">
+                          <Text>联系酒店</Text>
+                        </View>
+                        <View className="action-btn primary">
+                          <Text>{order.status === '待入住' ? '查看详情' : '再次预订'}</Text>
+                        </View>
+                     </View>
+                   </View>
+                 ))}
                </View>
              </View>
            )}
            
-           {activeTab === 2 && (
-             <View>
-               <View className="settings-list">
-                 <View className="setting-item">
-                   <Text>修改密码</Text>
-                   <ArrowRight color="#999" size="16" />
-                 </View>
-                 <View className="setting-item">
-                   <Text>隐私设置</Text>
-                   <ArrowRight color="#999" size="16" />
-                 </View>
-                 <View className="setting-item">
-                   <Text>用户协议</Text>
-                   <ArrowRight color="#999" size="16" />
-                 </View>
-                 <View className="setting-item">
-                   <Text>我的订单</Text>
-                   <ArrowRight color="#999" size="16" />
-                 </View>
-                 <View className="setting-item danger" onClick={handleLogout}>
-                   <Text>退出登录</Text>
-                 </View>
+           {activeTab === 3 && (
+             <View className="settings-section">
+               <View className="settings-list-card">
+                 {[
+                   { label: '账户与安全', icon: '🔒' },
+                   { label: '通知设置', icon: '🔔' },
+                   { label: '清除缓存', icon: '🧹' },
+                   { label: '关于宜宿', icon: 'ℹ️' },
+                   { label: '帮助与反馈', icon: '💬' }
+                 ].map((item, id) => (
+                   <View key={id} className="setting-row">
+                     <View className="row-left">
+                       <Text className="row-icon">{item.icon}</Text>
+                       <Text className="row-label">{item.label}</Text>
+                     </View>
+                     <ArrowRight color="#CCCCCC" size="16" />
+                   </View>
+                 ))}
+               </View>
+               <View className="logout-btn-container">
+                 <Button className="logout-btn" onClick={handleLogout}>退出当前账号</Button>
                </View>
              </View>
            )}
