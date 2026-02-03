@@ -6,3 +6,22 @@ hotel-app-v4/node_modules/
 
 hotel-app-v4/新建 DOCX 文档.docx
 hotel-app-v4/~$ DOCX 文档.docx
+
+# IDE
+.idea/
+*.iml
+
+# Android
+android/.gradle/
+android/build/
+android/**/build/
+android/**/intermediates/
+
+# Node
+node_modules/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
