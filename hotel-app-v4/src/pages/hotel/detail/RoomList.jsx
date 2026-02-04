@@ -6,60 +6,47 @@ import { ArrowDown, ArrowUp } from '@taroify/icons'
 import useSearchStore from '../../../store/search'
 import './RoomList.scss'
 
-export default function RoomList() {
+export default function RoomList({ hotelId, roomTypes = [] }) {
   const { searchParams } = useSearchStore()
   const [expandedRoom, setExpandedRoom] = useState(null)
 
-  const rooms = [
+  // Transform room types from database or use fallback mock data
+  const rooms = roomTypes.length > 0 ? roomTypes.map(room => ({
+    id: room.room_type_id,
+    name: room.type_name,
+    image: room.image_url || 'https://images.unsplash.com/photo-1648383228240-6ed939727ad6?fit=crop&w=400&h=300',
+    bedType: room.bed_type || '大床',
+    size: room.room_size || 25,
+    breakfast: room.breakfast_included ? '含早餐' : '不含早餐',
+    maxGuests: room.max_guests || 2,
+    freeCancellation: true,
+    instantConfirm: true,
+    price: Number(room.price) || 0,
+    originalPrice: room.original_price ? Number(room.original_price) : null,
+    facilities: ['免费WiFi', '空调', '迷你吧', '保险箱']
+  })) : [
+    // Fallback mock data if no room types from database
     {
       id: 1,
-      name: '豪华双床房',
-      image: 'https://images.unsplash.com/photo-1648383228240-6ed939727ad6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3RlbCUyMHR3aW4lMjBiZWQlMjByb29tfGVufDF8fHx8MTc2OTg1Njc5NXww&ixlib=rb-4.1.0&q=80&w=1080',
-      bedType: '2张单人床',
-      size: 35,
-      breakfast: '含双人早餐',
+      name: '标准房',
+      image: 'https://images.unsplash.com/photo-1648383228240-6ed939727ad6?fit=crop&w=400&h=300',
+      bedType: '大床/双床',
+      size: 25,
+      breakfast: '含早餐',
       maxGuests: 2,
       freeCancellation: true,
       instantConfirm: true,
-      price: 850,
-      originalPrice: 1200,
-      facilities: ['免费WiFi', '空调', '迷你吧', '保险箱', '浴缸']
-    },
-    {
-      id: 2,
-      name: '高级大床房',
-      image: 'https://images.unsplash.com/photo-1572177215152-32f247303126?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBob3RlbCUyMHJvb20lMjBiZWR8ZW58MXx8fHwxNzY5Nzk1MzA1fDA&ixlib=rb-4.1.0&q=80&w=1080',
-      bedType: '1张大床',
-      size: 30,
-      breakfast: '含单人早餐',
-      maxGuests: 2,
-      freeCancellation: true,
-      instantConfirm: true,
-      price: 720,
-      facilities: ['免费WiFi', '空调', '迷你吧', '保险箱']
-    },
-    {
-       id: 3,
-       name: '豪华套房',
-       image: 'https://images.unsplash.com/photo-1731336478850-6bce7235e320?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3RlbCUyMHN1aXRlJTIwbHV4dXJ5fGVufDF8fHx8MTc2OTg0MTcyNnww&ixlib=rb-4.1.0&q=80&w=1080',
-       bedType: '1张特大床 + 客厅',
-       size: 60,
-       breakfast: '含双人早餐',
-       maxGuests: 3,
-       freeCancellation: true,
-       instantConfirm: true,
-       price: 1580,
-       originalPrice: 2200,
-       facilities: ['免费WiFi', '空调', '迷你吧', '保险箱', '浴缸', '客厅', '厨房']
-     }
+      price: 399,
+      facilities: ['免费WiFi', '空调', '迷你吧']
+    }
   ]
 
   const toggleRoom = (id) => {
     setExpandedRoom(expandedRoom === id ? null : id)
   }
   
-  const handleBook = () => {
-    Taro.navigateTo({ url: '/pages/order/index' })
+  const handleBook = (roomId) => {
+    Taro.navigateTo({ url: `/pages/order/index?hotelId=${hotelId}&roomId=${roomId}` })
   }
 
   return (
@@ -119,7 +106,7 @@ export default function RoomList() {
                   className="book-btn" 
                   color="#047857"
                   size="small"
-                  onClick={handleBook}
+                  onClick={() => handleBook(room.id)}
                 >
                   预订
                 </Button>
@@ -137,3 +124,4 @@ export default function RoomList() {
     </View>
   )
 }
+

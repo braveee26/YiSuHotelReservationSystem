@@ -1,11 +1,19 @@
 import { create } from 'zustand'
 
+// Helper to get formatted date string
+const getDateStr = (daysFromNow = 0) => {
+  const date = new Date()
+  date.setDate(date.getDate() + daysFromNow)
+  return date.toISOString().split('T')[0]
+}
+
 const useSearchStore = create((set) => ({
   searchParams: {
-    city: '大阪',
+    city: '',
     location: '',
-    checkIn: '2026-02-15',
-    checkOut: '2026-02-16',
+    keyword: '',
+    checkIn: getDateStr(0),  // Today
+    checkOut: getDateStr(1), // Tomorrow
     nights: 1,
     rooms: 1,
     adults: 2,
@@ -23,10 +31,11 @@ const useSearchStore = create((set) => ({
   
   resetSearch: () => set({
     searchParams: {
-      city: '大阪',
+      city: '',
       location: '',
-      checkIn: '2026-02-15',
-      checkOut: '2026-02-16',
+      keyword: '',
+      checkIn: getDateStr(0),
+      checkOut: getDateStr(1),
       nights: 1,
       rooms: 1,
       adults: 2,
@@ -37,3 +46,4 @@ const useSearchStore = create((set) => ({
 }))
 
 export default useSearchStore
+

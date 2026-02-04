@@ -10,17 +10,17 @@ export default function Login() {
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [activeTab, setActiveTab] = useState(0) // 0: Login, 1: Register
   const [loginMethod, setLoginMethod] = useState('password') // 'password' or 'code'
-  const [phone, setPhone] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [code, setCode] = useState('')
   const [countdown, setCountdown] = useState(0)
 
   console.log('✅ [Login] Component rendering...')
   
-  const login = useAuthStore(state => state.loginWithPhone)
+  const loginWithCredentials = useAuthStore(state => state.loginWithCredentials)
 
   const handleSendCode = () => {
-    if (phone.length === 11) {
+    if (username.length >= 3) {
       setCountdown(60)
       const timer = setInterval(() => {
         setCountdown((prev) => {
@@ -32,25 +32,33 @@ export default function Login() {
         })
       }, 1000)
     } else {
-      Taro.showToast({ title: '请输入11位手机号', icon: 'none' })
+      Taro.showToast({ title: '请输入用户名', icon: 'none' })
     }
   }
 
   const handleLogin = async () => {
-    if (!phone) {
-      Taro.showToast({ title: '请输入手机号', icon: 'none' })
+    if (!username) {
+      Taro.showToast({ title: '请输入用户名', icon: 'none' })
+      return
+    }
+    if (!password) {
+      Taro.showToast({ title: '请输入密码', icon: 'none' })
       return
     }
     
-    // Mock login logic
+    // Real login API call
     Taro.showLoading({ title: '登录中...' })
-    await login(phone, password)
+    const result = await loginWithCredentials(username, password)
     Taro.hideLoading()
     
-    Taro.showToast({ title: '登录成功', icon: 'success' })
-    setTimeout(() => {
-      Taro.redirectTo({ url: '/pages/home/index' })
-    }, 1500)
+    if (result.success) {
+      Taro.showToast({ title: '登录成功', icon: 'success' })
+      setTimeout(() => {
+        Taro.redirectTo({ url: '/pages/home/index' })
+      }, 1500)
+    } else {
+      Taro.showToast({ title: result.error || '登录失败', icon: 'none' })
+    }
   }
 
   // Test login - directly go to home
@@ -152,10 +160,10 @@ export default function Login() {
 
                 <View className="input-group">
                   <Input 
-                    placeholder="请输入手机号" 
-                    value={phone} 
-                    onChange={(e) => setPhone(e.detail.value)}
-                    prefix={<PhoneOutlined />}
+                    placeholder="请输入用户名" 
+                    value={username} 
+                    onChange={(e) => setUsername(e.detail.value)}
+                    prefix={<FriendsOutlined />}
                   />
                 </View>
 
@@ -208,10 +216,10 @@ export default function Login() {
               <View className="form-container">
                 <View className="input-group">
                   <Input 
-                    placeholder="请输入手机号" 
-                    value={phone} 
-                    onChange={(e) => setPhone(e.detail.value)}
-                    prefix={<PhoneOutlined />}
+                    placeholder="请输入用户名" 
+                    value={username} 
+                    onChange={(e) => setUsername(e.detail.value)}
+                    prefix={<FriendsOutlined />}
                   />
                 </View>
                  <View className="input-group code-group">

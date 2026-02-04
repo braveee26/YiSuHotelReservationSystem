@@ -123,13 +123,13 @@ YiSuHotelReservationSystem/
 为了让开发伙伴共同使用同一个云数据库，请按照以下步骤操作：
 
 1.  **添加协作者**：
-    -   登录 [Supabase Dashboard](https://supabase.com/dashboard)。
-    -   进入 **Project Settings -> Members**。
-    -   点击 **Invite Member**，输入伙伴的邮箱并分配相应权限。
+    - 登录 [Supabase Dashboard](https://supabase.com/dashboard)。
+    - 进入 **Project Settings -> Members**。
+    - 点击 **Invite Member**，输入伙伴的邮箱并分配相应权限。
 2.  **共享环境变量**：
-    -   将你的 `.env` 文件中的 `SUPABASE_URL` 和 `SUPABASE_KEY` 安全地共享给伙伴。建议伙伴在本地创建自己的 `.env` 文件。
+    - 将你的 `.env` 文件中的 `SUPABASE_URL` 和 `SUPABASE_KEY` 安全地共享给伙伴。建议伙伴在本地创建自己的 `.env` 文件。
 3.  **模式同步**：
-    -   如果数据库结构发生变动（例如运行了新的 SQL 脚本），请将变更后的 SQL 脚本共享给伙伴。
+    - 如果数据库结构发生变动（例如运行了新的 SQL 脚本），请将变更后的 SQL 脚本共享给伙伴。
 
 ---
 
@@ -137,8 +137,8 @@ YiSuHotelReservationSystem/
 
 Node.js 后端在选择 API Key 时应遵循以下原则：
 
--   **使用 `anon` (Publishable key)**: 适用于绝大多数常规业务。它受 RLS (Row Level Security) 策略约束，即即使用户拿到了 Key，也只能访问权限允许的数据。
--   **谨慎使用 `service_role` (Secret key)**: 该 Key 具有最高权限（绕过 RLS）。**仅当**你在后端执行一些系统级管理操作（如批量修改用户角色、管理系统配置）且能确保 Key 不外泄时才使用。
+- **使用 `anon` (Publishable key)**: 适用于绝大多数常规业务。它受 RLS (Row Level Security) 策略约束，即即使用户拿到了 Key，也只能访问权限允许的数据。
+- **谨慎使用 `service_role` (Secret key)**: 该 Key 具有最高权限（绕过 RLS）。**仅当**你在后端执行一些系统级管理操作（如批量修改用户角色、管理系统配置）且能确保 Key 不外泄时才使用。
 
 > [!CAUTION]
 > 绝对不要在前端代码（Taro/ReactNative）中直接硬编码 `service_role` key，否则攻击者可以轻易清空你的整个数据库！
@@ -332,15 +332,15 @@ A: 這是 Gradle 进程锁死。去 `C:\Users\你的用户名\.gradle\wrapper\di
 
 1.  **底部导航栏图标 (TabBar)**：
     - 采用 **本地图片资源** 方式引入。
-    -   采用 **本地图片资源** 方式引入。
-    -   路径：`src/assets/tab/`
-    -   命名规范：`tab-{name}.png` (未选中) 和 `tab-{name}-active.png` (选中)。
-    -   在 `src/components/TabBar/index.jsx` 中直接 `import` 使用。
+    - 采用 **本地图片资源** 方式引入。
+    - 路径：`src/assets/tab/`
+    - 命名规范：`tab-{name}.png` (未选中) 和 `tab-{name}-active.png` (选中)。
+    - 在 `src/components/TabBar/index.jsx` 中直接 `import` 使用。
 
 2.  **通用 UI 图标**：
-    -   通过 **@taroify/icons** 组件库。
-    -   引入方式：`import { IconName } from '@taroify/icons'`
-    -   注意：已移除 babel-plugin-import 配置，直接使用具名导入即可支持 Tree-shaking。
+    - 通过 **@taroify/icons** 组件库。
+    - 引入方式：`import { IconName } from '@taroify/icons'`
+    - 注意：已移除 babel-plugin-import 配置，直接使用具名导入即可支持 Tree-shaking。
 
 ### 3. 可复用组件与视觉升级
 
@@ -350,8 +350,8 @@ A: 這是 Gradle 进程锁死。去 `C:\Users\你的用户名\.gradle\wrapper\di
 
 展示酒店基本信息的通用卡片组件，用于首页推荐、收藏列表、酒店列表等。
 
--   **路径**：`src/components/HotelCard.jsx`
--   **使用示例**：
+- **路径**：`src/components/HotelCard.jsx`
+- **使用示例**：
 
 ```jsx
 import HotelCard from "@/components/HotelCard";
@@ -377,25 +377,25 @@ import HotelCard from "@/components/HotelCard";
 
 个人中心订单选项卡内的高级订单卡片，支持多种筛选状态。
 
--   **路径**：`src/pages/user/index.jsx` (作为子组件实现)
--   **视觉特性**：
-    -   采用模块化圆角设计，区分酒店基本信息与价格操作区。
-    -   支持 `待入住` 等不同状态的色彩提示。
+- **路径**：`src/pages/user/index.jsx` (作为子组件实现)
+- **视觉特性**：
+  - 采用模块化圆角设计，区分酒店基本信息与价格操作区。
+  - 支持 `待入住` 等不同状态的色彩提示。
 
 #### User Interface (个人中心视觉升级)
 
 对个人中心进行了全方位的视觉美化：
 
--   **玻璃拟态 (Glassmorphism)**：用户信息卡片采用毛玻璃背景。
--   **动态渐变**：顶部背景采用 `linear-gradient` 渐变色，提升高端感。
--   **平滑动画**：选项卡切换带指示条位移微动效。
+- **玻璃拟态 (Glassmorphism)**：用户信息卡片采用毛玻璃背景。
+- **动态渐变**：顶部背景采用 `linear-gradient` 渐变色，提升高端感。
+- **平滑动画**：选项卡切换带指示条位移微动效。
 
 #### TabBar (自定义底部导航)
 
 替代原生 TabBar，支持更灵活的样式定制和图标控制。
 
--   **路径**：`src/components/TabBar/index.jsx`
--   **使用示例**：
+- **路径**：`src/components/TabBar/index.jsx`
+- **使用示例**：
 
 ```jsx
 import TabBar from "@/components/TabBar";
@@ -406,8 +406,8 @@ import TabBar from "@/components/TabBar";
 
 #### 其他组件 (开发中)
 
--   `CitySelector` (src/components/CitySelector): 城市选择器组件（结构已创建，待完善）
--   `PriceDisplay` (src/components/PriceDisplay): 价格展示组件（结构已创建，待完善）
+- `CitySelector` (src/components/CitySelector): 城市选择器组件（结构已创建，待完善）
+- `PriceDisplay` (src/components/PriceDisplay): 价格展示组件（结构已创建，待完善）
 
 ---
 
@@ -416,21 +416,38 @@ import TabBar from "@/components/TabBar";
 ### 个人中心 (User) 与 订单 (Order) 模块升级
 
 1.  **功能更新**：
-    -   **新增“订单”选项卡**：在个人中心集成订单管理，支持按“全部、待入住、待评价、历史订单、退款/售后”五大维度筛选。
-    -   **整合入口**：将常用入住人、个人信息与订单管理统一在四个选项卡中。
+    - **新增“订单”选项卡**：在个人中心集成订单管理，支持按“全部、待入住、待评价、历史订单、退款/售后”五大维度筛选。
+    - **整合入口**：将常用入住人、个人信息与订单管理统一在四个选项卡中。
 
 2.  **视觉重构**：
-    -   重写 `pages/user/index.scss`，引入高端深蓝渐变色调。
-    -   优化 VIP 会员标识及用户头像展示。
-    -   订单列表采用全新的卡片样式，包含“联系酒店”与“再次预订”操作按钮。
+    - 重写 `pages/user/index.scss`，引入高端深蓝渐变色调。
+    - 优化 VIP 会员标识及用户头像展示。
+    - 订单列表采用全新的卡片样式，包含“联系酒店”与“再次预订”操作按钮。
 
 ### 后端架构迁移与云数据库集成
 
 1.  **Node.js 后端上线**：
-    -   新建 `YiSuServer_Node` 目录，采用 Express.js 框架重构后端逻辑。
-    -   实现了用户鉴权、酒店管理及房型查询等核心 API。
+    - 新建 `YiSuServer_Node` 目录，采用 Express.js 框架重构后端逻辑。
+    - 实现了用户鉴权、酒店管理及房型查询等核心 API。
 
-2.  **Supabase 集成**：
-    -   全面对接 Supabase (PostgreSQL) 云数据库，弃用本地 MySQL。
-    -   使用 `@supabase/supabase-js` SDK 进行数据交互，大幅提升开发效率。
-    -   提供了完善的 [接入指南](./YiSuServer_Node/supabase_guide.md)。
+### Search 与 HotelList 模块优化 (2026-02-04)
+
+1.  **SearchCard 组件升级**：
+    - **城市选择优化**：弃用下拉菜单，改为**输入框**模式，支持用户直接输入城市名。
+    - **动态日历交互**：
+      - 修复了日期同步 bug，现在选择日期后能正确回显。
+      - 日历底部新增**动态确认按钮**（例如：“完成（3晚）”），实时计算并显示入住晚数。
+      - 默认入住/离店日期自动设为今日/明日。
+
+2.  **HotelList 筛选功能增强**：
+    - **动态筛选标签**：对接 `GET /hotels/attributes` 接口，从数据库动态拉取 `hotel_attribute` 作为筛选条件。
+    - **星级筛选**：新增“五星/四星/三星”等级过滤。
+    - **真实排序**：实现了前端基于价格（升/降序）和评分的实时排序逻辑。
+    - **URL 参数解析**：修复了中文参数（如城市、关键字）的 URL 编码/解码问题。
+
+3.  **UI/UX 视觉提升**：
+    - **HotelCard 重构**：
+      - 全新**水平 Flex 布局**（左图右文）。
+      - 价格醒目化（右上角红色大字体）。
+      - 操作便捷化（右下角深蓝圆角“查看”按钮）。
+      - 标签与评分样式美化（清爽蓝调）。

@@ -163,7 +163,27 @@ async function deleteImage(path) {
   bucket_id = 'hotel-assets'
   ```
 
-## 开发注意事项
+# 开发注意事项
 
 1. **上传文件 (Upload):** - 前端调用上传接口时，客户端必须持有有效的 Session Token (即用户必须处于登录状态)，否则 Supabase 会返回 `403 Forbidden` 或 `new row violates row-level security policy` 错误。
 2. **读取文件 (View):** - 使用 `getPublicUrl` 获取的链接无需携带 Token，任何人都可访问。
+
+# 后端功能更新日志 (2026-02-04)
+
+### 新增 API 接口
+
+- **获取筛选标签**: `GET /api/hotels/attributes`
+  - **功能**: 从 `hotel_attribute` 表获取所有可用的酒店标签（如“近地铁”、“免费取消”等）。
+  - **用途**: 用于前端首页和列表页的动态筛选展示。
+
+### 中间件增强 (Middleware)
+
+为了方便调试和监控，后端新增了以下中间件：
+
+1. **请求日志 (Request Logging)**:
+   - 自动记录所有进入 API 的请求。
+   - 日志格式包含：`[时间戳] Method URL` 以及 Query 参数和 Body 内容。
+
+2. **全局错误处理 (Global Error Handler)**:
+   - 统一捕获应用中的未处理异常。
+   - 返回标准的 JSON 错误响应 `{ error: 'Internal server error', message: ... }` 并打印堆栈跟踪。

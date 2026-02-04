@@ -1,19 +1,76 @@
 import Taro from '@tarojs/taro'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { View, Text, Button } from '@tarojs/components'
-import { Tag } from '@taroify/core'
+import { Tag, Loading } from '@taroify/core'
 import BannerCarousel from './BannerCarousel'
 import SearchCard from './SearchCard'
 import HotelCard from '../../components/HotelCard'
 import TabBar from '../../components/TabBar'
+import { getHotelList, getHotelAttributes } from '../../services/api'
 import './index.scss'
 
 export default function Home() {
-  const hotTags = [
-    '商圈', '温泉酒店', '4.5分以上', '免费取消', '许愿券', '双床', '会员', '高端星'
-  ]
-
+  const [hotTags, setHotTags] = useState([])
   const [selectedTags, setSelectedTags] = useState([])
+  const [hotels, setHotels] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  // Fetch hotels and hot tags from API on mount
+  useEffect(() => {
+    fetchHotels()
+    fetchHotTags()
+  }, [])
+
+  const fetchHotTags = async () => {
+    try {
+      const data = await getHotelAttributes()
+      setHotTags(data.map(attr => attr.attr_name))
+    } catch (error) {
+      console.error('Failed to fetch hot tags:', error)
+      // Fallback to default tags
+      setHotTags(['商圈', '温泉酒店', '免费取消', '双床', '高端星'])
+    }
+  }
+
+  const fetchHotels = async () => {
+    setLoading(true)
+    try {
+      const data = await getHotelList()
+      // Transform backend data to match HotelCard expected props
+      const transformedHotels = data.map(hotel => {
+        // Parse nearby_attractions as tags if available
+        let tags = []
+        if (hotel.nearby_attractions) {
+          // Split by comma or semicolon
+          tags = hotel.nearby_attractions.split(/[,;，；]/).map(t => t.trim()).filter(Boolean).slice(0, 3)
+        }
+        if (tags.length === 0) {
+          // Fallback to generic tags based on star level
+          if (hotel.star_level >= 5) tags = ['五星体验', '设施完善']
+          else if (hotel.star_level >= 4) tags = ['品质住宿', '交通便利']
+          else tags = ['经济实惠']
+        }
+        
+        return {
+          id: hotel.hotel_id,
+          name: hotel.hotel_name_cn,
+          image: hotel.primary_image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?fit=crop&w=400&h=300',
+          stars: hotel.star_level,
+          reviews: 0,
+          price: hotel.min_price || 0,
+          tags: tags,
+          distance: hotel.detail_address,
+          badges: hotel.star_level >= 4 ? ['推荐'] : []
+        }
+      })
+      setHotels(transformedHotels)
+    } catch (error) {
+      console.error('Failed to fetch hotels:', error)
+      Taro.showToast({ title: '加载失败', icon: 'none' })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const toggleTag = (tag) => {
     setSelectedTags(prev => 
@@ -23,36 +80,16 @@ export default function Home() {
     )
   }
 
-  const recommendedHotels = [
-    {
-      id: 1,
-      name: '大阪皇家花园酒店',
-      image: 'https://images.unsplash.com/photo-1744782996368-dc5b7e697f4c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3J8ZW58MXx8fHwxNzY5NzgxNDEyfDA&ixlib=rb-4.1.0&q=80&w=1080',
-      stars: 5,
-      rating: 4.8,
-      reviews: 1523,
-      price: 850,
-      tags: ['床很舒服', '服务热情', '交通便利'],
-      distance: '距离难波步行100米',
-      badges: ['推荐', '华人优选']
-    },
-    {
-      id: 2,
-      name: '心斋桥温泉酒店',
-      image: 'https://images.unsplash.com/photo-1610375233775-6e0166927193?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxqYXBhbmVzZSUyMGhvdGVsJTIwcnlva2FufGVufDF8fHx8MTc2OTg1NjY1M3ww&ixlib=rb-4.1.0&q=80&w=1080',
-      stars: 4,
-      rating: 4.6,
-      reviews: 987,
-      price: 680,
-      tags: ['温泉很棒', '日式风格', '早餐丰富'],
-      distance: '距离心斋桥地铁站200米',
-      badges: ['推荐']
-    }
-  ]
-
   const handleSearch = (params) => {
     console.log('Search params:', params)
-    Taro.navigateTo({ url: '/pages/hotel/list/index' })
+    // Navigate to hotel list with search params
+    const query = new URLSearchParams({
+      city: params.city || '',
+      keyword: params.keyword || '',
+      checkIn: params.checkIn || '',
+      checkOut: params.checkOut || ''
+    }).toString()
+    Taro.navigateTo({ url: `/pages/hotel/list/index?${query}` })
   }
 
   const handleHotelClick = (id) => {
@@ -93,13 +130,24 @@ export default function Home() {
              <Text className="title">为你推荐</Text>
           </View>
           <View className="hotel-list">
-            {recommendedHotels.map(hotel => (
-              <HotelCard 
-                key={hotel.id} 
-                hotel={hotel} 
-                onClick={() => handleHotelClick(hotel.id)} 
-              />
-            ))}
+            {loading ? (
+              <View style={{ textAlign: 'center', padding: '40px 0' }}>
+                <Loading type="spinner" />
+                <Text style={{ display: 'block', marginTop: '10px', color: '#999' }}>加载中...</Text>
+              </View>
+            ) : hotels.length > 0 ? (
+              hotels.map(hotel => (
+                <HotelCard 
+                  key={hotel.id} 
+                  hotel={hotel} 
+                  onClick={() => handleHotelClick(hotel.id)} 
+                />
+              ))
+            ) : (
+              <View style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
+                <Text>暂无酒店数据</Text>
+              </View>
+            )}
           </View>
         </View>
         
@@ -112,3 +160,4 @@ export default function Home() {
     </View>
   )
 }
+
