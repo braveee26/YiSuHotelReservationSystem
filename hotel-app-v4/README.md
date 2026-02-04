@@ -92,19 +92,56 @@ npm run dev:weapp
 ## 项目结构
 
 ```
-hotel-app-v4/
-├── config/             # Taro 构建配置
-├── src/
-│   ├── app.jsx         # 应用入口
-│   ├── app.config.js   # 路由配置
-│   ├── assets/         # 静态资源
-│   ├── components/     # 公共组件
-│   ├── pages/          # 页面
-│   ├── services/       # API 请求
-│   ├── store/          # 状态管理
-│   └── utils/          # 工具函数
-└── dist/               # 构建产物
+YiSuHotelReservationSystem/
+├── hotel-app-v4/       # 前端跨端项目 (Taro + React)
+│   ├── src/            # 源代码
+│   └── android/        # Android 原生工程
+├── YiSuServer_Node/    # 后端项目 (Node.js + Express)
+│   ├── routes/         # API 路由
+│   ├── config/         # Supabase 客户端配置
+│   └── server.js       # 入口文件
+└── YiSuSystem/         # 旧版 Java 后端脚手架 (备用)
 ```
+
+---
+
+## Node.js 后端启动 (YiSuServer_Node)
+
+本项目后端现已迁移至 Node.js 环境，并无缝集成 Supabase 云数据库。
+
+1.  **进入目录**：`cd YiSuServer_Node`
+2.  **安装依赖**：`npm install`
+3.  **配置环境**：根据 `.env.example` 创建 `.env` 文件，并填入你的 Supabase `URL` 和 `Key`。
+4.  **启动服务**：`node server.js`
+
+详细的 Supabase 接入流程请参考 [supabase_guide.md](./YiSuServer_Node/supabase_guide.md)。
+
+---
+
+## 多人协作说明 (Supabase)
+
+为了让开发伙伴共同使用同一个云数据库，请按照以下步骤操作：
+
+1.  **添加协作者**：
+    -   登录 [Supabase Dashboard](https://supabase.com/dashboard)。
+    -   进入 **Project Settings -> Members**。
+    -   点击 **Invite Member**，输入伙伴的邮箱并分配相应权限。
+2.  **共享环境变量**：
+    -   将你的 `.env` 文件中的 `SUPABASE_URL` 和 `SUPABASE_KEY` 安全地共享给伙伴。建议伙伴在本地创建自己的 `.env` 文件。
+3.  **模式同步**：
+    -   如果数据库结构发生变动（例如运行了新的 SQL 脚本），请将变更后的 SQL 脚本共享给伙伴。
+
+---
+
+## API Keys 安全选择指南
+
+Node.js 后端在选择 API Key 时应遵循以下原则：
+
+-   **使用 `anon` (Publishable key)**: 适用于绝大多数常规业务。它受 RLS (Row Level Security) 策略约束，即即使用户拿到了 Key，也只能访问权限允许的数据。
+-   **谨慎使用 `service_role` (Secret key)**: 该 Key 具有最高权限（绕过 RLS）。**仅当**你在后端执行一些系统级管理操作（如批量修改用户角色、管理系统配置）且能确保 Key 不外泄时才使用。
+
+> [!CAUTION]
+> 绝对不要在前端代码（Taro/ReactNative）中直接硬编码 `service_role` key，否则攻击者可以轻易清空你的整个数据库！
 
 ---
 
@@ -386,3 +423,14 @@ import TabBar from "@/components/TabBar";
     -   重写 `pages/user/index.scss`，引入高端深蓝渐变色调。
     -   优化 VIP 会员标识及用户头像展示。
     -   订单列表采用全新的卡片样式，包含“联系酒店”与“再次预订”操作按钮。
+
+### 后端架构迁移与云数据库集成
+
+1.  **Node.js 后端上线**：
+    -   新建 `YiSuServer_Node` 目录，采用 Express.js 框架重构后端逻辑。
+    -   实现了用户鉴权、酒店管理及房型查询等核心 API。
+
+2.  **Supabase 集成**：
+    -   全面对接 Supabase (PostgreSQL) 云数据库，弃用本地 MySQL。
+    -   使用 `@supabase/supabase-js` SDK 进行数据交互，大幅提升开发效率。
+    -   提供了完善的 [接入指南](./YiSuServer_Node/supabase_guide.md)。
