@@ -113,13 +113,13 @@ public class Hotel implements Serializable {
      * （商户可操作，下线可恢复）
      */
     @TableField("online_status")
-    private String onlineStatus;
+    private OnlineStatusEnum onlineStatus;
 
     /**
      * 审核状态
      */
     @TableField("audit_status")
-    private String auditStatus;
+    private  AuditStatusEnum auditStatus;
 
     /**
      * 审核备注信息：不通过的审核要附加信息
@@ -138,4 +138,15 @@ public class Hotel implements Serializable {
      */
     @TableField("update_time")
     private LocalDateTime updateTime;
+
+    public enum AuditStatusEnum {
+        pending,
+        rejected,
+        auditing,
+        approved
+    }
+    public enum OnlineStatusEnum {
+        online,
+        offline
+    }
 }

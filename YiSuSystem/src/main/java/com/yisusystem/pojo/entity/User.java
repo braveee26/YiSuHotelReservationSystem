@@ -52,13 +52,13 @@ public class User implements Serializable {
      * 商户、管理员
      */
     @TableField("role")
-    private String role;
+    private UserRoleEnum role;
 
     /**
      * 用户头像
      */
     @TableField("avatar")
-    private String avatar;
+    private String avatar = "/static/images/default-avatar.png";
 
     /**
      * 真实姓名（商户 / 管理员需实名）
@@ -95,4 +95,9 @@ public class User implements Serializable {
      */
     @TableField("id_card")
     private String idCard;
+
+    public enum UserRoleEnum {
+        admin,
+        merchant
+    }
 }
