@@ -12,9 +12,8 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * <p>
  * 存储所有角色用户信息（商户、管理员） 前端控制器
- * </p>
+ * @order 1
  *
  * @author liufuming
  * @since 2026-02-04

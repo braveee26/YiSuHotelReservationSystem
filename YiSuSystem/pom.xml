@@ -43,9 +43,15 @@
         </dependency>
         -->
 <!--mysql驱动-->
+<!--        <dependency>-->
+<!--            <groupId>com.mysql</groupId>-->
+<!--            <artifactId>mysql-connector-j</artifactId>-->
+<!--            <scope>runtime</scope>-->
+<!--        </dependency>-->
+        <!-- 添加 PostgreSQL 驱动 -->
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
 <!--        注解简化代码-->
@@ -150,6 +156,28 @@
                         </exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.ly.smart-doc</groupId>
+                <artifactId>smart-doc-maven-plugin</artifactId>
+                <version>3.0.5</version>
+                <configuration>
+                    <configFile>./src/main/resources/smart-doc.json</configFile>
+                    <projectName>${project.description}</projectName>
+                    <excludes>
+                        <exclude>com.alibaba:.*</exclude>
+                        <exclude>org.mapstruct</exclude>
+                        <exclude>com.yisusystem.convert</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>html</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

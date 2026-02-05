@@ -14,8 +14,8 @@
                 <result column="avatar" property="avatar" />
                 <result column="email" property="email" />
                 <result column="role" property="role" />
-                <result column="create_time" property="createTime" />
-                <result column="update_time" property="updateTime" />
+                <result column="create_time" property="createTime" typeHandler="com.yisusystem.handler.LocalDateTimeTypeHandler" />
+                <result column="update_time" property="updateTime" typeHandler="com.yisusystem.handler.LocalDateTimeTypeHandler" />
         </resultMap>
 
         <!-- 根据多个 id 批量查询用户 -->
@@ -32,7 +32,7 @@
                         role,
                         create_time,
                         update_time
-                FROM `user`
+                FROM "user"
                 WHERE user_id IN
                 <foreach collection="list" item="id" open="(" separator="," close=")">
                         #{id}
@@ -53,7 +53,7 @@
                         role,
                         create_time,
                         update_time
-                FROM `user`
+                FROM "user"
                 WHERE user_name = #{userName}
                 LIMIT 1
         </select>

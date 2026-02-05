@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.yisusystem.handler.LocalDateTimeTypeHandler;
+import com.yisusystem.handler.StarLevelEnumTypeHandler;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,7 +22,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName("hotel")
+@TableName("\"hotel\"")
 public class Hotel implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -76,8 +78,8 @@ public class Hotel implements Serializable {
     /**
      * 星级：1 = 一星～5 = 五星（核心筛选字段）
      */
-    @TableField("star_level")
-    private String starLevel;
+    @TableField(value = "star_level", typeHandler = StarLevelEnumTypeHandler.class)
+    private StarLevelEnum starLevel;
 
     /**
      * 开业时间（必须字段）
@@ -130,13 +132,13 @@ public class Hotel implements Serializable {
     /**
      * 录入时间
      */
-    @TableField("create_time")
+    @TableField(value = "create_time", typeHandler = LocalDateTimeTypeHandler.class)
     private LocalDateTime createTime;
 
     /**
      * 修改时间
      */
-    @TableField("update_time")
+    @TableField(value = "update_time", typeHandler = LocalDateTimeTypeHandler.class)
     private LocalDateTime updateTime;
 
     public enum AuditStatusEnum {
@@ -148,5 +150,22 @@ public class Hotel implements Serializable {
     public enum OnlineStatusEnum {
         online,
         offline
+    }
+    public enum StarLevelEnum {
+        ONE(1),
+        TWO(2),
+        THREE(3),
+        FOUR(4),
+        FIVE(5);
+        
+        private final int value;
+        
+        StarLevelEnum(int value) {
+            this.value = value;
+        }
+        
+        public int getValue() {
+            return value;
+        }
     }
 }

@@ -1,0 +1,17 @@
+{
+  "outPath": "./src/main/resources/static/doc",
+  "serverUrl": "http://localhost:8080",
+  "allInOne": true,
+  "createDebugPage": true,
+  "style": "xt256",
+  "isStrict": false,
+  "requestHeaders": [
+    {
+      "name": "Authorization",
+      "type": "string",
+      "description": "Bearer token for authentication",
+      "required": true,
+      "excludePathPatterns": "/user/login,/user/register"
+    }
+  ]
+}

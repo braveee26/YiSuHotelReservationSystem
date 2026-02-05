@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.yisusystem.handler.LocalDateTimeTypeHandler;
+import com.yisusystem.handler.UserRoleEnumTypeHandler;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -19,7 +21,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName("user")
+@TableName("\"user\"")
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -51,7 +53,7 @@ public class User implements Serializable {
     /**
      * 商户、管理员
      */
-    @TableField("role")
+    @TableField(value = "role", typeHandler = UserRoleEnumTypeHandler.class)
     private UserRoleEnum role;
 
     /**
@@ -81,13 +83,13 @@ public class User implements Serializable {
     /**
      * 注册时间
      */
-    @TableField("create_time")
+    @TableField(value = "create_time", typeHandler = LocalDateTimeTypeHandler.class)
     private LocalDateTime createTime;
 
     /**
      * 修改时间
      */
-    @TableField("update_time")
+    @TableField(value = "update_time", typeHandler = LocalDateTimeTypeHandler.class)
     private LocalDateTime updateTime;
 
     /**
@@ -98,6 +100,7 @@ public class User implements Serializable {
 
     public enum UserRoleEnum {
         admin,
-        merchant
+        merchant,
+        customer
     }
 }
