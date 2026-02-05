@@ -1,10 +1,13 @@
 import Taro from '@tarojs/taro'
 import { View, Image, Text } from '@tarojs/components'
-import { Tag, Rate } from '@taroify/core'
+import { Tag } from '@taroify/core'
 import { LocationOutlined } from '@taroify/icons'
 import './HotelCard.scss'
 
 export default function HotelCard({ hotel, onClick }) {
+  // Format score to 1 decimal place if it exists
+  const score = hotel.rating || hotel.stars || 4.5
+  
   return (
     <View className="hotel-card" onClick={onClick}>
       <View className="image-wrapper">
@@ -14,42 +17,39 @@ export default function HotelCard({ hotel, onClick }) {
           mode="aspectFill" 
         />
         {hotel.badges && hotel.badges.length > 0 && (
-          <View className="badge-container">
-            {hotel.badges.map((badge, index) => (
-              <View key={index} className="badge-item">{badge}</View>
-            ))}
-          </View>
+          <View className="badge-tag">{hotel.badges[0]}</View>
         )}
       </View>
       
       <View className="info-content">
-        <View className="name-row">
+        <View className="header-row">
           <Text className="hotel-name">{hotel.name}</Text>
           <View className="price-box">
-            <Text className="currency">¥</Text>
+            <Text className="symbol">¥</Text>
             <Text className="amount">{hotel.price}</Text>
             <Text className="suffix">起</Text>
           </View>
         </View>
         
-        <View className="rating-row">
-          <View className="score-box">{hotel.rating}</View>
-          <Text className="comment-count">{hotel.reviews}条评论</Text>
-          <Text className="separator">·</Text>
-          <Text className="star-text">{hotel.stars}星级</Text>
+        <View className="score-row">
+           <View className="score-tag">{Number(score).toFixed(1)}</View>
+           <Text className="review-text">{hotel.reviews || '暂无'}条评论</Text>
         </View>
-        
-        <View className="location-row">
-          <LocationOutlined className="icon" />
-          <Text className="text">{hotel.distance}</Text>
-        </View>
-        
+
         <View className="tags-row">
-          {hotel.tags && hotel.tags.map((tag, index) => (
-            <Tag key={index} color="#f0f9ff" textColor="#385e72" className="tag-item">
+          {hotel.tags && hotel.tags.slice(0, 3).map((tag, index) => (
+            <View key={index} className="feature-tag">
               {tag}
-            </Tag>
+            </View>
           ))}
+        </View>
+
+        <View className="footer-row">
+          <View className="location-info">
+             <LocationOutlined size="12" />
+             <Text className="text">{hotel.distance}</Text>
+          </View>
+          <View className="view-btn">查看</View>
         </View>
       </View>
     </View>

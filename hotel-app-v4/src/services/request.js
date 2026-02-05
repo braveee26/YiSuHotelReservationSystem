@@ -2,7 +2,7 @@
 import Taro from '@tarojs/taro'
 import useUserStore from '../store/userStore'
 
-const baseUrl = 'https://api.example.com' // Replace with actual API URL
+const baseUrl = 'http://localhost:3000/api' // Local Backend API
 
 const request = (options) => {
     const { url, method = 'GET', data, header = {} } = options
@@ -21,16 +21,17 @@ const request = (options) => {
             ...header
         }
     }).then(res => {
-        const { code, data, msg } = res.data
-        if (code === 200) {
-            return data
-        } else if (code === 401) {
+        // Backend returns data directly, not wrapped in {code, data, msg}
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+            return res.data
+        } else if (res.statusCode === 401) {
             // Unauthenticated
             Taro.navigateTo({ url: '/pages/auth/login/index' })
             return Promise.reject('Unauthorized')
         } else {
-            Taro.showToast({ title: msg || 'Error', icon: 'none' })
-            return Promise.reject(msg)
+            const errorMsg = res.data?.error || 'Error'
+            Taro.showToast({ title: errorMsg, icon: 'none' })
+            return Promise.reject(errorMsg)
         }
     }).catch(err => {
         Taro.showToast({ title: 'Network Error', icon: 'none' })
@@ -39,3 +40,4 @@ const request = (options) => {
 }
 
 export default request
+

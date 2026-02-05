@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { View, Text, Image, Button, Input } from '@tarojs/components'
 import { ArrowRight } from '@taroify/icons'
 import useAuthStore from '../../store/auth'
@@ -7,15 +7,45 @@ import TabBar from '../../components/TabBar'
 import './index.scss'
 
 export default function User() {
-  const { userInfo, logout } = useAuthStore()
+  const { userInfo, logout, isLoggedIn } = useAuthStore()
   const [activeTab, setActiveTab] = useState(0)
   const [isEditing, setIsEditing] = useState(false)
+  
+  // Initialize edit form from userInfo
   const [editForm, setEditForm] = useState({
-    name: '张三',
-    email: 'zhangsan@example.com',
-    phone: '138****8888',
+    name: '',
+    email: '',
+    phone: '',
     gender: '不透露'
   })
+
+  // Update form when userInfo changes
+  useEffect(() => {
+    if (userInfo) {
+      setEditForm({
+        name: userInfo.real_name || userInfo.user_name || '',
+        email: userInfo.email || '',
+        phone: userInfo.phone ? maskPhone(userInfo.phone) : '',
+        gender: '不透露'
+      })
+    }
+  }, [userInfo])
+
+  // Mask phone number for display
+  const maskPhone = (phone) => {
+    if (!phone || phone.length < 7) return phone
+    return phone.slice(0, 3) + '****' + phone.slice(-4)
+  }
+
+  // Redirect to login if not logged in
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Taro.showToast({ title: '请先登录', icon: 'none' })
+      setTimeout(() => {
+        Taro.navigateTo({ url: '/pages/auth/login/index' })
+      }, 1000)
+    }
+  }, [isLoggedIn])
 
   const [guests, setGuests] = useState([
     { id: 1, name: '张三', idCard: '1101011990****1234', phone: '138****8888' },
@@ -77,18 +107,18 @@ export default function User() {
            <View className="placeholder"></View>
          </View>
          
-         <View className="user-profile-card">
-           <View className="avatar-box">
-              <Image className="avatar-img" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?fit=crop&w=100&h=100" />
-           </View>
-           <View className="user-info">
-              <Text className="name">{userInfo?.name || editForm.name}</Text>
-              <Text className="email">{userInfo?.email || editForm.email}</Text>
-           </View>
-           <View className="vip-tag">
-             <Text className="vip-text">尊享会员</Text>
-           </View>
-         </View>
+          <View className="user-profile-card">
+            <View className="avatar-box">
+               <Image className="avatar-img" src={userInfo?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?fit=crop&w=100&h=100"} />
+            </View>
+            <View className="user-info">
+               <Text className="name">{userInfo?.real_name || userInfo?.user_name || '游客'}</Text>
+               <Text className="email">{userInfo?.email || '未设置邮箱'}</Text>
+            </View>
+            <View className="vip-tag">
+              <Text className="vip-text">尊享会员</Text>
+            </View>
+          </View>
        </View>
 
        {/* Custom Tabs */}

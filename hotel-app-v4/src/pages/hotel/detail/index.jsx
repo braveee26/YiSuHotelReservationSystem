@@ -1,42 +1,89 @@
-import Taro from '@tarojs/taro'
-import { useState } from 'react'
+import Taro, { useRouter } from '@tarojs/taro'
+import { useState, useEffect } from 'react'
 import { View, Text, Swiper, SwiperItem, Image } from '@tarojs/components'
-import { Tabs } from '@taroify/core'
+import { Tabs, Loading } from '@taroify/core'
 import { LocationOutlined } from '@taroify/icons'
 import useSearchStore from '../../../store/search'
+import { getHotelDetail } from '../../../services/api'
 import RoomList from './RoomList'
 import './index.scss'
 
 export default function HotelDetail() {
+  const router = useRouter()
+  const hotelId = router.params.id
   const { searchParams } = useSearchStore()
   const [activeTab, setActiveTab] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [hotel, setHotel] = useState(null)
 
-  // Mock hotel data (would come from API/Prop in real app)
-  const hotel = {
-    id: 1,
-    name: '大阪皇家花园酒店',
-    nameEn: 'Osaka Royal Park Hotel',
-    stars: 5,
-    openYear: 2018,
-    rating: 4.8,
-    reviews: 1523,
-    images: [
-      'https://images.unsplash.com/photo-1744782996368-dc5b7e697f4c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3J8ZW58MXx8fHwxNzY5NzgxNDEyfDA&ixlib=rb-4.1.0&q=80&w=1080',
-      'https://images.unsplash.com/photo-1572177215152-32f247303126?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBob3RlbCUyMHJvb20lMjBiZWR8ZW58MXx8fHwxNzY5Nzk1MzA1fDA&ixlib=rb-4.1.0&q=80&w=1080',
-      'https://images.unsplash.com/photo-1695173849152-c506198aaf90?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3RlbCUyMHJlc29ydCUyMHBvb2x8ZW58MXx8fHwxNzY5ODMyMDkwfDA&ixlib=rb-4.1.0&q=80&w=1080',
-      'https://images.unsplash.com/photo-1677763856232-d9eb9e127e9b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3RlbCUyMHNwYSUyMHdlbGxuZXNzfGVufDF8fHx8MTc2OTgzNzUzMnww&ixlib=rb-4.1.0&q=80&w=1080'
-    ],
-    address: '大阪市中央区难波1-2-3',
-    facilities: [
-      { icon: '🍳', label: '早餐' },
-      { icon: '📶', label: 'WiFi' },
-      { icon: '🏊', label: '泳池' },
-      { icon: '🅿️', label: '停车' },
-      { icon: '💆', label: 'SPA' },
-      { icon: '🧺', label: '洗衣' }
-    ],
-    distance: '距离难波步行100米',
-    reviewKeywords: ['床很舒服', '服务热情', '交通便利', '早餐丰富']
+  // Fetch hotel data from API
+  useEffect(() => {
+    if (hotelId) {
+      fetchHotelDetail()
+    }
+  }, [hotelId])
+
+  const fetchHotelDetail = async () => {
+    setLoading(true)
+    try {
+      const data = await getHotelDetail(hotelId)
+      // Transform data for display
+      const images = data.hotel_image?.length > 0 
+        ? data.hotel_image.sort((a, b) => a.sort_order - b.sort_order).map(img => img.image_url)
+        : ['https://images.unsplash.com/photo-1566073771259-6a8506099945?fit=crop&w=800&h=600']
+      
+      // Parse nearby_attractions as review keywords
+      let reviewKeywords = []
+      if (data.nearby_attractions) {
+        reviewKeywords = data.nearby_attractions.split(/[,;，；]/).map(t => t.trim()).filter(Boolean).slice(0, 4)
+      }
+      if (reviewKeywords.length === 0) {
+        reviewKeywords = ['位置优越', '设施完善', '服务周到']
+      }
+
+      setHotel({
+        id: data.hotel_id,
+        name: data.hotel_name_cn,
+        nameEn: data.hotel_name_en || '',
+        stars: data.star_level || 4,
+        openYear: data.open_year || 2020,
+        images: images,
+        address: data.detail_address || data.city + data.district,
+        facilities: [
+          { icon: '🍳', label: '早餐' },
+          { icon: '📶', label: 'WiFi' },
+          { icon: '🏊', label: '泳池' },
+          { icon: '🅿️', label: '停车' },
+          { icon: '💆', label: 'SPA' },
+          { icon: '🧺', label: '洗衣' }
+        ],
+        distance: data.nearby_attractions ? data.nearby_attractions.split(/[,;，；]/)[0] : '市中心',
+        reviewKeywords: reviewKeywords,
+        roomTypes: data.room_type || []
+      })
+    } catch (error) {
+      console.error('Failed to fetch hotel detail:', error)
+      Taro.showToast({ title: '加载失败', icon: 'none' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <View className="hotel-detail" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Loading type="spinner" />
+        <Text style={{ marginLeft: '10px' }}>加载中...</Text>
+      </View>
+    )
+  }
+
+  if (!hotel) {
+    return (
+      <View className="hotel-detail" style={{ padding: '40px', textAlign: 'center' }}>
+        <Text>酒店信息加载失败</Text>
+      </View>
+    )
   }
 
   return (
@@ -80,14 +127,14 @@ export default function HotelDetail() {
 
         {/* Rating & Location */}
         <View className="review-box">
-          <View className="score-badge">{hotel.rating}</View>
+          <View className="score-badge">4.5</View>
           <View className="review-info">
              <View className="keywords">
                {hotel.reviewKeywords.map((k, i) => (
                  <Text key={i} className="k-tag">{k}</Text>
                ))}
              </View>
-             <Text className="count">{hotel.reviews}条评论</Text>
+             <Text className="count">暂无评论</Text>
           </View>
         </View>
 
@@ -109,7 +156,7 @@ export default function HotelDetail() {
 
          <Tabs active={activeTab} onChange={({eventKey}) => setActiveTab(eventKey)} sticky>
            <Tabs.TabPane title="房型">
-             <RoomList />
+             <RoomList hotelId={hotelId} roomTypes={hotel.roomTypes} />
            </Tabs.TabPane>
            <Tabs.TabPane title="设施">
              <View className="content-pad">
@@ -134,3 +181,4 @@ export default function HotelDetail() {
     </View>
   )
 }
+
