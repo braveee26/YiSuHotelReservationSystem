@@ -3,11 +3,11 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 120px;
+  height: 110rpx;
   background: white;
   display: flex;
   padding-bottom: env(safe-area-inset-bottom);
-  border-top: 1px solid #eee;
+  border-top: 2rpx solid #eee;
   z-index: 999;
 
   .tab-item {
@@ -16,21 +16,23 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding: 12rpx 0;
     
     .tab-icon {
-      width: 64px;
-      height: 64px;
-      margin-bottom: 4px;
+      width: 44rpx;
+      height: 44rpx;
+      margin-bottom: 4rpx;
     }
 
     .tab-text {
-      font-size: 22px;
+      font-size: 20rpx;
       color: #999;
     }
 
     &.active {
       .tab-text {
-        color: #fa2c19;
+        color: #4a8ca8;
+        font-weight: 500;
       }
     }
   }

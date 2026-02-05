@@ -1,0 +1,94 @@
+.hotel-card {
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+  padding: 24rpx;
+  display: flex;
+  gap: 24rpx;
+  
+  .hotel-image {
+    width: 200rpx;
+    height: 160rpx;
+    border-radius: 8rpx;
+    flex-shrink: 0;
+  }
+  
+  .hotel-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    
+    .hotel-name {
+      font-size: 30rpx;
+      font-weight: 500;
+      color: #333;
+      display: block;
+      margin-bottom: 8rpx;
+    }
+    
+    .stars {
+      color: #ff9500;
+      font-size: 24rpx;
+      display: block;
+    }
+    
+    .rating-row {
+      display: flex;
+      align-items: center;
+      gap: 12rpx;
+      margin: 8rpx 0;
+      
+      .rating-badge {
+        background: #4a8ca8;
+        color: #fff;
+        font-size: 22rpx;
+        padding: 4rpx 12rpx;
+        border-radius: 6rpx;
+        font-weight: 500;
+      }
+      
+      .reviews {
+        font-size: 22rpx;
+        color: #999;
+      }
+    }
+    
+    .location-text {
+      font-size: 22rpx;
+      color: #999;
+      display: flex;
+      align-items: center;
+      gap: 8rpx;
+      margin-top: 8rpx;
+    }
+  }
+  
+  .price-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    
+    .price {
+      font-size: 40rpx;
+      font-weight: 600;
+      color: #ff5000;
+    }
+    
+    .unit {
+      font-size: 22rpx;
+      color: #999;
+    }
+    
+    .view-btn {
+      background: #385e72;
+      color: #fff;
+      font-size: 24rpx;
+      padding: 12rpx 32rpx;
+      border-radius: 8rpx;
+      margin-top: 16rpx;
+    }
+  }
+}

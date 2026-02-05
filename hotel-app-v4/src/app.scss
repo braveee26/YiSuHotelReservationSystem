@@ -7,6 +7,8 @@ page, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
     Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei',
     sans-serif;
+  font-size: 28rpx;
+  color: #333;
 }
 
 /* 确保 Taro 自定义元素可见 */
@@ -53,6 +55,6 @@ taro-image-core {
 /* 确保文本内容可见 */
 .taro_page taro-text-core {
   color: #333;
-  font-size: 14px;
+  font-size: 28rpx;
   line-height: 1.5;
 }

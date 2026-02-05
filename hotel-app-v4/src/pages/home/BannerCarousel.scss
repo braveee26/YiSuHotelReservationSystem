@@ -1,0 +1,44 @@
+.banner-swiper {
+  height: 500rpx;
+  width: 100%;
+}
+
+.banner-item {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.banner-bg {
+  width: 100%;
+  height: 100%;
+}
+
+.banner-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 100rpx; /* Space for search card overlap */
+}
+
+.text-box {
+  padding: 0 40rpx;
+  
+  .title {
+    color: #fff;
+    font-size: 40rpx;
+    font-weight: bold;
+    margin-bottom: 8rpx;
+    text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.3);
+  }
+  
+  .subtitle {
+    color: rgba(255,255,255,0.9);
+    font-size: 28rpx;
+  }
+}

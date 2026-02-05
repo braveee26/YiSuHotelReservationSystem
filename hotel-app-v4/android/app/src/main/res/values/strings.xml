@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Hotel App</string>
+    <string name="title_activity_main">Hotel App</string>
+    <string name="package_name">com.yourcompany.hotelapp</string>
+    <string name="custom_url_scheme">com.yourcompany.hotelapp</string>
+</resources>

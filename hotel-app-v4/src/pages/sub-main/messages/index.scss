@@ -1,0 +1,104 @@
+
+.messages-page {
+  background: #f7f8fa;
+  min-height: 100vh;
+  padding-bottom: 120rpx;
+}
+
+.page-header {
+  background: #4a8ca8;
+  padding: 24rpx 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  
+  /* If back button is added later, it will be positioned absolutely */
+  
+  .title {
+    font-size: 34rpx;
+    font-weight: 500;
+    color: #fff;
+  }
+}
+
+.messages-list {
+  padding: 32rpx;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 120rpx 0;
+  
+  .empty-text {
+    font-size: 28rpx;
+    color: #999;
+  }
+}
+
+.message-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  display: flex;
+  align-items: flex-start;
+  gap: 24rpx;
+  position: relative;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.03);
+  
+  &.unread {
+    background: #f0f7ff;
+    border: 2rpx solid #dbeafe;
+  }
+  
+  .message-icon {
+    width: 88rpx;
+    height: 88rpx;
+    background: #e8f4f8;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40rpx;
+    flex-shrink: 0;
+  }
+  
+  .message-content {
+    flex: 1;
+    
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16rpx;
+      
+      .message-title {
+        font-size: 30rpx;
+        font-weight: bold;
+        color: #333;
+      }
+      
+      .message-time {
+        font-size: 24rpx;
+        color: #999;
+      }
+    }
+    
+    .message-text {
+      font-size: 26rpx;
+      color: #666;
+      line-height: 1.4;
+    }
+  }
+  
+  .unread-dot {
+    position: absolute;
+    top: 32rpx;
+    right: 32rpx;
+    width: 16rpx;
+    height: 16rpx;
+    background: #ff5000;
+    border-radius: 50%;
+  }
+}
