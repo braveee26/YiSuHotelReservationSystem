@@ -62,6 +62,23 @@ npm run dev:weapp
 
 构建产物会输出到 `dist/` 目录。
 
+### 5. 使用 Android Studio 启动
+
+构建 Web 资源：在 hotel-app-v4 目录下执行：
+
+```bash
+npm run build:h5
+```
+
+同步安卓工程：将编译好的资源推送到原生外壳：
+
+```bash
+npx cap sync android
+```
+
+打开项目：在终端运行 npx cap open android，或直接用 Android Studio 打开 hotel-app-v4/android 目录。
+运行：等待 Android Studio Gradle 构建完成后，点击上方的 “Run” (绿色三角形按钮) 即可安装到模拟器或真机。
+
 ---
 
 ## 微信开发者工具测试
