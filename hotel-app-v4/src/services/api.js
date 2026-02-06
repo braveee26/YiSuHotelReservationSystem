@@ -3,6 +3,7 @@ import request from './request'
 
 // Auth
 export const login = (data) => request({ url: '/users/login', method: 'POST', data })
+export const register = (data) => request({ url: '/users/register', method: 'POST', data })
 export const getUserProfile = (userId) => request({ url: `/users/profile/${userId}` })
 export const updateUserProfile = (userId, data) => request({ url: `/users/profile/${userId}`, method: 'PUT', data })
 

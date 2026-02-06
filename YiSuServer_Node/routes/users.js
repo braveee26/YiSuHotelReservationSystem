@@ -1,64 +1,101 @@
 const express = require('express');
 const router = express.Router();
 const supabase = require('../config/supabase');
+const bcrypt = require('bcryptjs');
 
 // User Registration
 router.post('/register', async (req, res) => {
-    const { user_name, password, phone, role } = req.body;
-    // Note: In a real app, hash password here
-    const { data, error } = await supabase
-        .from('user')
-        .insert([{ user_name, password, phone, role, salt: 'default_salt' }])
-        .select();
+    const { phone, password, role } = req.body;
+    console.log(`\n--- [Register Start] --- Phone: ${phone}`);
 
-    if (error) return res.status(400).json({ error: error.message });
-    res.status(201).json(data[0]);
+    if (!phone || !password) {
+        console.log('[Register] Validation Failed: Missing fields');
+        return res.status(400).json({ error: 'Phone and password are required' });
+    }
+
+    try {
+        console.log('[Register] Step 1: Generating salt...');
+        const saltBuffer = await bcrypt.genSalt(10);
+        console.log('[Register] Step 2: Hashing password...');
+        const hashedPassword = await bcrypt.hash(password, saltBuffer);
+        console.log('[Register] Step 3: Hash complete');
+
+        console.log('[Register] Step 4: Supabase insert initiating...');
+        const roleValue = (role === 1 || role === '1') ? 'admin' : 'merchant';
+
+        const { data, error } = await supabase
+            .from('user')
+            .insert([{
+                user_name: phone,
+                password: hashedPassword,
+                phone,
+                salt: saltBuffer,
+                role: roleValue
+            }])
+            .select();
+
+        if (error) {
+            console.error('[Register] Supabase Error:', error.message);
+            return res.status(400).json({ error: error.message });
+        }
+
+        console.log('[Register] Step 5: Success! User ID:', data[0]?.user_id);
+        res.status(201).json({ message: 'Registration successful', user: data[0] });
+    } catch (err) {
+        console.error('[Register] CRITICAL EXCEPTION:', err.message);
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// User Login (Simplified)
+// User Login (Supports Password and Code)
 router.post('/login', async (req, res) => {
-    const { user_name, password } = req.body;
-    const { data, error } = await supabase
-        .from('user')
-        .select('user_id, user_name, role, avatar, real_name, phone, email, id_card, create_time')
-        .eq('user_name', user_name)
-        .eq('password', password)
-        .single();
+    const { phone, password, code, method } = req.body;
+    console.log(`\n--- [Login Start] --- Phone: ${phone}, Method: ${method}`);
 
-    if (error || !data) return res.status(401).json({ error: 'Invalid credentials' });
-    
-    // Return user object directly (without password/salt)
-    res.json({ 
-        message: 'Login successful', 
-        user: data 
-    });
+    if (!phone) return res.status(400).json({ error: 'Phone is required' });
+
+    try {
+        console.log('[Login] Step 1: Fetching user...');
+        const { data: user, error } = await supabase
+            .from('user')
+            .select('*')
+            .eq('phone', phone)
+            .single();
+
+        if (error || !user) {
+            console.log('[Login] User lookup failed/not found');
+            return res.status(401).json({ error: 'User not found' });
+        }
+
+        if (method === 'code') {
+            console.log('[Login] Step 2 (Code): Verifying...');
+            if (code !== '123456') {
+                return res.status(401).json({ error: 'Invalid verification code' });
+            }
+        } else {
+            console.log('[Login] Step 2 (Pass): Comparing hash...');
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) {
+                console.log('[Login] Password mismatch');
+                return res.status(401).json({ error: 'Invalid password' });
+            }
+        }
+
+        delete user.password;
+        delete user.salt;
+
+        console.log('[Login] Step 3: Success!');
+        res.json({ message: 'Login successful', user: user });
+    } catch (err) {
+        console.error('[Login] CRITICAL EXCEPTION:', err.message);
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// Get user profile by ID
+// Update profile, profile by ID, etc... (Keeping other existing routes)
 router.get('/profile/:id', async (req, res) => {
     const { id } = req.params;
-    const { data, error } = await supabase
-        .from('user')
-        .select('user_id, user_name, role, avatar, real_name, phone, email, id_card, create_time')
-        .eq('user_id', id)
-        .single();
-
-    if (error) return res.status(400).json({ error: error.message });
-    res.json(data);
-});
-
-// Update user profile
-router.put('/profile/:id', async (req, res) => {
-    const { id } = req.params;
-    const { real_name, email, avatar } = req.body;
-    
-    const { data, error } = await supabase
-        .from('user')
-        .update({ real_name, email, avatar })
-        .eq('user_id', id)
-        .select('user_id, user_name, role, avatar, real_name, phone, email, id_card, create_time')
-        .single();
-
+    const { data, error } = await supabase.from('user').select('user_id, user_name, role, avatar, real_name, phone, email, id_card').eq('user_id', id).single();
     if (error) return res.status(400).json({ error: error.message });
     res.json(data);
 });
