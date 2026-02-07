@@ -1,6 +1,7 @@
 import Taro from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
-import TabBar from '../../../components/TabBar'
+import CustomTabBar from '../../../components/CustomTabBar'
+import PageFadeIn from '../../../components/PageFadeIn'
 import './index.scss'
 
 import messageIcon from '../../../assets/message/mes-message.png'
@@ -31,6 +32,8 @@ export default function Messages() {
   ]
 
   return (
+    <>
+    <PageFadeIn>
     <View className="messages-page">
       <View className="page-header">
         <Text className="title">消息中心</Text>
@@ -60,7 +63,12 @@ export default function Messages() {
         )}
       </View>
       
-      <TabBar current={2} />
+      {/* Spacer for CustomTabBar */}
+      <View style={{ height: '120px' }}></View>
     </View>
+    </PageFadeIn>
+
+    <CustomTabBar />
+    </>
   )
 }

@@ -31,7 +31,8 @@ export default {
       ]
     }
   ],
-  /* Custom TabBar Implementation - Disabling native config
+  // Custom TabBar Implementation - Disabling native config
+  /*
   tabBar: {
     custom: false,
     color: '#999',

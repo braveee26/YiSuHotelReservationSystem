@@ -5,7 +5,8 @@ import { Tag, Loading } from '@taroify/core'
 import BannerCarousel from './BannerCarousel'
 import SearchCard from './SearchCard'
 import HotelCard from '../../components/HotelCard'
-import TabBar from '../../components/TabBar'
+import CustomTabBar from '../../components/CustomTabBar'
+import PageFadeIn from '../../components/PageFadeIn'
 import { getHotelList, getHotelAttributes } from '../../services/api'
 import './index.scss'
 
@@ -97,6 +98,8 @@ export default function Home() {
   }
 
   return (
+    <>
+    <PageFadeIn>
     <View className="home-page">
       <View className="scroll-content">
          {/* Banner */}
@@ -152,12 +155,14 @@ export default function Home() {
         </View>
         
         {/* Placeholder for bottom spacing */}
-        <View style={{ height: '80px' }}></View>
+        <View style={{ height: '120px' }}></View>
       </View>
-
-      {/* Custom TabBar */}
-      <TabBar current={0} />
     </View>
+    </PageFadeIn>
+
+    {/* CustomTabBar 必须在 PageFadeIn 外面，否则 transform 会导致 fixed 失效 */}
+    <CustomTabBar />
+    </>
   )
 }
 

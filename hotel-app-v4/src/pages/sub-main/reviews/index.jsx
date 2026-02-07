@@ -2,7 +2,8 @@ import Taro from '@tarojs/taro'
 import { useState } from 'react'
 import { View, Text, Image, Textarea } from '@tarojs/components'
 import { Button, Tabs, Popup, Rate } from '@taroify/core'
-import TabBar from '../../../components/TabBar'
+import CustomTabBar from '../../../components/CustomTabBar'
+import PageFadeIn from '../../../components/PageFadeIn'
 import './index.scss'
 
 export default function Reviews() {
@@ -53,6 +54,8 @@ export default function Reviews() {
   }
 
   return (
+    <>
+    <PageFadeIn>
     <View className="reviews-page">
       <View className="page-header">
         <Text className="title">我的点评</Text>
@@ -151,7 +154,13 @@ export default function Reviews() {
         </View>
       </Popup>
 
-      <TabBar current={3} />
+      
+      {/* Spacer for CustomTabBar */}
+      <View style={{ height: '120px' }}></View>
     </View>
+    </PageFadeIn>
+
+    <CustomTabBar />
+    </>
   )
 }

@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react'
 import { View, Text, Image, Button, Input } from '@tarojs/components'
 import { ArrowRight } from '@taroify/icons'
 import useAuthStore from '../../store/auth'
-import TabBar from '../../components/TabBar'
+import CustomTabBar from '../../components/CustomTabBar'
+import PageFadeIn from '../../components/PageFadeIn'
 import logoSvg from '../../assets/login/logo.svg'
 import './index.scss'
 
@@ -97,6 +98,8 @@ export default function User() {
   ]
 
   return (
+    <>
+    <PageFadeIn>
     <View className="user-page">
        {!isLoggedIn ? (
           // Guest View - Full Screen
@@ -120,7 +123,6 @@ export default function User() {
            {/* Header */}
            <View className="user-header">
              <View className="header-nav">
-               <Text className="back-btn" onClick={() => Taro.navigateBack()}>‹</Text>
                <Text className="header-title">个人中心</Text>
              </View>
              
@@ -307,7 +309,13 @@ export default function User() {
          </>
        )}
 
-       <TabBar current={4} />
+
+       {/* Spacer for CustomTabBar */}
+       <View style={{ height: '120px' }}></View>
     </View>
+    </PageFadeIn>
+
+    <CustomTabBar />
+    </>
   )
 }

@@ -284,3 +284,51 @@ CREATE TABLE IF NOT EXISTS "discount" (
     description VARCHAR(500)
 );
 ```
+
+---
+
+# 前端组件更新日志 (2026-02-07)
+
+本节记录前端 `hotel-app-v4` 项目新增的通用组件，供开发者参考。
+
+## 新增组件概览
+
+| 组件名       | 路径                           | 功能描述                     |
+| ------------ | ------------------------------ | ---------------------------- |
+| CustomTabBar | `src/components/CustomTabBar/` | 自定义底部导航栏，带滑动动画 |
+| PageFadeIn   | `src/components/PageFadeIn/`   | 页面进场淡入动画组件         |
+| tabStore     | `src/store/tabStore.js`        | Tab 状态管理 (Zustand)       |
+
+## CustomTabBar 使用说明
+
+自定义底部导航栏，替代原生 TabBar，支持：
+
+- 滑动指示条动画
+- 图标缩放动画
+- 全局状态同步 (Zustand)
+
+```jsx
+import CustomTabBar from "@/components/CustomTabBar";
+
+// ⚠️ 必须放在 PageFadeIn 外部
+<>
+  <PageFadeIn>
+    <View>{/* 页面内容 */}</View>
+  </PageFadeIn>
+  <CustomTabBar />
+</>;
+```
+
+## PageFadeIn 使用说明
+
+为页面添加进场动画（淡入 + 上滑）。
+
+```jsx
+import PageFadeIn from "@/components/PageFadeIn";
+
+<PageFadeIn>
+  <View className="page">{/* 页面内容 */}</View>
+</PageFadeIn>;
+```
+
+**动画参数**：位移 40px，时长 0.5s，延迟 0.05s。
