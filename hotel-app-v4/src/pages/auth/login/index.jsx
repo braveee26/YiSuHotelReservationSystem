@@ -2,7 +2,8 @@ import Taro from '@tarojs/taro'
 import { useState } from 'react'
 import { View, Text, Image } from '@tarojs/components'
 import { Button, Input, Popup, Tabs } from '@taroify/core'
-import { FriendsOutlined, PhoneOutlined, CommentOutlined, LockOutlined } from '@taroify/icons'
+import { PhoneOutlined, CommentOutlined, LockOutlined } from '@taroify/icons'
+import logoSvg from '../../../assets/login/logo.svg'
 import useAuthStore from '../../../store/auth'
 import './index.scss'
 
@@ -77,21 +78,24 @@ export default function Login() {
       <View className="bg-overlay" />
 
       <View className="content-container">
+        {/* 优化后的Logo区域 */}
         <View className="logo-section">
           <View className="logo-box">
-            <FriendsOutlined size="24" color="#385e72" />
+            <Image src={logoSvg} className="logo-img" mode="aspectFit" />
           </View>
           <Text className="app-name">悠然酒店</Text>
         </View>
 
+        {/* 主标题区域 */}
         <View className="hero-text">
           <Text className="title">开启您的{'\n'}奢华旅程</Text>
           <Text className="subtitle">精选全球高端酒店，为您提供独一无二的定制化住宿体验</Text>
         </View>
 
+        {/* 优化后的按钮区域 - 位置上移 */}
         <View className="action-buttons">
           <Button
-            className="btn-register"
+            className="btn-login"
             block
             shape="round"
             onClick={() => setShowLoginModal(true)}
@@ -99,13 +103,14 @@ export default function Login() {
             登 录
           </Button>
 
-          <View className="login-link">
-            <Text className="login-text">还没有账号？</Text>
-            <Text className="login-btn" onClick={goToRegister}>立即注册</Text>
+          <View className="register-link">
+            <Text className="register-text">还没有账号？</Text>
+            <Text className="register-btn" onClick={goToRegister}>立即注册</Text>
           </View>
         </View>
       </View>
 
+      {/* 登录弹窗 */}
       <Popup
         open={showLoginModal}
         rounded
@@ -119,6 +124,7 @@ export default function Login() {
           </View>
 
           <View className="form-container">
+            {/* 登录方式切换 */}
             <View className="method-toggle">
               <Text
                 className={`method-item ${loginMethod === 'password' ? 'active' : ''}`}
@@ -134,6 +140,7 @@ export default function Login() {
               </Text>
             </View>
 
+            {/* 手机号输入 */}
             <View className="input-group">
               <Input
                 type="number"
@@ -143,6 +150,7 @@ export default function Login() {
               />
             </View>
 
+            {/* 密码或验证码输入 */}
             {loginMethod === 'password' ? (
               <View className="input-group">
                 <Input
@@ -162,16 +170,16 @@ export default function Login() {
                 />
                 <Button
                   size="small"
-                  variant="text"
+                  className="code-button"
                   disabled={countdown > 0}
                   onClick={handleSendCode}
-                  style={{ color: '#385e72', fontWeight: '800' }}
                 >
-                  {countdown > 0 ? `${countdown}s` : '获取'}
+                  {countdown > 0 ? `${countdown}s` : '获取验证码'}
                 </Button>
               </View>
             )}
 
+            {/* 提交按钮 */}
             <Button
               block
               shape="round"

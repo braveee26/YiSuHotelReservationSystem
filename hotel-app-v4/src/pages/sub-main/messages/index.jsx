@@ -3,6 +3,8 @@ import { View, Text, Image } from '@tarojs/components'
 import TabBar from '../../../components/TabBar'
 import './index.scss'
 
+import messageIcon from '../../../assets/message/mes-message.png'
+
 export default function Messages() {
   const messages = [
     {
@@ -43,7 +45,7 @@ export default function Messages() {
           messages.map(item => (
             <View key={item.id} className={`message-card ${item.unread ? 'unread' : ''}`}>
               <View className="message-icon">
-                <Text>📧</Text>
+                <Image src={messageIcon} className="icon-img" mode="aspectFit" />
               </View>
               <View className="message-content">
                 <View className="message-header">

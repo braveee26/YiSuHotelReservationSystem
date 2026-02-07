@@ -2,7 +2,8 @@ import Taro from '@tarojs/taro'
 import { useState } from 'react'
 import { View, Text, Image } from '@tarojs/components'
 import { Button, Input } from '@taroify/core'
-import { FriendsOutlined, PhoneOutlined, LockOutlined, CommentOutlined } from '@taroify/icons'
+import { PhoneOutlined, LockOutlined, CommentOutlined } from '@taroify/icons'
+import logoSvg from '../../../assets/login/logo.svg'
 import { register } from '../../../services/api'
 import './index.scss'
 
@@ -70,81 +71,88 @@ export default function Register() {
       <View className="bg-overlay" />
 
       <View className="content-container">
+        {/* 优化后的顶部区域 */}
         <View className="logo-section">
           <View className="logo-box">
-            <FriendsOutlined size="24" color="#385e72" />
+            <Image src={logoSvg} className="logo-img" mode="aspectFit" />
           </View>
           <Text className="app-name">悠然酒店</Text>
+          <Text className="app-slogan">尊享品质住宿体验</Text>
         </View>
 
-        <View className="register-content" style={{ marginTop: '40rpx', backgroundColor: 'rgba(255,255,255,0.95)', padding: '60rpx 40rpx', borderRadius: '40rpx' }}>
-          <Text style={{ fontSize: '44rpx', fontWeight: '800', color: '#1e293b', marginBottom: '40rpx', display: 'block' }}>加入悠然会员</Text>
+        {/* 优化后的表单区域 */}
+        <View className="register-content">
+          <Text className="form-title">加入悠然会员</Text>
 
-          <View style={{ marginBottom: '30rpx' }}>
+          {/* 手机号输入 */}
+          <View className="input-wrapper">
             <Input
               className="custom-input"
               type="number"
               placeholder="手机号码"
               value={phone}
               onInput={(e) => setPhone(e.detail.value)}
-              style={{ background: '#f8fafc', padding: '24rpx', borderRadius: '16rpx', border: '1rpx solid #e2e8f0' }}
             />
           </View>
 
-          <View style={{ display: 'flex', gap: '20rpx', marginBottom: '30rpx' }}>
-            <Input
-              className="custom-input"
-              type="number"
-              placeholder="验证码 (123456)"
-              value={code}
-              onInput={(e) => setCode(e.detail.value)}
-              style={{ flex: 1, background: '#f8fafc', padding: '24rpx', borderRadius: '16rpx', border: '1rpx solid #e2e8f0' }}
-            />
+          {/* 验证码输入 */}
+          <View className="code-wrapper">
+            <View className="input-wrapper flex-1">
+              <Input
+                className="custom-input"
+                type="number"
+                placeholder="验证码 (123456)"
+                value={code}
+                onInput={(e) => setCode(e.detail.value)}
+              />
+            </View>
             <Button
               size="small"
               disabled={countdown > 0}
               onClick={handleSendCode}
-              style={{ width: '200rpx', height: '90rpx', borderRadius: '16rpx', background: '#385e72', color: '#fff' }}
+              className="code-btn"
             >
-              {countdown > 0 ? `${countdown}s` : '获取'}
+              {countdown > 0 ? `${countdown}s` : '获取验证码'}
             </Button>
           </View>
 
-          <View style={{ marginBottom: '30rpx' }}>
+          {/* 密码输入 */}
+          <View className="input-wrapper">
             <Input
               className="custom-input"
               password
               placeholder="设置登录密码 (≥6位)"
               value={password}
               onInput={(e) => setPassword(e.detail.value)}
-              style={{ background: '#f8fafc', padding: '24rpx', borderRadius: '16rpx', border: '1rpx solid #e2e8f0' }}
             />
           </View>
 
-          <View style={{ marginBottom: '60rpx' }}>
+          {/* 确认密码输入 */}
+          <View className="input-wrapper">
             <Input
               className="custom-input"
               password
               placeholder="确认登录密码"
               value={confirmPassword}
               onInput={(e) => setConfirmPassword(e.detail.value)}
-              style={{ background: '#f8fafc', padding: '24rpx', borderRadius: '16rpx', border: '1rpx solid #e2e8f0' }}
             />
           </View>
 
+          {/* 注册按钮 */}
           <Button
             block
             shape="round"
             onClick={handleRegister}
-            style={{ height: '100rpx', background: '#385e72', color: '#fff', fontSize: '32rpx', fontWeight: '800' }}
+            className="register-btn"
           >
             完成注册
           </Button>
 
-          <View style={{ marginTop: '40rpx', textAlign: 'center' }}>
-            <Text style={{ color: '#64748b', fontSize: '26rpx' }}>已经有账户？</Text>
+          {/* 底部链接 */}
+          <View className="footer-links">
+            <Text className="footer-text">已经有账户?</Text>
             <Text
-              style={{ color: '#385e72', fontSize: '26rpx', fontWeight: '800', marginLeft: '10rpx' }}
+              className="link-text"
               onClick={() => Taro.navigateBack()}
             >
               去登录
@@ -152,7 +160,7 @@ export default function Register() {
           </View>
         </View>
 
-        <View style={{ padding: '60rpx 0' }} />
+        <View className="bottom-spacer" />
       </View>
     </View>
   )
