@@ -1,5 +1,5 @@
-import { RegisterView } from "../views/base/registerView.jsx";
+import RegisterView from "../views/base/Register.jsx";
 
-export default function Register() {
+export default function RegisterRoute() {
     return <RegisterView />;
 }

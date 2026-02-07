@@ -1,5 +1,5 @@
-import { LoginView } from "../views/base/loginView.jsx";
+import LoginView from "../views/base/Login.jsx";
 
-export default function Login() {
+export default function LoginRoute() {
     return <LoginView />;
 }

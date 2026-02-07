@@ -23,15 +23,32 @@ type Pages = {
   "/admin": {
     params: {};
   };
+  "/admin/audit": {
+    params: {};
+  };
+  "/admin/property": {
+    params: {};
+  };
+  "/admin/users": {
+    params: {};
+  };
   "/merchant": {
     params: {};
+  };
+  "/merchant/profile": {
+    params: {};
+  };
+  "/*": {
+    params: {
+      "*": string;
+    };
   };
 };
 
 type RouteFiles = {
   "root.jsx": {
     id: "root";
-    page: "/" | "/login" | "/register" | "/admin" | "/merchant";
+    page: "/" | "/login" | "/register" | "/admin" | "/admin/audit" | "/admin/property" | "/admin/users" | "/merchant" | "/merchant/profile" | "/*";
   };
   "routes/index.jsx": {
     id: "routes/index";
@@ -45,13 +62,41 @@ type RouteFiles = {
     id: "routes/register";
     page: "/register";
   };
-  "routes/admin/adminCenter.jsx": {
-    id: "routes/admin/adminCenter";
+  "routes/admin/layout.jsx": {
+    id: "routes/admin/layout";
+    page: "/admin" | "/admin/audit" | "/admin/property" | "/admin/users";
+  };
+  "routes/admin/profile.jsx": {
+    id: "routes/admin/profile";
     page: "/admin";
   };
-  "routes/merchant/merchantCenter.jsx": {
-    id: "routes/merchant/merchantCenter";
+  "routes/admin/audit.jsx": {
+    id: "routes/admin/audit";
+    page: "/admin/audit";
+  };
+  "routes/admin/property.jsx": {
+    id: "routes/admin/property";
+    page: "/admin/property";
+  };
+  "routes/admin/users.jsx": {
+    id: "routes/admin/users";
+    page: "/admin/users";
+  };
+  "routes/merchant/layout.jsx": {
+    id: "routes/merchant/layout";
+    page: "/merchant" | "/merchant/profile";
+  };
+  "routes/merchant/hotels.jsx": {
+    id: "routes/merchant/hotels";
     page: "/merchant";
+  };
+  "routes/merchant/profile.jsx": {
+    id: "routes/merchant/profile";
+    page: "/merchant/profile";
+  };
+  "routes/notfound.jsx": {
+    id: "routes/notfound";
+    page: "/*";
   };
 };
 
@@ -60,6 +105,13 @@ type RouteModules = {
   "routes/index": typeof import("./app/routes/index.jsx");
   "routes/login": typeof import("./app/routes/login.jsx");
   "routes/register": typeof import("./app/routes/register.jsx");
-  "routes/admin/adminCenter": typeof import("./app/routes/admin/adminCenter.jsx");
-  "routes/merchant/merchantCenter": typeof import("./app/routes/merchant/merchantCenter.jsx");
+  "routes/admin/layout": typeof import("./app/routes/admin/layout.jsx");
+  "routes/admin/profile": typeof import("./app/routes/admin/profile.jsx");
+  "routes/admin/audit": typeof import("./app/routes/admin/audit.jsx");
+  "routes/admin/property": typeof import("./app/routes/admin/property.jsx");
+  "routes/admin/users": typeof import("./app/routes/admin/users.jsx");
+  "routes/merchant/layout": typeof import("./app/routes/merchant/layout.jsx");
+  "routes/merchant/hotels": typeof import("./app/routes/merchant/hotels.jsx");
+  "routes/merchant/profile": typeof import("./app/routes/merchant/profile.jsx");
+  "routes/notfound": typeof import("./app/routes/notfound.jsx");
 };

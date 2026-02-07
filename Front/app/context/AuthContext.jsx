@@ -23,7 +23,25 @@ const TEST_USERS = [
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
+  // 初始化用户状态 - 只在客户端执行
+  useState(() => {
+    if (typeof window !== 'undefined') {
+      const currentUser = localStorage.getItem('currentUser');
+      if (currentUser) {
+        try {
+          setUser(JSON.parse(currentUser));
+        } catch (error) {
+          console.error('解析当前用户失败:', error);
+          localStorage.removeItem('currentUser');
+        }
+      }
+    }
+  });
+
   const login = (username, password) => {
+    // 只在客户端环境操作 localStorage
+    if (typeof window === 'undefined') return false;
+    
     // 检查本地存储中的用户数据
     const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
     
@@ -44,6 +62,9 @@ export function AuthProvider({ children }) {
 
   // 快速登录方法，接受用户名直接登录
   const quickLogin = (username) => {
+    // 只在客户端环境操作 localStorage
+    if (typeof window === 'undefined') return false;
+    
     const testUser = TEST_USERS.find(user => user.username === username);
     if (testUser) {
       localStorage.setItem('currentUser', JSON.stringify(testUser));
@@ -54,7 +75,10 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('currentUser');
+    // 只在客户端环境操作 localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('currentUser');
+    }
     setUser(null);
   };
 

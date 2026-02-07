@@ -1,0 +1,324 @@
+import React, { useState } from 'react';
+import { Search, User, Building2, Mail, Phone, MoreVertical, Shield, Ban, CheckCircle } from 'lucide-react';
+import ConfirmModal from '../../components/merchant/ConfirmModal';
+
+export default function UserManagement() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [statusConfirm, setStatusConfirm] = useState({
+    isOpen: false,
+    userId: '',
+    currentStatus: '',
+    username: '',
+  });
+
+  // 模拟用户数据
+  const users = [
+    {
+      id: '1',
+      username: 'merchant_001',
+      email: 'merchant001@yisu.com',
+      phone: '13800138000',
+      role: 'merchant',
+      company: '北京易宿酒店管理有限公司',
+      hotelCount: 5,
+      status: 'active',
+      registerDate: '2023-06-15',
+    },
+    {
+      id: '2',
+      username: 'merchant_002',
+      email: 'merchant002@yisu.com',
+      phone: '13800138001',
+      role: 'merchant',
+      company: '上海外滩酒店集团',
+      hotelCount: 8,
+      status: 'active',
+      registerDate: '2023-08-20',
+    },
+    {
+      id: '3',
+      username: 'admin_001',
+      email: 'admin001@yisu.com',
+      phone: '13800138002',
+      role: 'admin',
+      company: '易宿平台',
+      hotelCount: 0,
+      status: 'active',
+      registerDate: '2023-01-10',
+    },
+    {
+      id: '4',
+      username: 'merchant_003',
+      email: 'merchant003@yisu.com',
+      phone: '13800138003',
+      role: 'merchant',
+      company: '深圳商旅酒店有限公司',
+      hotelCount: 3,
+      status: 'inactive',
+      registerDate: '2023-11-05',
+    },
+  ];
+
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.company.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+    return matchesSearch && matchesRole;
+  });
+
+  const getStatusBadge = (status) => {
+    return status === 'active' ? (
+      <span className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+        <CheckCircle className="w-3 h-3" />
+        <span>正常</span>
+      </span>
+    ) : (
+      <span className="flex items-center space-x-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
+        <Ban className="w-3 h-3" />
+        <span>禁用</span>
+      </span>
+    );
+  };
+
+  const getRoleBadge = (role) => {
+    return role === 'admin' ? (
+      <span className="flex items-center space-x-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm">
+        <Shield className="w-3 h-3" />
+        <span>管理员</span>
+      </span>
+    ) : (
+      <span className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+        <Building2 className="w-3 h-3" />
+        <span>商户</span>
+      </span>
+    );
+  };
+
+  const handleToggleStatus = (userId, currentStatus, username) => {
+    setStatusConfirm({
+      isOpen: true,
+      userId,
+      currentStatus,
+      username,
+    });
+  };
+
+  const confirmToggleStatus = () => {
+    const action = statusConfirm.currentStatus === 'active' ? '禁用' : '启用';
+    if (confirm(`确定要${action}用户 ${statusConfirm.username} 吗？`)) {
+      alert(`用户 ${statusConfirm.username} 已${action}`);
+      setStatusConfirm({
+        isOpen: false,
+        userId: '',
+        currentStatus: '',
+        username: '',
+      });
+    }
+  };
+
+  const cancelToggleStatus = () => {
+    setStatusConfirm({
+      isOpen: false,
+      userId: '',
+      currentStatus: '',
+      username: '',
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold text-gray-800">用户管理</h2>
+      </div>
+
+      {/* Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <User className="w-6 h-6 text-blue-600" />
+            </div>
+            <span className="text-2xl font-semibold text-gray-800">{users.length}</span>
+          </div>
+          <div className="text-gray-600">总用户数</div>
+        </div>
+
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <Building2 className="w-6 h-6 text-indigo-600" />
+            </div>
+            <span className="text-2xl font-semibold text-gray-800">
+              {users.filter(u => u.role === 'merchant').length}
+            </span>
+          </div>
+          <div className="text-gray-600">商户</div>
+        </div>
+
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <Shield className="w-6 h-6 text-purple-600" />
+            </div>
+            <span className="text-2xl font-semibold text-gray-800">
+              {users.filter(u => u.role === 'admin').length}
+            </span>
+          </div>
+          <div className="text-gray-600">管理员</div>
+        </div>
+
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+            <span className="text-2xl font-semibold text-gray-800">
+              {users.filter(u => u.status === 'active').length}
+            </span>
+          </div>
+          <div className="text-gray-600">活跃用户</div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+          {/* Search */}
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="搜索用户名、邮箱或企业..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+
+          {/* Role Filter */}
+          <div className="flex space-x-2">
+            {[
+              { value: 'all', label: '全部' },
+              { value: 'merchant', label: '商户' },
+              { value: 'admin', label: '管理员' },
+            ].map((filter) => (
+              <button
+                key={filter.value}
+                onClick={() => setRoleFilter(filter.value)}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  roleFilter === filter.value
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Users Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">用户信息</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">联系方式</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">企业/机构</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">角色</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">酒店数</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">状态</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">注册时间</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">操作</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredUsers.map((user) => (
+                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                        {user.username.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-800">{user.username}</div>
+                        <div className="text-xs text-gray-500">ID: {user.id}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center text-sm text-gray-600">
+                        <Mail className="w-3 h-3 mr-2 text-gray-400" />
+                        {user.email}
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <Phone className="w-3 h-3 mr-2 text-gray-400" />
+                        {user.phone}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-800">{user.company}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {getRoleBadge(user.role)}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-800">{user.hotelCount}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {getStatusBadge(user.status)}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-600">{user.registerDate}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleToggleStatus(user.id, user.status, user.username)}
+                        className={`px-3 py-1.5 rounded text-sm transition-colors ${
+                          user.status === 'active'
+                            ? 'text-red-600 hover:bg-red-50'
+                            : 'text-green-600 hover:bg-green-50'
+                        }`}
+                      >
+                        {user.status === 'active' ? '禁用' : '启用'}
+                      </button>
+                      <button className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Status Toggle Confirmation Modal */}
+      <ConfirmModal
+        isOpen={statusConfirm.isOpen}
+        onClose={() => setStatusConfirm({ ...statusConfirm, isOpen: false })}
+        onConfirm={confirmToggleStatus}
+        title={statusConfirm.currentStatus === 'active' ? '确认禁用用户' : '确认启用用户'}
+        message={
+          statusConfirm.currentStatus === 'active'
+            ? `确定要禁用用户「${statusConfirm.username}」吗？禁用后该用户将无法登录系统。`
+            : `确定要启用用户「${statusConfirm.username}」吗？启用后该用户可以正常登录系统。`
+        }
+        confirmText={statusConfirm.currentStatus === 'active' ? '禁用' : '启用'}
+        type={statusConfirm.currentStatus === 'active' ? 'danger' : 'info'}
+      />
+    </div>
+  );
+}

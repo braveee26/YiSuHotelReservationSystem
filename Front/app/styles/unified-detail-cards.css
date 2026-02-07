@@ -1,0 +1,107 @@
+/* 统一卡片样式 */
+.card-hover-effect {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0);
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* 渐变标题栏动画 */
+.gradient-header {
+  background-size: 200% 200%;
+  animation: gradientShift 6s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 统一图标容器样式 */
+.icon-container-unified {
+  transition: all 0.3s ease;
+  transform: scale(1);
+}
+
+.card-hover-effect:hover .icon-container-unified {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 状态标签统一样式 */
+.status-badge-unified {
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+}
+
+.status-badge-unified:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 时间信息条目样式 */
+.time-entry-item {
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.time-entry-item:hover {
+  border-left-color: rgba(59, 130, 246, 0.3);
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .card-hover-effect {
+    margin-bottom: 1rem;
+  }
+  
+  .card-hover-effect:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .icon-container-unified {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  
+  .icon-container-unified svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+}
+
+/* 暗色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .card-hover-effect:hover {
+    box-shadow: 0 12px 24px rgba(255, 255, 255, 0.1);
+  }
+  
+  .time-entry-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-left-color: rgba(96, 165, 250, 0.5);
+  }
+}
+
+/* 加载状态骨架屏 */
+.skeleton-card {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 1rem;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 平滑滚动优化 */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}

@@ -12,7 +12,9 @@
     "@react-router/node": "7.12.0",
     "@react-router/serve": "7.12.0",
     "antd": "^6.2.2",
+    "element-china-area-data": "^6.1.0",
     "isbot": "^5.1.31",
+    "lucide-react": "^0.563.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router": "7.12.0"
