@@ -29,7 +29,7 @@ export default function Booking() {
        Taro.hideLoading()
        Taro.showToast({ title: '预订成功', icon: 'success' })
        setTimeout(() => {
-         Taro.switchTab({ url: '/pages/order/index' })
+         Taro.redirectTo({ url: '/pages/order/index' })
        }, 1500)
      }, 1000)
   }

@@ -64,6 +64,10 @@ export default function Login() {
     }
   }
 
+  const handleGuestLogin = () => {
+    Taro.reLaunch({ url: '/pages/home/index' })
+  }
+
   const goToRegister = () => {
     Taro.navigateTo({ url: '/pages/auth/register/index' })
   }
@@ -94,8 +98,12 @@ export default function Login() {
 
         {/* 优化后的按钮区域 - 位置上移 */}
         <View className="action-buttons">
-          <Button
-            className="btn-login"
+      <View className="guest-entry" onClick={handleGuestLogin}>
+        <Text>不想登录？</Text>
+        <Text className="highlight">直接看 -&gt;</Text>
+      </View>
+      <Button
+        className="btn-login"
             block
             shape="round"
             onClick={() => setShowLoginModal(true)}
