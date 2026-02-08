@@ -72,5 +72,4 @@ public class UserController {
         return userService.login(userLoginReq);
     }
 
-
 }

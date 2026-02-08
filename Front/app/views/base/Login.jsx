@@ -1,32 +1,66 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Hotel } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { message } from 'antd';
+import { login } from '../../api/base/userApi';
+import { useUserStore } from '../../store/useUserStore';
 
 export default function LoginView() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login: storeLogin } = useUserStore();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setLoading(true);
 
     if (!username || !password) {
-      setError('请输入用户名和密码');
+      message.error('请输入用户名和密码');
+      setLoading(false);
       return;
     }
 
-    // 模拟登录逻辑：根据用户名前缀判断角色
-    const role = username.startsWith('admin') ? 'admin' : 'merchant';
-    
-    // 保存用户信息到本地存储
-    localStorage.setItem('currentUser', JSON.stringify({ username, role }));
-    
-    // 根据角色跳转到对应页面
-    if (role === 'admin') {
-      window.location.href = '/admin';
-    } else {
-      window.location.href = '/merchant';
+    try {
+      // 调用后端登录API
+      const response = await login({
+        userName: username,
+        password: password
+      });
+
+      if (response.code === 200) {
+        // 登录成功，解析JWT token获取用户信息
+        const token = response.data;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userRole = payload.role;
+        const userUsername = payload.username;
+        
+        // 保存用户信息到状态管理
+        const userInfo = {
+          username: userUsername,
+          role: userRole.toLowerCase()
+        };
+        
+        storeLogin(userInfo, token);
+        
+        message.success('登录成功');
+        
+        // 根据角色跳转到对应页面
+        if (userRole.toLowerCase() === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/merchant');
+        }
+      } else {
+        message.error(response.msg || '登录失败');
+      }
+    } catch (error) {
+      console.error('登录错误:', error);
+      message.error(error.response?.data?.msg || '登录失败，请检查网络连接');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,17 +110,14 @@ export default function LoginView() {
               </div>
             </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
+
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              登录
+              {loading ? '登录中...' : '登录'}
             </button>
           </form>
 
@@ -106,8 +137,8 @@ export default function LoginView() {
           {/* Demo Hint */}
           <div className="mt-6 p-4 bg-gray-50 rounded-lg text-xs text-gray-600">
             <p className="font-medium mb-1">测试账号提示：</p>
-            <p>• 商户账号：使用任意用户名（非admin开头）</p>
-            <p>• 管理员账号：使用 admin 开头的用户名</p>
+            <p>• 请使用已在系统中注册的账号进行登录</p>
+            <p>• 如无账号，请先进行注册</p>
           </div>
         </div>
       </div>

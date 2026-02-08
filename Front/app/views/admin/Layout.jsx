@@ -4,8 +4,10 @@ import HotelAudit from './HotelAudit';
 import PropertyManagement from './PropertyManagement';
 import UserManagement from './UserManagement';
 import Profile from './Profile';
+import { useNavigate } from 'react-router';
 
-export default function AdminLayout({ onLogout }) {
+export default function AdminLayout() {
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
   const [currentUser, setCurrentUser] = useState({});
@@ -222,7 +224,12 @@ export default function AdminLayout({ onLogout }) {
         {/* Logout */}
         <div className="p-3 border-t border-gray-200">
           <button
-            onClick={onLogout}
+            onClick={() => {
+              // 清除用户信息
+              localStorage.removeItem('currentUser');
+              // 跳转到登录页
+              navigate('/login');
+            }}
             className="w-full flex items-center space-x-3 px-3 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-all"
           >
             <LogOut className="w-5 h-5 flex-shrink-0" />

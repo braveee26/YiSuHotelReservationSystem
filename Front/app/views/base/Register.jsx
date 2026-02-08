@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Hotel, Check } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { message } from 'antd';
+import { register } from '../../api/base/userApi';
 
 export default function RegisterView() {
   const [formData, setFormData] = useState({
@@ -13,34 +16,61 @@ export default function RegisterView() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setLoading(true);
 
     // 验证表单
     if (!formData.username || !formData.password || !formData.email || !formData.phone) {
-      setError('请填写所有必填项');
+      message.error('请填写所有必填项');
+      setLoading(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('两次输入的密码不一致');
+      message.error('两次输入的密码不一致');
+      setLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('密码长度至少6位');
+      message.error('密码长度至少6位');
+      setLoading(false);
       return;
     }
 
-    // 模拟注册成功
-    setSuccess(true);
-    setTimeout(() => {
-      window.location.href = '/login';
-    }, 2000);
+    try {
+      // 构造注册请求数据
+      const registerData = {
+        userName: formData.username,
+        password: formData.password,
+        email: formData.email,
+        phone: formData.phone,
+        role: formData.role
+      };
+
+      // 调用后端注册API
+      const response = await register(registerData);
+
+      if (response.code === 200) {
+        message.success('注册成功');
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      } else {
+        message.error(response.msg || '注册失败');
+      }
+    } catch (error) {
+      console.error('注册错误:', error);
+      message.error(error.response?.data?.msg || '注册失败，请检查网络连接');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateFormData = (field, value) => {
@@ -113,30 +143,15 @@ export default function RegisterView() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm text-gray-700 mb-2">用户名 *</label>
-                <input
-                  type="text"
-                  value={formData.username}
-                  onChange={(e) => updateFormData('username', e.target.value)}
-                  placeholder="请输入用户名"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm text-gray-700 mb-2">
-                  {formData.role === 'merchant' ? '企业名称' : '姓名'}
-                </label>
-                <input
-                  type="text"
-                  value={formData.companyName}
-                  onChange={(e) => updateFormData('companyName', e.target.value)}
-                  placeholder={formData.role === 'merchant' ? '请输入企业名称' : '请输入姓名'}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
+            <div>
+              <label className="block text-sm text-gray-700 mb-2">用户名 *</label>
+              <input
+                type="text"
+                value={formData.username}
+                onChange={(e) => updateFormData('username', e.target.value)}
+                placeholder="请输入用户名"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -205,17 +220,14 @@ export default function RegisterView() {
               </div>
             </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
+
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              注册
+              {loading ? '注册中...' : '注册'}
             </button>
           </form>
 
@@ -224,7 +236,7 @@ export default function RegisterView() {
             <p className="text-gray-600">
               已有账号？
               <button
-                onClick={() => window.location.href = '/login'}
+                onClick={() => navigate('/login')}
                 className="text-blue-600 hover:text-blue-700 ml-1 font-medium"
               >
                 立即登录
