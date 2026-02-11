@@ -217,17 +217,31 @@ export default function UserManagement() {
   };
 
   const getRoleBadge = (role) => {
-    return role === 'admin' ? (
+    // 客户
+    if (role === 'customer') {
+      return (
+        <span className="flex items-center space-x-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+          <User className="w-3 h-3" />
+          <span>客户</span>
+        </span>
+      );
+    }
+    else if(role === 'admin' ){
+      return(
       <span className="flex items-center space-x-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm">
-        <Shield className="w-3 h-3" />
+        <Shield className="w-3 h-3"/>
         <span>管理员</span>
       </span>
-    ) : (
+      );
+    }
+    else {
+      return (
       <span className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-        <Building2 className="w-3 h-3" />
+        <Building2 className="w-3 h-3"/>
         <span>商户</span>
       </span>
-    );
+      );
+    }
   };
 
   const handleToggleStatus = (userId, currentStatus, username) => {
@@ -263,11 +277,6 @@ export default function UserManagement() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-gray-800">用户管理</h2>
-      </div>
-
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -335,19 +344,18 @@ export default function UserManagement() {
           </div>
 
           {/* Role Filter */}
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 gap-2">
             {[
               { value: 'all', label: '全部' },
               { value: 'merchant', label: '商户' },
               { value: 'admin', label: '管理员' },
+              { value: 'customer', label: '客户' },
             ].map((filter) => (
               <button
                 key={filter.value}
                 onClick={() => setRoleFilter(filter.value)}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  roleFilter === filter.value
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                className={`btn-secondary ${
+                  roleFilter === filter.value ? 'selected' : ''
                 }`}
               >
                 {filter.label}
@@ -361,7 +369,7 @@ export default function UserManagement() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {/* 固定表头的表格容器 */}
         <div className="overflow-hidden">
-          <div className="overflow-y-auto" style={{ maxHeight: '550px' }}>
+          <div className="overflow-y-auto" style={{ maxHeight: '500px' }}>
             <table className="w-full">
               {/* 固定表头 */}
               <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
@@ -369,9 +377,9 @@ export default function UserManagement() {
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[200px]">用户信息</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[220px]">联系方式</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[200px]">企业/机构</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[110px]">角色</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[130px]">角色</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[90px]">酒店数</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[110px]">状态</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[130px]">状态</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[130px]">注册时间</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[130px]">操作</th>
                 </tr>
@@ -393,24 +401,24 @@ export default function UserManagement() {
                     </td>
                     <td className="px-6 py-4 align-top">
                       <div className="space-y-1">
-                        <div className="flex items-center text-sm text-gray-600">
+                        <div className="flex items-center text-body">
                           <Mail className="w-3 h-3 mr-2 text-gray-400 flex-shrink-0" />
                           <span className="truncate max-w-[180px]" title={user.email}>{user.email}</span>
                         </div>
-                        <div className="flex items-center text-sm text-gray-600">
+                        <div className="flex items-center text-body">
                           <Phone className="w-3 h-3 mr-2 text-gray-400 flex-shrink-0" />
                           <span>{user.phone}</span>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 align-top">
-                      <div className="text-sm text-gray-800 truncate max-w-[180px]" title={user.company}>{user.company}</div>
+                      <div className="text-body truncate max-w-[180px]" title={user.company}>{user.company}</div>
                     </td>
                     <td className="px-6 py-4 align-top">
                       {getRoleBadge(user.role)}
                     </td>
                     <td className="px-6 py-4 align-top">
-                      <div className="text-sm text-gray-800">{user.hotelCount}</div>
+                      <div className="text-body font-medium">{user.hotelCount}</div>
                     </td>
                     <td className="px-6 py-4 align-top">
                       {getStatusBadge(user.status)}
@@ -422,16 +430,13 @@ export default function UserManagement() {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => handleToggleStatus(user.id, user.status, user.username)}
-                          className={`px-3 py-1.5 rounded text-sm transition-colors ${
+                          className={`btn-outline btn-sm ${
                             user.status === 'active'
-                              ? 'text-red-600 hover:bg-red-50'
-                              : 'text-green-600 hover:bg-green-50'
+                              ? 'btn-secondary'
+                              : 'btn-secondary'
                           }`}
                         >
                           {user.status === 'active' ? '禁用' : '启用'}
-                        </button>
-                        <button className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                          <MoreVertical className="w-4 h-4" />
                         </button>
                       </div>
                     </td>

@@ -47,7 +47,7 @@ export default function HotelDetail({ hotelId, onBack, initialTab = 'info' }) {
       {/* Tabs */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="border-b border-gray-200">
-          <div className="flex space-x-8 px-6">
+          <div className="flex space-x-10 px-6 gap-4">
             {tabs.map((tab) => (
               <button
                 key={tab.id}

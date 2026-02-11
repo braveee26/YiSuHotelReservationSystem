@@ -188,7 +188,7 @@ export default function FacilityManagementModal({ isOpen, onClose }) {
             <div className="mt-4">
               <button
                 onClick={handleAddFacility}
-                className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                className="btn-primary flex items-center space-x-2"
               >
                 <Plus className="w-4 h-4" />
                 <span>添加设施</span>
@@ -233,17 +233,17 @@ export default function FacilityManagementModal({ isOpen, onClose }) {
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                               />
                             </div>
-                            <div className="flex space-x-2">
+                            <div className="flex space-x-2 gap-4">
                               <button
                                 onClick={handleEditSave}
-                                className="flex items-center space-x-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                                className="btn-success btn-sm flex items-center space-x-1"
                               >
                                 <Save className="w-4 h-4" />
                                 <span>保存</span>
                               </button>
                               <button
                                 onClick={handleEditCancel}
-                                className="flex items-center space-x-1 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                                className="btn-secondary btn-sm flex items-center space-x-1"
                               >
                                 <X className="w-4 h-4" />
                                 <span>取消</span>
@@ -262,16 +262,16 @@ export default function FacilityManagementModal({ isOpen, onClose }) {
                                 <p className="text-sm text-gray-600 ml-6">{facility.description}</p>
                               )}
                             </div>
-                            <div className="flex space-x-1 ml-4">
+                            <div className="flex space-x-1 ml-4 gap-2">
                               <button
                                 onClick={() => handleEditStart(facility)}
-                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                className="btn-outline btn-sm p-1.5 text-blue-600 hover:bg-blue-50"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDeleteClick(facility.id, facility.name)}
-                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                className="btn-outline btn-sm p-1.5 text-red-600 hover:bg-red-50"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -321,7 +321,7 @@ export default function FacilityManagementModal({ isOpen, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            className="btn-secondary"
           >
             关闭
           </button>

@@ -444,7 +444,7 @@ export default function HotelAudit() {
         <div className="flex flex-col lg:flex-row lg:items-end gap-4">
           {/* 搜索框 */}
           <div className="flex-1 min-w-[280px]">
-            <label className="block text-sm font-medium text-gray-700 mb-2">关键词搜索</label>
+            <label className="block text-subheading font-bold-important mb-2">关键词搜索</label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -459,7 +459,7 @@ export default function HotelAudit() {
 
           {/* 审核状态 */}
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-sm font-medium text-gray-700 mb-2">审核状态</label>
+            <label className="block text-subheading font-bold-important mb-2">审核状态</label>
             <div className="flex flex-wrap gap-1.5">
               {[
                 { value: 'pending', label: '待提交' },
@@ -470,10 +470,8 @@ export default function HotelAudit() {
                 <button
                   key={status.value}
                   onClick={() => handleAuditStatusToggle(status.value)}
-                  className={`px-3 py-2 rounded-lg text-sm transition-colors ${
-                    auditStatusFilters.includes(status.value)
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  className={`btn-secondary btn-sm ${
+                    auditStatusFilters.includes(status.value) ? 'selected' : ''
                   }`}
                 >
                   {status.label}
@@ -487,11 +485,7 @@ export default function HotelAudit() {
             {/* 详细筛选按钮 */}
             <button
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg transition-colors text-sm ${
-                showAdvancedFilters
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`btn-secondary btn-sm flex items-center space-x-1.5 ${showAdvancedFilters ? 'selected' : ''}`}
             >
               <Filter className="w-4 h-4" />
               <span>详细筛选</span>
@@ -505,7 +499,7 @@ export default function HotelAudit() {
             {/* 设施管理按钮 */}
             <button
               onClick={() => setShowFacilityModal(true)}
-              className="flex items-center space-x-1.5 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm text-sm"
+              className="btn-primary btn-sm flex items-center space-x-1.5"
             >
               <Settings className="w-4 h-4" />
               <span>设施管理</span>
@@ -515,7 +509,7 @@ export default function HotelAudit() {
         
         {/* Record Count */}
         <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end">
-          <span className="text-sm text-gray-600">
+          <span className="text-body font-medium">
             共找到 {filteredHotels.length} 条记录
           </span>
         </div>
@@ -527,7 +521,7 @@ export default function HotelAudit() {
           <div className="space-y-6">
             {/* 地区筛选 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">地理位置筛选</label>
+              <label className="block text-subheading font-bold-important mb-3">地理位置筛选</label>
               <AreaSelector
                 province={areaFilter.province}
                 city={areaFilter.city}
@@ -539,16 +533,14 @@ export default function HotelAudit() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* 星级筛选 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">酒店星级</label>
+                <label className="block text-subheading font-bold-important mb-3">酒店星级</label>
                 <div className="flex flex-wrap gap-2">
                   {[1, 2, 3, 4, 5].map(star => (
                     <button
                       key={star}
                       onClick={() => handleStarToggle(star.toString())}
-                      className={`px-4 py-2 rounded-lg transition-colors ${
-                        starFilters.includes(star.toString())
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      className={`btn-secondary ${
+                        starFilters.includes(star.toString()) ? 'selected' : ''
                       }`}
                     >
                       {star}星
@@ -559,7 +551,7 @@ export default function HotelAudit() {
 
               {/* 上线状态 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">上线状态</label>
+                <label className="block text-subheading font-bold-important mb-3">上线状态</label>
                 <div className="flex flex-wrap gap-2">
                   {[
                     { value: 'online', label: '已上线' },
@@ -568,10 +560,8 @@ export default function HotelAudit() {
                     <button
                       key={status.value}
                       onClick={() => handleOnlineStatusToggle(status.value)}
-                      className={`px-4 py-2 rounded-lg transition-colors ${
-                        onlineStatusFilters.includes(status.value)
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      className={`btn-secondary ${
+                        onlineStatusFilters.includes(status.value) ? 'selected' : ''
                       }`}
                     >
                       {status.label}
@@ -585,7 +575,7 @@ export default function HotelAudit() {
             <div className="flex justify-end pt-4 border-t border-gray-200">
               <button
                 onClick={resetFilters}
-                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                className="btn-secondary"
               >
                 重置筛选条件
               </button>
@@ -598,7 +588,7 @@ export default function HotelAudit() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {/* 固定表头的表格容器 */}
         <div className="overflow-hidden">
-          <div className="overflow-y-auto" style={{ maxHeight: '660px' }}>
+          <div className="overflow-y-auto" style={{ maxHeight: '560px' }}>
             <table className="w-full">
               {/* 固定表头 */}
               <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
@@ -608,9 +598,9 @@ export default function HotelAudit() {
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[90px]">星级</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[130px]">地区</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[130px]">提交时间</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[110px]">审核状态</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[110px]">上线状态</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[90px]">操作</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[130px]">审核状态</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[130px]">上线状态</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[125px]">操作</th>
                 </tr>
               </thead>
               {/* 滚动的内容 */}
@@ -619,8 +609,8 @@ export default function HotelAudit() {
                   <tr key={hotel.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 align-top">
                       <div>
-                        <div className="font-medium text-gray-800">{hotel.hotelNameCn}</div>
-                        <div className="text-sm text-gray-500">{hotel.hotelNameEn}</div>
+                        <div className="font-bold text-gray-800">{hotel.hotelNameCn}</div>
+                        <div className="text-body text-gray-500">{hotel.hotelNameEn}</div>
                         <div className="flex items-center text-xs text-gray-500 mt-1">
                           <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
                           <span className="truncate">{hotel.address}</span>
@@ -637,12 +627,12 @@ export default function HotelAudit() {
                       </div>
                     </td>
                     <td className="px-6 py-4 align-top">
-                      <div className="text-sm text-gray-600 truncate max-w-[120px]" title={`${hotel.province} ${hotel.city}`}>
+                      <div className="text-body text-gray-600 truncate max-w-[120px]" title={`${hotel.province} ${hotel.city}`}>
                         {hotel.province} {hotel.city}
                       </div>
                     </td>
                     <td className="px-6 py-4 align-top">
-                      <div className="text-sm text-gray-600">{hotel.submitDate}</div>
+                      <div className="text-body">{hotel.submitDate}</div>
                     </td>
                     <td className="px-6 py-4 align-top">
                       {getStatusBadge(hotel.status)}
@@ -679,7 +669,7 @@ export default function HotelAudit() {
               <p className="text-gray-500 mb-4">请调整筛选条件或重置所有筛选</p>
               <button
                 onClick={resetFilters}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                className="btn-primary"
               >
                 重置筛选条件
               </button>

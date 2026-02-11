@@ -85,7 +85,7 @@ export default function PropertyManagement() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-gray-800">属性管理</h2>
+        <h2 className="text-2xl font-bold text-gray-800">属性管理</h2>
         <button
           onClick={() => setShowAddModal(true)}
           className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
@@ -133,7 +133,7 @@ export default function PropertyManagement() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-2">
                         <MapPin className="w-5 h-5 text-indigo-600" />
-                        <span className="font-semibold text-gray-800">{city.name}</span>
+                        <span className="font-bold text-gray-800">{city.name}</span>
                       </div>
                       <div className="flex space-x-2">
                         <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors">
@@ -172,7 +172,7 @@ export default function PropertyManagement() {
                       ))}
                     </div>
                     <div>
-                      <div className="font-semibold text-gray-800">{star.name}</div>
+                      <div className="font-bold text-gray-800">{star.name}</div>
                       <div className="text-sm text-gray-600">{star.description}</div>
                     </div>
                   </div>
@@ -195,7 +195,7 @@ export default function PropertyManagement() {
           {activeTab === 'facilities' && (
             <div>
               {/* 固定高度的滚动容器 */}
-              <div className="overflow-y-auto" style={{ maxHeight: '600px' }}>
+              <div className="overflow-y-auto" style={{ maxHeight: '550px' }}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                   {facilities.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((facility) => (
                     <div
