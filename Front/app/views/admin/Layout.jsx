@@ -30,7 +30,7 @@ export default function AdminLayout() {
   const menuItems = [
     { id: 'home', icon: Home, label: '首页' },
     { id: 'audit', icon: CheckSquare, label: '酒店审核' },
-    { id: 'property', icon: Settings, label: '属性管理' },
+    // { id: 'property', icon: Settings, label: '属性管理' },
     { id: 'users', icon: Users, label: '用户管理' },
     { id: 'profile', icon: User, label: '个人中心' },
   ];

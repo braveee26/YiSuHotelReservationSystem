@@ -13,6 +13,11 @@ export default function HotelAuditDetailModal({
   approveConfirm,
   setApproveConfirm
 }) {
+  const [rejectConfirm, setRejectConfirm] = useState({
+    isOpen: false,
+    hotelId: '',
+    hotelName: '',
+  });
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
 
@@ -44,7 +49,7 @@ export default function HotelAuditDetailModal({
     setApproveConfirm({
       isOpen: true,
       hotelId: hotel.id,
-      hotelName: hotel.nameCn,
+      hotelName: hotel.hotelNameCn,
     });
   };
 
@@ -53,12 +58,21 @@ export default function HotelAuditDetailModal({
       alert('请填写驳回原因');
       return;
     }
-    onReject(hotel.id);
+    setRejectConfirm({
+      isOpen: true,
+      hotelId: hotel.id,
+      hotelName: hotel.nameCn,
+    });
   };
 
   const confirmApprove = () => {
     onApprove(approveConfirm.hotelId);
     setApproveConfirm({ isOpen: false, hotelId: '', hotelName: '' });
+  };
+
+  const confirmReject = () => {
+    onReject(rejectConfirm.hotelId);
+    setRejectConfirm({ isOpen: false, hotelId: '', hotelName: '' });
   };
 
   const nextImage = () => {
@@ -94,8 +108,8 @@ export default function HotelAuditDetailModal({
               <div className="px-6 py-5 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-b border-gray-100">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-xl font-bold text-gray-800 truncate mb-1">{hotel.nameCn}</h4>
-                    <p className="text-sm text-gray-500 font-medium truncate">{hotel.nameEn}</p>
+                    <h4 className="text-xl font-bold text-gray-800 truncate mb-1">{hotel.hotelNameCn}</h4>
+                    <p className="text-sm text-gray-500 font-medium truncate">{hotel.hotelNameEn}</p>
                   </div>
                   <div className="ml-4 flex-shrink-0">
                     {getStatusBadge(hotel.status)}
@@ -128,7 +142,7 @@ export default function HotelAuditDetailModal({
                       <div className="min-w-0 flex-1">
                         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">酒店星级</div>
                         <div className="text-gray-800 font-medium">
-                          <span className="text-amber-600 font-bold">{hotel.star}</span> 星级酒店
+                          <span className="text-amber-600 font-bold">{hotel.starLevel}</span> 星级酒店
                         </div>
                       </div>
                     </div>
@@ -460,6 +474,17 @@ export default function HotelAuditDetailModal({
         message={`确定要通过「${approveConfirm.hotelName}」的审核吗？通过后商户可以上线该酒店。`}
         confirmText="通过审核"
         type="info"
+      />
+
+      {/* Reject Confirmation Modal */}
+      <ConfirmModal
+        isOpen={rejectConfirm.isOpen}
+        onClose={() => setRejectConfirm({ ...rejectConfirm, isOpen: false })}
+        onConfirm={confirmReject}
+        title="确认驳回审核"
+        message={`确定要驳回「${rejectConfirm.hotelName}」的审核申请吗？驳回后需要填写驳回原因：${rejectReason}`}
+        confirmText="驳回审核"
+        type="danger"
       />
     </>
   );

@@ -6,7 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-import { AuthProvider } from "./context/AuthContext";
+
 import "antd/dist/reset.css";
 
 import "./app.css";
@@ -36,9 +36,7 @@ export function Layout({ children }) {
         <Links />
       </head>
       <body>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        {children}
         <ScrollRestoration />
         <Scripts />
       </body>

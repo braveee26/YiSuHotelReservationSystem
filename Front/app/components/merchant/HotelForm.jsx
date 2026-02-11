@@ -4,17 +4,18 @@ import { ArrowLeft, Upload, X, Save, MapPin, Building2, Star, Calendar, Globe } 
 export default function HotelForm({ hotelId, onBack }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    nameCn: '',
-    nameEn: '',
+    hotelNameCn: '',
+    hotelNameEn: '',
     province: '',
     city: '',
     district: '',
-    address: '',
-    star: 3,
+    detailAddress: '',
+    starLevel: 3,
     openDate: '',
     description: '',
     nearbyAttractions: '',
-    transportation: '',
+    trafficInfo: '',
+    mallInfo: '',
     facilities: [],
     images: [],
   });
@@ -23,17 +24,18 @@ export default function HotelForm({ hotelId, onBack }) {
     if (hotelId) {
       // 模拟加载现有酒店数据
       setFormData({
-        nameCn: '北京王府井大酒店',
-        nameEn: 'Beijing Wangfujing Hotel',
+        hotelNameCn: '北京王府井大酒店',
+        hotelNameEn: 'Beijing Wangfujing Hotel',
         province: '北京市',
         city: '北京市',
         district: '东城区',
-        address: '王府井大街100号',
-        star: 5,
+        detailAddress: '王府井大街100号',
+        starLevel: 5,
         openDate: '2020-01-15',
         description: '位于北京市中心的豪华酒店，毗邻王府井步行街',
         nearbyAttractions: '故宫、天安门广场、王府井步行街',
-        transportation: '地铁1号线王府井站A口步行5分钟',
+        trafficInfo: '地铁1号线王府井站A口步行5分钟',
+        mallInfo: '北京apm购物中心,王府中环',
         facilities: ['免费WiFi', '健身房', '游泳池', '餐厅'],
         images: [],
       });
@@ -146,8 +148,8 @@ export default function HotelForm({ hotelId, onBack }) {
                 </label>
                 <input
                   type="text"
-                  value={formData.nameCn}
-                  onChange={(e) => updateField('nameCn', e.target.value)}
+                  value={formData.hotelNameCn}
+                  onChange={(e) => updateField('hotelNameCn', e.target.value)}
                   placeholder="请输入酒店中文名称"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -160,8 +162,8 @@ export default function HotelForm({ hotelId, onBack }) {
                 </label>
                 <input
                   type="text"
-                  value={formData.nameEn}
-                  onChange={(e) => updateField('nameEn', e.target.value)}
+                  value={formData.hotelNameEn}
+                  onChange={(e) => updateField('hotelNameEn', e.target.value)}
                   placeholder="请输入酒店英文名称"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -175,8 +177,8 @@ export default function HotelForm({ hotelId, onBack }) {
                   <span>星级 *</span>
                 </label>
                 <select
-                  value={formData.star}
-                  onChange={(e) => updateField('star', parseInt(e.target.value))}
+                  value={formData.starLevel}
+                  onChange={(e) => updateField('starLevel', parseInt(e.target.value))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -269,8 +271,8 @@ export default function HotelForm({ hotelId, onBack }) {
               <label className="text-sm text-gray-700 mb-2 block">详细地址 *</label>
               <input
                 type="text"
-                value={formData.address}
-                onChange={(e) => updateField('address', e.target.value)}
+                value={formData.detailAddress}
+                onChange={(e) => updateField('detailAddress', e.target.value)}
                 placeholder="请输入详细地址"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -288,10 +290,21 @@ export default function HotelForm({ hotelId, onBack }) {
             </div>
 
             <div>
+              <label className="text-sm text-gray-700 mb-2 block">周边商场</label>
+              <textarea
+                value={formData.mallInfo}
+                onChange={(e) => updateField('mallInfo', e.target.value)}
+                placeholder="例如：北京apm购物中心,王府中环..."
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
               <label className="text-sm text-gray-700 mb-2 block">交通信息</label>
               <textarea
-                value={formData.transportation}
-                onChange={(e) => updateField('transportation', e.target.value)}
+                value={formData.trafficInfo}
+                onChange={(e) => updateField('trafficInfo', e.target.value)}
                 placeholder="例如：地铁1号线王府井站A口步行5分钟..."
                 rows={3}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

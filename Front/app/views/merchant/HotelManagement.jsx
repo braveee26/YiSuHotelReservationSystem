@@ -38,10 +38,10 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
     },
     {
       id: '2',
-      nameCn: '上海外滩精品酒店',
-      nameEn: 'Shanghai Bund Boutique Hotel',
+      hotelNameCn: '上海外滩精品酒店',
+      hotelNameEn: 'Shanghai Bund Boutique Hotel',
       address: '上海市黄浦区中山东一路',
-      star: 4,
+      starLevel: 4,
       openDate: '2019-06-20',
       auditStatus: 'approved',
       isOnline: false,
@@ -51,10 +51,10 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
     },
     {
       id: '3',
-      nameCn: '杭州西湖度假酒店',
-      nameEn: 'Hangzhou West Lake Resort',
+      hotelNameCn: '杭州西湖度假酒店',
+      hotelNameEn: 'Hangzhou West Lake Resort',
       address: '浙江省杭州市西湖区',
-      star: 5,
+      starLevel: 5,
       openDate: '2021-03-10',
       auditStatus: 'pending',
       isOnline: false,
@@ -64,10 +64,10 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
     },
     {
       id: '4',
-      nameCn: '深圳湾商务酒店',
-      nameEn: 'Shenzhen Bay Business Hotel',
+      hotelNameCn: '深圳湾商务酒店',
+      hotelNameEn: 'Shenzhen Bay Business Hotel',
       address: '广东省深圳市南山区',
-      star: 4,
+      starLevel: 4,
       openDate: '2022-08-05',
       auditStatus: 'rejected',
       isOnline: false,
@@ -77,10 +77,10 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
     },
     {
       id: '5',
-      nameCn: '成都宽窄巷子酒店',
-      nameEn: 'Chengdu Kuanzhai Alley Hotel',
+      hotelNameCn: '成都宽窄巷子酒店',
+      hotelNameEn: 'Chengdu Kuanzhai Alley Hotel',
       address: '四川省成都市青羊区',
-      star: 4,
+      starLevel: 4,
       openDate: '2023-12-20',
       auditStatus: 'not_submitted',
       isOnline: false,
@@ -129,7 +129,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
       isOpen: true,
       hotelId,
       action: hotel.isOnline ? 'offline' : 'online',
-      hotelName: hotel.nameCn,
+      hotelName: hotel.hotelNameCn,
     });
   };
 
@@ -154,7 +154,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
     setAuditConfirmModal({
       isOpen: true,
       hotelId,
-      hotelName: hotel.nameCn,
+      hotelName: hotel.hotelNameCn,
     });
   };
 
@@ -170,8 +170,8 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
 
   const filteredHotels = hotels.filter((hotel) => {
     const matchesSearch =
-      hotel.nameCn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      hotel.nameEn.toLowerCase().includes(searchTerm.toLowerCase());
+      hotel.hotelNameCn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      hotel.hotelNameEn.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesAuditStatus = auditStatusFilter === 'all' || hotel.auditStatus === auditStatusFilter;
     const matchesOnlineStatus = onlineStatusFilter === 'all' || (onlineStatusFilter === 'online' ? hotel.isOnline : !hotel.isOnline);
     return matchesSearch && matchesAuditStatus && matchesOnlineStatus;
@@ -269,7 +269,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                     <>
                       <img 
                         src={hotel.photo} 
-                        alt={hotel.nameCn} 
+                        alt={hotel.hotelNameCn} 
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
                       />
                       <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -287,8 +287,8 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                   <div className="flex-1 pr-5 flex flex-col justify-between min-w-0">
                     <div>
                       <div className="mb-2">
-                        <h3 className="text-lg font-semibold text-gray-800 truncate mb-1">{hotel.nameCn}</h3>
-                        <p className="text-sm text-gray-500 truncate">{hotel.nameEn}</p>
+                        <h3 className="text-lg font-semibold text-gray-800 truncate mb-1">{hotel.hotelNameCn}</h3>
+                        <p className="text-sm text-gray-500 truncate">{hotel.hotelNameEn}</p>
                       </div>
                       <div className="flex items-center text-sm text-gray-600 mb-3">
                         <MapPin className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" />
@@ -310,7 +310,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                     <div className="flex items-center space-x-4 mt-2">
                       <div className="flex items-center text-sm text-gray-700 font-medium">
                         <Star className="w-4 h-4 text-yellow-500 fill-current mr-1" />
-                        <span>{hotel.star}星级</span>
+                        <span>{hotel.starLevel}星级</span>
                       </div>
                       <div className="flex items-center text-sm text-gray-600">
                         <Calendar className="w-4 h-4 text-blue-500 mr-1" />

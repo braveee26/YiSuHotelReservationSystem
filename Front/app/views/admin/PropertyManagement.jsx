@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, MapPin, Tag, Star } from 'lucide-react';
+import { Pagination } from 'antd';
 import ConfirmModal from '../../components/merchant/ConfirmModal';
 
 export default function PropertyManagement() {
@@ -11,6 +12,10 @@ export default function PropertyManagement() {
     id: '',
     name: '',
   });
+  
+  // 分页状态
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8); // 设施管理每页显示8条数据
 
   // 模拟数据
   const cities = [
@@ -38,6 +43,23 @@ export default function PropertyManagement() {
     { id: '6', name: '会议室', icon: '👥', usageCount: 267 },
     { id: '7', name: '商务中心', icon: '💼', usageCount: 198 },
     { id: '8', name: '洗衣服务', icon: '🧺', usageCount: 345 },
+    // 添加更多设施用于分页测试
+    { id: '9', name: '行李寄存', icon: '🧳', usageCount: 298 },
+    { id: '10', name: '叫醒服务', icon: '⏰', usageCount: 187 },
+    { id: '11', name: '接机服务', icon: '🚗', usageCount: 165 },
+    { id: '12', name: '送机服务', icon: '🚕', usageCount: 143 },
+    { id: '13', name: '儿童乐园', icon: '游乐场', usageCount: 212 },
+    { id: '14', name: 'SPA按摩', icon: '💆', usageCount: 178 },
+    { id: '15', name: '酒吧', icon: '🍸', usageCount: 256 },
+    { id: '16', name: '棋牌室', icon: '🀄', usageCount: 98 },
+    { id: '17', name: 'KTV', icon: '🎤', usageCount: 134 },
+    { id: '18', name: '桑拿浴室', icon: '🧖', usageCount: 156 },
+    { id: '19', name: '台球室', icon: '🎱', usageCount: 87 },
+    { id: '20', name: '乒乓球室', icon: '🏓', usageCount: 76 },
+    { id: '21', name: '网球场', icon: '🎾', usageCount: 65 },
+    { id: '22', name: '篮球场', icon: '🏀', usageCount: 54 },
+    { id: '23', name: '高尔夫练习场', icon: '🏌️', usageCount: 43 },
+    { id: '24', name: '温泉', icon: '♨️', usageCount: 189 },
   ];
 
   const handleAdd = () => {
@@ -171,32 +193,56 @@ export default function PropertyManagement() {
 
           {/* Facilities Tab */}
           {activeTab === 'facilities' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {facilities.map((facility) => (
-                <div
-                  key={facility.id}
-                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-2xl">{facility.icon}</span>
-                      <span className="font-semibold text-gray-800">{facility.name}</span>
+            <div>
+              {/* 固定高度的滚动容器 */}
+              <div className="overflow-y-auto" style={{ maxHeight: '600px' }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  {facilities.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((facility) => (
+                    <div
+                      key={facility.id}
+                      className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-2xl">{facility.icon}</span>
+                          <span className="font-semibold text-gray-800 truncate max-w-[120px]" title={facility.name}>{facility.name}</span>
+                        </div>
+                        <div className="flex space-x-1">
+                          <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors">
+                            <Edit className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(facility.id, facility.name)}
+                            className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-600">使用：{facility.usageCount}次</div>
                     </div>
-                    <div className="flex space-x-1">
-                      <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                        <Edit className="w-3 h-3" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(facility.id, facility.name)}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-600">使用：{facility.usageCount}次</div>
+                  ))}
                 </div>
-              ))}
+              </div>
+                
+              {/* 分页组件 */}
+              {facilities.length > pageSize && (
+                <div className="border-t border-gray-200 pt-4 flex flex-col items-center space-y-3">
+                  <Pagination
+                    current={currentPage}
+                    pageSize={pageSize}
+                    total={facilities.length}
+                    onChange={(page, size) => {
+                      setCurrentPage(page);
+                      setPageSize(size);
+                    }}
+                    showSizeChanger
+                    showQuickJumper
+                    showTotal={(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条记录`}
+                    pageSizeOptions={['8', '16', '24', '32']}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
