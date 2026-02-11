@@ -306,21 +306,21 @@ export default function HotelInfoTab({ hotelId, onSaveSuccess }) {
           <button
             onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
             disabled={currentStep === 1}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             上一步
           </button>
           {currentStep < 3 ? (
             <button
               onClick={() => setCurrentStep(Math.min(3, currentStep + 1))}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="btn-primary"
             >
               下一步
             </button>
           ) : (
             <button
               onClick={handleSubmit}
-              className="flex items-center space-x-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="btn-success flex items-center space-x-2"
             >
               <Save className="w-5 h-5" />
               <span>保存酒店信息</span>

@@ -52,10 +52,10 @@ export default function ConfirmModal({
             </div>
           </div>
         </div>
-        <div className="flex space-x-3 p-6 border-t border-gray-200">
+        <div className="flex space-x-3 p-6 border-t border-gray-200 gap-2">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            className="flex-1 btn-secondary"
           >
             {cancelText}
           </button>
@@ -64,7 +64,7 @@ export default function ConfirmModal({
               onConfirm();
               onClose();
             }}
-            className={`flex-1 px-4 py-2.5 text-white rounded-lg transition-colors font-medium ${styles.confirmBtn}`}
+            className={`flex-1 ${type === 'danger' ? 'btn-danger' : type === 'info' ? 'btn-primary' : 'btn-warning'}`}
           >
             {confirmText}
           </button>

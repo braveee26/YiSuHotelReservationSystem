@@ -8,16 +8,16 @@ export default function Profile() {
 
   // 模拟从数据库获取的用户数据
   const [userData, setUserData] = useState({
-    userId: '100001',
-    userName: '',
+    user_id: '100001',
+    user_name: '',
     role: 'merchant', // 'merchant' or 'admin'
     avatar: '', // 用户头像 URL
-    realName: '张晓明',
+    real_name: '张晓明',
     phone: '13800138000',
     email: 'zhangxm@yisu.com',
-    idCard: '110101199001011234', // 身份证号（脱敏显示）
-    createTime: '2023-06-15 10:30:00',
-    updateTime: '2024-02-04 14:20:00',
+    id_card: '110101199001011234', // 身份证号（脱敏显示）
+    create_time: '2023-06-15 10:30:00',
+    update_time: '2024-02-04 14:20:00',
   });
 
   // 只在客户端环境访问 localStorage
@@ -30,7 +30,7 @@ export default function Profile() {
           setCurrentUser(user);
           setUserData(prev => ({
             ...prev,
-            userName: user.username || 'merchant001',
+            user_name: user.username || 'merchant001',
             role: user.role || 'merchant'
           }));
         } catch (error) {
@@ -114,7 +114,7 @@ export default function Profile() {
                 <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-600 text-4xl font-semibold">
-                  {userData.realName?.charAt(0) || userData.userName.charAt(0).toUpperCase()}
+                  {userData.real_name?.charAt(0) || userData.user_name.charAt(0).toUpperCase()}
                 </div>
               )}
             </div>
@@ -135,19 +135,19 @@ export default function Profile() {
 
           {/* User Info */}
           <div className="flex-1 text-white">
-            <h2 className="text-3xl font-bold mb-2">{userData.realName}</h2>
+            <h2 className="text-3xl font-bold mb-2">{userData.real_name}</h2>
             <div className="flex items-center space-x-3 mb-3">
               <span className={`px-3 py-1 ${getRoleBadgeColor(userData.role)} bg-opacity-90 rounded-full text-sm font-medium`}>
                 {getRoleName(userData.role)}
               </span>
               <span className="text-blue-100">•</span>
-              <span className="text-blue-100">账号：{userData.userName}</span>
+              <span className="text-blue-100">账号：{userData.user_name}</span>
               <span className="text-blue-100">•</span>
-              <span className="text-blue-100">ID：{userData.userId}</span>
+              <span className="text-blue-100">ID：{userData.user_id}</span>
             </div>
             <div className="flex items-center space-x-2 text-blue-100">
               <Calendar className="w-4 h-4" />
-              <span className="text-sm">注册时间：{userData.createTime}</span>
+              <span className="text-sm">注册时间：{userData.create_time}</span>
             </div>
           </div>
         </div>
@@ -219,8 +219,8 @@ export default function Profile() {
                 </label>
                 <input
                   type="text"
-                  value={userData.realName}
-                  onChange={(e) => updateField('realName', e.target.value)}
+                  value={userData.real_name}
+                  onChange={(e) => updateField('real_name', e.target.value)}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                 />
               </div>
@@ -232,7 +232,7 @@ export default function Profile() {
                 </label>
                 <input
                   type="text"
-                  value={userData.userName}
+                  value={userData.user_name}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
                   disabled
                 />
@@ -270,7 +270,7 @@ export default function Profile() {
             <div className="flex justify-end pt-4 border-t border-gray-200">
               <button
                 type="submit"
-                className="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg"
+                className="btn-primary flex items-center space-x-2 shadow-md"
               >
                 <Save className="w-5 h-5" />
                 <span>保存更改</span>
@@ -296,7 +296,7 @@ export default function Profile() {
                   </div>
                   <div>
                     <div className="text-sm font-medium text-gray-800">已实名认证</div>
-                    <div className="text-xs text-gray-500 mt-0.5">认证时间：{userData.createTime.split(' ')[0]}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">认证时间：{userData.create_time.split(' ')[0]}</div>
                   </div>
                 </div>
               </div>
@@ -308,7 +308,7 @@ export default function Profile() {
                 </label>
                 <input
                   type="text"
-                  value={maskIdCard(userData.idCard)}
+                  value={maskIdCard(userData.id_card)}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
                   disabled
                 />
@@ -326,17 +326,17 @@ export default function Profile() {
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">用户ID</span>
-                <span className="font-medium text-gray-800">{userData.userId}</span>
+                <span className="font-medium text-gray-800">{userData.user_id}</span>
               </div>
               <div className="h-px bg-gray-200"></div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">注册时间</span>
-                <span className="font-medium text-gray-800">{userData.createTime.split(' ')[0]}</span>
+                <span className="font-medium text-gray-800">{userData.create_time.split(' ')[0]}</span>
               </div>
               <div className="h-px bg-gray-200"></div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">最后更新</span>
-                <span className="font-medium text-gray-800">{userData.updateTime.split(' ')[0]}</span>
+                <span className="font-medium text-gray-800">{userData.update_time.split(' ')[0]}</span>
               </div>
             </div>
           </div>

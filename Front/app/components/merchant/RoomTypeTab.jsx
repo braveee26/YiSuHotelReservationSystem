@@ -232,7 +232,7 @@ export default function RoomTypeTab({ hotelId }) {
             </div>
             <button
               onClick={handleAdd}
-              className="flex items-center space-x-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg whitespace-nowrap"
+              className="btn-primary flex items-center space-x-2 whitespace-nowrap"
             >
               <Plus className="w-5 h-5" />
               <span className="font-medium">添加房型</span>
@@ -388,14 +388,14 @@ export default function RoomTypeTab({ hotelId }) {
                       <div className="flex gap-2 ml-4">
                         <button
                           onClick={() => handleEdit(room)}
-                          className="flex items-center space-x-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg text-sm font-medium"
+                          className="btn-primary flex items-center space-x-1.5 text-sm"
                         >
                           <Edit className="w-4 h-4" />
                           <span>编辑</span>
                         </button>
                         <button
                           onClick={() => handleDelete(room.id, room.roomName)}
-                          className="flex items-center space-x-1.5 px-4 py-2 bg-white border-2 border-red-300 text-red-600 rounded-lg hover:bg-red-50 hover:border-red-400 transition-all text-sm font-medium"
+                          className="btn-danger flex items-center space-x-1.5 text-sm"
                         >
                           <Trash2 className="w-4 h-4" />
                           <span>删除</span>
@@ -460,7 +460,7 @@ export default function RoomTypeTab({ hotelId }) {
             {!searchKeyword && filterBreakfast === 'all' && priceRange === 'all' && areaRange === 'all' && peopleFilter === 'all' && (
               <button
                 onClick={handleAdd}
-                className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg font-medium"
+                className="btn-primary inline-flex items-center space-x-2"
               >
                 <Plus className="w-5 h-5" />
                 <span>添加第一个房型</span>
@@ -655,13 +655,13 @@ export default function RoomTypeTab({ hotelId }) {
             <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-5 flex space-x-4 border-t border-gray-200 rounded-b-2xl flex-shrink-0">
               <button
                 onClick={() => setShowModal(false)}
-                className="flex-1 px-6 py-3.5 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-white hover:border-gray-400 transition-all"
+                className="btn-secondary flex-1"
               >
                 取消
               </button>
               <button
                 onClick={handleSubmit}
-                className="flex-1 flex items-center justify-center space-x-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40"
+                className="btn-primary flex-1 flex items-center justify-center space-x-2"
               >
                 <Save className="w-5 h-5" />
                 <span>{editingRoom ? '保存更改' : '添加房型'}</span>

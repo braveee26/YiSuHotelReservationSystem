@@ -42,8 +42,6 @@ export default function Profile() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <h2 className="text-2xl font-semibold text-gray-800">个人中心</h2>
 
       {/* Profile Card */}
       <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200">
@@ -52,14 +50,14 @@ export default function Profile() {
             {formData.username.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">{formData.username}</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">{formData.username}</h3>
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <span className="flex items-center space-x-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full">
                 <Shield className="w-3 h-3" />
                 <span>管理员</span>
               </span>
               <span>•</span>
-              <span>注册时间：{formData.registrationDate}</span>
+              <span className="font-medium">注册时间：{formData.registrationDate}</span>
             </div>
           </div>
         </div>
@@ -67,7 +65,7 @@ export default function Profile() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="flex items-center space-x-2 text-sm text-gray-700 mb-2">
+              <label className="flex items-center space-x-2 text-subheading font-bold-important mb-2">
                 <User className="w-4 h-4" />
                 <span>用户名</span>
               </label>
@@ -81,7 +79,7 @@ export default function Profile() {
             </div>
 
             <div>
-              <label className="flex items-center space-x-2 text-sm text-gray-700 mb-2">
+              <label className="flex items-center space-x-2 text-subheading font-bold-important mb-2">
                 <Mail className="w-4 h-4" />
                 <span>邮箱</span>
               </label>
@@ -96,7 +94,7 @@ export default function Profile() {
 
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="flex items-center space-x-2 text-sm text-gray-700 mb-2">
+              <label className="flex items-center space-x-2 text-subheading font-bold-important mb-2">
                 <Phone className="w-4 h-4" />
                 <span>手机号</span>
               </label>
@@ -109,7 +107,7 @@ export default function Profile() {
             </div>
 
             <div>
-              <label className="flex items-center space-x-2 text-sm text-gray-700 mb-2">
+              <label className="flex items-center space-x-2 text-subheading font-bold-important mb-2">
                 <Shield className="w-4 h-4" />
                 <span>部门</span>
               </label>
@@ -124,7 +122,7 @@ export default function Profile() {
 
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="flex items-center space-x-2 text-sm text-gray-700 mb-2">
+              <label className="flex items-center space-x-2 text-subheading font-bold-important mb-2">
                 <User className="w-4 h-4" />
                 <span>职位</span>
               </label>
@@ -137,7 +135,7 @@ export default function Profile() {
             </div>
 
             <div>
-              <label className="flex items-center space-x-2 text-sm text-gray-700 mb-2">
+              <label className="flex items-center space-x-2 text-subheading font-bold-important mb-2">
                 <Calendar className="w-4 h-4" />
                 <span>注册日期</span>
               </label>
@@ -153,10 +151,10 @@ export default function Profile() {
           <div className="flex justify-end pt-6 border-t border-gray-200">
             <button
               type="submit"
-              className="flex items-center space-x-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
+              className="btn-primary flex items-center space-x-2 shadow-md"
             >
               <Save className="w-5 h-5" />
-              <span>保存更改</span>
+              <span className="font-medium">保存更改</span>
             </button>
           </div>
         </form>

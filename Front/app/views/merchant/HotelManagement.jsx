@@ -25,10 +25,10 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
   const [hotels, setHotels] = useState([
     {
       id: '1',
-      nameCn: '北京王府井大酒店',
-      nameEn: 'Beijing Wangfujing Hotel',
+      hotel_name_cn: '北京王府井大酒店',
+      hotel_name_en: 'Beijing Wangfujing Hotel',
       address: '北京市东城区王府井大街',
-      star: 5,
+      starLevel: 5,
       openDate: '2020-01-15',
       auditStatus: 'approved',
       isOnline: true,
@@ -38,8 +38,8 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
     },
     {
       id: '2',
-      hotelNameCn: '上海外滩精品酒店',
-      hotelNameEn: 'Shanghai Bund Boutique Hotel',
+      hotel_name_cn: '上海外滩精品酒店',
+      hotel_name_en: 'Shanghai Bund Boutique Hotel',
       address: '上海市黄浦区中山东一路',
       starLevel: 4,
       openDate: '2019-06-20',
@@ -51,8 +51,8 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
     },
     {
       id: '3',
-      hotelNameCn: '杭州西湖度假酒店',
-      hotelNameEn: 'Hangzhou West Lake Resort',
+      hotel_name_cn: '杭州西湖度假酒店',
+      hotel_name_en: 'Hangzhou West Lake Resort',
       address: '浙江省杭州市西湖区',
       starLevel: 5,
       openDate: '2021-03-10',
@@ -64,8 +64,8 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
     },
     {
       id: '4',
-      hotelNameCn: '深圳湾商务酒店',
-      hotelNameEn: 'Shenzhen Bay Business Hotel',
+      hotel_name_cn: '深圳湾商务酒店',
+      hotel_name_en: 'Shenzhen Bay Business Hotel',
       address: '广东省深圳市南山区',
       starLevel: 4,
       openDate: '2022-08-05',
@@ -77,8 +77,8 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
     },
     {
       id: '5',
-      hotelNameCn: '成都宽窄巷子酒店',
-      hotelNameEn: 'Chengdu Kuanzhai Alley Hotel',
+      hotel_name_cn: '成都宽窄巷子酒店',
+      hotel_name_en: 'Chengdu Kuanzhai Alley Hotel',
       address: '四川省成都市青羊区',
       starLevel: 4,
       openDate: '2023-12-20',
@@ -129,7 +129,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
       isOpen: true,
       hotelId,
       action: hotel.isOnline ? 'offline' : 'online',
-      hotelName: hotel.hotelNameCn,
+      hotelName: hotel.hotel_name_cn,
     });
   };
 
@@ -154,7 +154,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
     setAuditConfirmModal({
       isOpen: true,
       hotelId,
-      hotelName: hotel.hotelNameCn,
+      hotelName: hotel.hotel_name_cn,
     });
   };
 
@@ -169,9 +169,13 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
   };
 
   const filteredHotels = hotels.filter((hotel) => {
+    // 安全检查字段是否存在
+    const hotelNameCn = hotel.hotel_name_cn || '';
+    const hotelNameEn = hotel.hotel_name_en || '';
+    
     const matchesSearch =
-      hotel.hotelNameCn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      hotel.hotelNameEn.toLowerCase().includes(searchTerm.toLowerCase());
+      hotelNameCn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      hotelNameEn.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesAuditStatus = auditStatusFilter === 'all' || hotel.auditStatus === auditStatusFilter;
     const matchesOnlineStatus = onlineStatusFilter === 'all' || (onlineStatusFilter === 'online' ? hotel.isOnline : !hotel.isOnline);
     return matchesSearch && matchesAuditStatus && matchesOnlineStatus;
@@ -198,7 +202,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
             {/* Create Button */}
             <button
               onClick={onCreate}
-              className="flex items-center space-x-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm hover:shadow-md text-sm font-medium flex-shrink-0"
+              className="btn-primary flex items-center space-x-1.5 shadow-sm text-sm flex-shrink-0"
             >
               <Plus className="w-4 h-4" />
               <span>新建酒店</span>
@@ -208,7 +212,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
           {/* Audit Status Filter */}
           <div className="flex items-center space-x-2.5">
             <label className="text-sm font-medium text-gray-700 whitespace-nowrap">审核状态：</label>
-            <div className="flex space-x-1.5">
+            <div className="flex gap-2">
               {[
                 { value: 'all', label: '全部' },
                 { value: 'not_submitted', label: '未审核' },
@@ -219,10 +223,8 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                 <button
                   key={filter.value}
                   onClick={() => setAuditStatusFilter(filter.value)}
-                  className={`px-2.5 py-1 rounded-lg transition-colors text-xs ${
-                    auditStatusFilter === filter.value
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  className={`btn-secondary btn-sm ${
+                    auditStatusFilter === filter.value ? 'selected' : ''
                   }`}
                 >
                   {filter.label}
@@ -234,7 +236,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
           {/* Online Status Filter */}
           <div className="flex items-center space-x-2.5">
             <label className="text-sm font-medium text-gray-700 whitespace-nowrap">上线状态：</label>
-            <div className="flex space-x-1.5">
+            <div className="flex gap-2">
               {[
                 { value: 'all', label: '全部' },
                 { value: 'online', label: '已上线' },
@@ -243,10 +245,8 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                 <button
                   key={filter.value}
                   onClick={() => setOnlineStatusFilter(filter.value)}
-                  className={`px-2.5 py-1 rounded-lg transition-colors text-xs ${
-                    onlineStatusFilter === filter.value
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  className={`btn-secondary btn-sm ${
+                    onlineStatusFilter === filter.value ? 'selected' : ''
                   }`}
                 >
                   {filter.label}
@@ -258,7 +258,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
       </div>
 
       {/* Hotels List - Scrollable Container */}
-      <div className="flex-1 overflow-y-auto pr-1">
+      <div className="flex-1 overflow-y-auto pr-1" style={{ minHeight: '620px' }}>
         <div className="space-y-3 pb-2">
           {filteredHotels.map((hotel) => (
             <div key={hotel.id} className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:border-blue-300">
@@ -269,7 +269,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                     <>
                       <img 
                         src={hotel.photo} 
-                        alt={hotel.hotelNameCn} 
+                        alt={hotel.hotel_name_cn} 
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
                       />
                       <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -287,7 +287,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                   <div className="flex-1 pr-5 flex flex-col justify-between min-w-0">
                     <div>
                       <div className="mb-2">
-                        <h3 className="text-lg font-semibold text-gray-800 truncate mb-1">{hotel.hotelNameCn}</h3>
+                        <h3 className="text-lg font-semibold text-gray-800 truncate mb-1">{hotel.hotel_name_cn}</h3>
                         <p className="text-sm text-gray-500 truncate">{hotel.hotelNameEn}</p>
                       </div>
                       <div className="flex items-center text-sm text-gray-600 mb-3">
@@ -328,7 +328,8 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                         {(hotel.auditStatus === 'not_submitted' || hotel.auditStatus === 'rejected') && (
                           <button
                             onClick={() => handleSubmitAudit(hotel.id)}
-                            className="flex items-center space-x-1 px-2 py-0.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded hover:from-orange-600 hover:to-orange-700 transition-all shadow-sm hover:shadow-md text-xs font-medium"
+                            className="btn-warning flex items-center space-x-0 shadow-sm text-xs font-medium"
+                            style={{ padding: '4px 8px', fontSize: '14px' }}
                           >
                             <Send className="w-3 h-3" />
                             <span>发起</span>
@@ -344,6 +345,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                             onClick={() => showRejectReason(hotel.rejectReason)}
                             className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
                             title="查看驳回原因"
+                            style={{ color: 'red' }}
                           >
                             <AlertCircle className="w-4 h-4" />
                           </button>
@@ -357,10 +359,8 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                       {hotel.auditStatus === 'approved' ? (
                         <button
                           onClick={() => handleToggleOnline(hotel.id)}
-                          className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                            hotel.isOnline
-                              ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          className={`btn-success btn-sm inline-flex items-center space-x-1.5 rounded-full text-sm font-medium ${
+                            hotel.isOnline ? '' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
                           {hotel.isOnline ? (
@@ -384,17 +384,17 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                   </div>
 
                   {/* Right: Actions - 两个按钮 */}
-                  <div className="flex flex-col justify-center space-y-2.5">
+                  <div className="flex flex-col justify-center space-y-2.5 gap-4">
                     <button
                       onClick={() => onRoomTypeSettings(hotel.id)}
-                      className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all shadow-md hover:shadow-lg text-sm font-medium"
+                      className="btn-secondary flex items-center space-x-2 shadow-md text-sm font-medium"
                     >
                       <BedDouble className="w-4 h-4" />
                       <span>设置房型</span>
                     </button>
                     <button
                       onClick={() => onView(hotel.id)}
-                      className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg text-sm font-medium"
+                      className="btn-primary flex items-center space-x-2 shadow-md text-sm font-medium"
                     >
                       <Info className="w-4 h-4" />
                       <span>查看信息</span>
@@ -416,7 +416,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
           <p className="text-gray-500 mb-6">开始添加您的第一家酒店</p>
           <button
             onClick={onCreate}
-            className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+            className="btn-primary inline-flex items-center space-x-2 shadow-md"
           >
             <Plus className="w-5 h-5" />
             <span>新建酒店</span>
@@ -426,13 +426,13 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
 
       {/* Reject Reason Modal */}
       {showRejectReasonModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full">
+        <div className="fixed inset-0 bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-lg w-full shadow-2xl border border-gray-200">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800">驳回原因</h3>
               <button
                 onClick={() => setShowRejectReasonModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -455,7 +455,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
             <div className="flex justify-end p-6 border-t border-gray-200">
               <button
                 onClick={() => setShowRejectReasonModal(false)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="btn-primary px-6 py-2"
               >
                 我知道了
               </button>
@@ -465,30 +465,106 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
       )}
 
       {/* Toggle Online Confirm Modal */}
-      <ConfirmModal
-        isOpen={confirmModal.isOpen}
-        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
-        onConfirm={confirmToggleOnline}
-        title={confirmModal.action === 'online' ? '确认上线酒店' : '确认下线酒店'}
-        message={
-          confirmModal.action === 'online'
-            ? `确定要上线「${confirmModal.hotelName}」吗？上线后用户将可以在平台上看到并预订此酒店。`
-            : `确定要下线「${confirmModal.hotelName}」吗？下线后用户将无法在平台上看到此酒店。`
-        }
-        confirmText={confirmModal.action === 'online' ? '确认上线' : '确认下线'}
-        type={confirmModal.action === 'online' ? 'info' : 'warning'}
-      />
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl border border-gray-200">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">
+                {confirmModal.action === 'online' ? '确认上线酒店' : '确认下线酒店'}
+              </h3>
+              <button
+                onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className={`p-4 rounded-lg ${
+                confirmModal.action === 'online' 
+                  ? 'bg-blue-50 border border-blue-200' 
+                  : 'bg-orange-50 border border-orange-200'
+              }`}>
+                <div className="flex items-start space-x-3">
+                  <AlertCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                    confirmModal.action === 'online' ? 'text-blue-600' : 'text-orange-600'
+                  }`} />
+                  <div className="flex-1">
+                    <p className={`text-sm leading-relaxed ${
+                      confirmModal.action === 'online' ? 'text-blue-800' : 'text-orange-800'
+                    }`}>
+                      {confirmModal.action === 'online'
+                        ? `确定要上线「${confirmModal.hotelName}」吗？上线后用户将可以在平台上看到并预订此酒店。`
+                        : `确定要下线「${confirmModal.hotelName}」吗？下线后用户将无法在平台上看到此酒店。`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 gap-4">
+              <button
+                onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={confirmToggleOnline}
+                className={`btn-warning px-4 py-2 rounded-lg font-medium transition-colors ${
+                  confirmModal.action === 'online' 
+                    ? 'bg-green-600 hover:bg-green-700 text-white' 
+                    : 'bg-orange-600 hover:bg-orange-700 text-white'
+                }`}
+              >
+                {confirmModal.action === 'online' ? '确认上线' : '确认下线'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Submit Audit Confirm Modal */}
-      <ConfirmModal
-        isOpen={auditConfirmModal.isOpen}
-        onClose={() => setAuditConfirmModal({ ...auditConfirmModal, isOpen: false })}
-        onConfirm={confirmSubmitAudit}
-        title="确认提交审核"
-        message={`确定要提交「${auditConfirmModal.hotelName}」的审核吗？提交后酒店状态将变为审核中。`}
-        confirmText="确认提交"
-        type="info"
-      />
+      {auditConfirmModal.isOpen && (
+        <div className="fixed inset-0 bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl border border-gray-200">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">确认提交审核</h3>
+              <button
+                onClick={() => setAuditConfirmModal({ ...auditConfirmModal, isOpen: false })}
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm text-blue-800 leading-relaxed">
+                      确定要提交「{auditConfirmModal.hotelName}」的审核吗？提交后酒店状态将变为审核中。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 gap-4">
+              <button
+                onClick={() => setAuditConfirmModal({ ...auditConfirmModal, isOpen: false })}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={confirmSubmitAudit}
+                className="btn-primary px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                确认提交
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

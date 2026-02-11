@@ -8,8 +8,8 @@ export default function RoomManagement() {
   const rooms = [
     {
       id: '1',
-      hotelName: '北京王府井大酒店',
-      roomType: '豪华大床房',
+      hotel_name: '北京王府井大酒店',
+      room_name: '豪华大床房',
       price: 680,
       capacity: 2,
       size: 35,
@@ -18,8 +18,8 @@ export default function RoomManagement() {
     },
     {
       id: '2',
-      hotelName: '北京王府井大酒店',
-      roomType: '行政套房',
+      hotel_name: '北京王府井大酒店',
+      room_name: '行政套房',
       price: 1280,
       capacity: 3,
       size: 60,
@@ -28,8 +28,8 @@ export default function RoomManagement() {
     },
     {
       id: '3',
-      hotelName: '上海外滩精品酒店',
-      roomType: '标准双床房',
+      hotel_name: '上海外滩精品酒店',
+      room_name: '标准双床房',
       price: 480,
       capacity: 2,
       size: 28,
@@ -38,8 +38,8 @@ export default function RoomManagement() {
     },
     {
       id: '4',
-      hotelName: '上海外滩精品酒店',
-      roomType: '江景套房',
+      hotel_name: '上海外滩精品酒店',
+      room_name: '江景套房',
       price: 1680,
       capacity: 4,
       size: 80,
@@ -49,8 +49,8 @@ export default function RoomManagement() {
   ];
 
   const filteredRooms = rooms.filter((room) =>
-    room.roomType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    room.hotelName.toLowerCase().includes(searchTerm.toLowerCase())
+    room.room_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    room.hotel_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -58,7 +58,7 @@ export default function RoomManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-gray-800">房型管理</h2>
-        <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md">
+        <button className="btn-primary flex items-center space-x-2 shadow-md">
           <Plus className="w-5 h-5" />
           <span>新建房型</span>
         </button>
@@ -98,12 +98,12 @@ export default function RoomManagement() {
               {filteredRooms.map((room) => (
                 <tr key={room.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="text-sm text-gray-800">{room.hotelName}</div>
+                    <div className="text-sm text-gray-800">{room.hotel_name}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
                       <Bed className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm font-medium text-gray-800">{room.roomType}</span>
+                      <span className="text-sm font-medium text-gray-800">{room.room_name}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -131,10 +131,10 @@ export default function RoomManagement() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
-                      <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors">
+                      <button className="btn-outline btn-sm p-1.5 text-blue-600 hover:bg-blue-50">
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                      <button className="btn-outline btn-sm p-1.5 text-gray-600 hover:bg-gray-100">
                         <Image className="w-4 h-4" />
                       </button>
                     </div>

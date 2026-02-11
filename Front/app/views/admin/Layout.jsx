@@ -49,7 +49,7 @@ export default function AdminLayout() {
         {breadcrumbs.map((crumb, index) => (
           <div key={index} className="flex items-center space-x-2">
             {index > 0 && <span>/</span>}
-            <span className={index === breadcrumbs.length - 1 ? 'text-gray-900 font-medium' : ''}>
+            <span className={index === breadcrumbs.length - 1 ? 'text-gray-900 font-bold' : ''}>
               {crumb.label}
             </span>
           </div>
@@ -64,7 +64,7 @@ export default function AdminLayout() {
         return (
           <div className="space-y-6">
             <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-xl p-8 text-white">
-              <h2 className="text-2xl font-semibold mb-2">欢迎回来，{currentUser.username}</h2>
+              <h2 className="text-3xl font-bold mb-2">欢迎回来，{currentUser.username}</h2>
               <p className="text-indigo-100">管理平台数据，审核酒店信息</p>
             </div>
 
@@ -111,27 +111,27 @@ export default function AdminLayout() {
             </div>
 
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">快速操作</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-4">快速操作</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button
                   onClick={() => setCurrentPage('audit')}
                   className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-600 hover:bg-indigo-50 transition-all text-left"
                 >
-                  <div className="font-medium text-gray-800 mb-1">审核酒店</div>
+                  <div className="font-bold text-gray-800 mb-1">审核酒店</div>
                   <div className="text-sm text-gray-600">查看待审核的酒店信息</div>
                 </button>
                 <button
                   onClick={() => setCurrentPage('property')}
                   className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-600 hover:bg-indigo-50 transition-all text-left"
                 >
-                  <div className="font-medium text-gray-800 mb-1">属性管理</div>
+                  <div className="font-bold text-gray-800 mb-1">属性管理</div>
                   <div className="text-sm text-gray-600">管理城市和酒店属性</div>
                 </button>
                 <button
                   onClick={() => setCurrentPage('users')}
                   className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-600 hover:bg-indigo-50 transition-all text-left"
                 >
-                  <div className="font-medium text-gray-800 mb-1">用户管理</div>
+                  <div className="font-bold text-gray-800 mb-1">用户管理</div>
                   <div className="text-sm text-gray-600">管理商户和用户信息</div>
                 </button>
               </div>
@@ -139,7 +139,7 @@ export default function AdminLayout() {
 
             {/* Recent Activities */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">最近动态</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-4">最近动态</h3>
               <div className="space-y-3">
                 {[
                   { action: '新酒店待审核', hotel: '北京王府井大酒店', time: '5分钟前', type: 'pending' },
@@ -153,7 +153,7 @@ export default function AdminLayout() {
                         activity.type === 'approved' ? 'bg-green-500' : 'bg-red-500'
                       }`} />
                       <div>
-                        <div className="text-sm text-gray-800">{activity.action}</div>
+                        <div className="text-base font-medium text-gray-800">{activity.action}</div>
                         <div className="text-xs text-gray-500">{activity.hotel}</div>
                       </div>
                     </div>
@@ -192,7 +192,7 @@ export default function AdminLayout() {
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <Shield className="w-5 h-5 text-white" />
               </div>
-              <span className="font-semibold text-gray-800">易宿管理端</span>
+              <span className="font-bold text-gray-800">易宿管理端</span>
             </div>
           )}
           <button
@@ -245,7 +245,7 @@ export default function AdminLayout() {
           {renderBreadcrumb()}
           <div className="flex items-center space-x-4">
             <div className="text-right">
-              <div className="text-sm font-medium text-gray-800">{currentUser.username}</div>
+              <div className="text-base font-bold text-gray-800">{currentUser.username}</div>
               <div className="text-xs text-gray-500">管理员</div>
             </div>
           </div>
