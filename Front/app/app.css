@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* 字体大小和粗细统一规范 */
+.text-heading {
+  @apply text-lg font-semibold text-gray-800;
+}
+
+.text-subheading {
+  @apply text-base font-medium text-gray-700;
+}
+
+.text-body {
+  @apply text-sm text-gray-600;
+}
+
+.text-caption {
+  @apply text-xs text-gray-500;
+}
+
+.font-bold-important {
+  @apply font-semibold;
+}
+
+/* 通用按钮样式 */
+.btn-primary {
+  @apply px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm font-medium;
+}
+
+.btn-primary.selected {
+  @apply bg-indigo-600 text-white;
+}
+
+.btn-secondary {
+  @apply px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium;
+}
+
+.btn-secondary.selected {
+  @apply bg-blue-600 text-white;
+}
+
+.btn-success {
+  @apply px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium;
+}
+
+.btn-success.selected {
+  @apply bg-green-600 text-white;
+}
+
+.btn-danger {
+  @apply px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium;
+}
+
+.btn-danger.selected {
+  @apply bg-red-600 text-white;
+}
+
+.btn-warning {
+  @apply px-4 py-2.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium;
+}
+
+.btn-warning.selected {
+  @apply bg-orange-600 text-white;
+}
+
+.btn-outline {
+  @apply px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium;
+}
+
+.btn-outline.selected {
+  @apply bg-blue-600 text-white border-blue-600;
+}
+
+/* 按钮尺寸变体 */
+.btn-sm {
+  @apply px-3 py-2 text-sm;
+}
+
+.btn-lg {
+  @apply px-6 py-3.5 text-base;
+}
+
+/* 分页组件样式 */
+.pagination-btn {
+  @apply w-10 h-10 flex items-center justify-center rounded-lg transition-colors;
+}
+
+.pagination-btn-default {
+  @apply bg-gray-100 text-gray-700 hover:bg-indigo-100;
+}
+
+.pagination-btn-active {
+  @apply bg-indigo-600 text-white;
+}
+
+.pagination-btn-disabled {
+  @apply bg-gray-100 text-gray-400 cursor-not-allowed opacity-50;
+}
+
+html,
+body {
+  @apply bg-white dark:bg-gray-950;
+
+  @media (prefers-color-scheme: dark) {
+    color-scheme: dark;
+  }
+}
