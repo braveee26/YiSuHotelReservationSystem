@@ -424,17 +424,17 @@ export default function HotelAuditDetailModal({
                   />
                 </div>
 
-                <div className="flex space-x-3">
+                <div className="flex space-x-3 gap-4">
                   <button
                     onClick={handleApproveClick}
-                    className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="btn-primary flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     <CheckCircle className="w-5 h-5" />
                     <span>审核通过</span>
                   </button>
                   <button
                     onClick={handleRejectClick}
-                    className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    className="btn-warning flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   >
                     <XCircle className="w-5 h-5" />
                     <span>驳回</span>

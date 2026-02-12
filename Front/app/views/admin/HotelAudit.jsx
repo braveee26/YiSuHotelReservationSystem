@@ -598,9 +598,9 @@ export default function HotelAudit() {
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[90px]">星级</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[130px]">地区</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[130px]">提交时间</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[110px]">审核状态</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[110px]">上线状态</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[90px]">操作</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[130px]">审核状态</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[130px]">上线状态</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[125px]">操作</th>
                 </tr>
               </thead>
               {/* 滚动的内容 */}
@@ -649,7 +649,7 @@ export default function HotelAudit() {
                     <td className="px-6 py-4 align-top">
                       <button
                         onClick={() => setSelectedHotel(hotel)}
-                        className="flex items-center space-x-1 px-3 py-1.5 text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                        className="btn-view btn-sm"
                       >
                         <Eye className="w-4 h-4" />
                         <span>查看</span>

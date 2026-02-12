@@ -62,7 +62,7 @@ export default function ConfirmModal({
           <button
             onClick={() => {
               onConfirm();
-              onClose();
+              // onClose由父组件在onConfirm中处理
             }}
             className={`flex-1 ${type === 'danger' ? 'btn-danger' : type === 'info' ? 'btn-primary' : 'btn-warning'}`}
           >

@@ -30,7 +30,7 @@ public class User implements Serializable {
      * 用户唯一 ID（自增）
      */
     @TableId(value = "user_id", type = IdType.AUTO)
-    private Long userId;
+    private Integer userId;
 
     /**
      * 登录账号（不可重复）
@@ -97,6 +97,11 @@ public class User implements Serializable {
      */
     @TableField("id_card")
     private String idCard;
+    /**
+     * 是否可用
+     */
+    @TableField("is_active")
+    private Boolean isActive = true;
 
     public enum UserRoleEnum {
         admin,

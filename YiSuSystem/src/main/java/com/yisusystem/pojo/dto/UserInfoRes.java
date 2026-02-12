@@ -29,13 +29,19 @@ public class UserInfoRes {
     /** 创建时间 */
     private LocalDateTime createTime;
 
-    /** 最后登录时间 */
-    private String lastLoginTime;
-
     /** 用户类型 / 角色 */
     private User.UserRoleEnum role;
 
     /** 用户头像路径 */
-    private String avatarUrl;
+    private String avatar;
+
+    /** 身份证号认证 */
+    private String idCard;
+
+    /** 修改时间 */
+    private LocalDateTime updateTime;
+
+    /** 是否激活 */
+    private Boolean isActive;
 
 }

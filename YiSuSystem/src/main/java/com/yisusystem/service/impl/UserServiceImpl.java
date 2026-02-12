@@ -60,8 +60,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
         String salt = EncryptUtil.generateSalt();
         String hashedPassword = EncryptUtil.hash(userDto.getPassword(), salt);
-        //设置电话
-        user.setPhone(userDto.getPhone());
+        
+        // 设置需要特殊处理的字段
         user.setPassword(hashedPassword);
         user.setSalt(salt);
         LocalDateTime now = DateTimeUtil.now();
@@ -79,9 +79,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             return Response.error(HttpStatus.LoginError);
         }
 
+        // 检查账户是否激活
+        if (!user.getIsActive()) {
+            return Response.error(401, "账户已被禁用，请联系管理员");
+        }
+
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole().name());
         claims.put("username", user.getUserName());
+        claims.put("isActive", user.getIsActive()); // 将激活状态加入JWT claims
         String token = JwtUtil.generateToken(user.getUserId().toString(), claims);
 
         return Response.success("Bearer " + token);
@@ -94,16 +100,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
         if (user != null) {
             BeanUtils.copyProperties(user, userInfoDTO);
-            userInfoDTO.setAvatarUrl(getAvatarUrl(user.getAvatar()));
+            // avatar字段已经通过BeanUtils自动复制
+            // 如果需要特殊处理头像URL，可以在这里添加逻辑
             return userInfoDTO;
         } else {
             return null;
         }
-    }
-
-    private String getAvatarUrl(String avatarObjectKey) {
-        // 暂时不实现头像上传功能，直接返回null
-        return null;
     }
 
 }

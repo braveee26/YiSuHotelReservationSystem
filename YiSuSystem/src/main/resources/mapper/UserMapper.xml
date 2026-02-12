@@ -52,7 +52,8 @@
                         email,
                         role,
                         create_time,
-                        update_time
+                        update_time,
+                        is_active
                 FROM "user"
                 WHERE user_name = #{userName}
                 LIMIT 1
