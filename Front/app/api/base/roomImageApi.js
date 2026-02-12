@@ -1,25 +1,25 @@
 import {service as request} from '../../utils/request.js';
 
 /**
- * 获取指定酒店的全部图片
- * @param {number} hotelId 酒店 ID
+ * 获取指定房型的全部图片
+ * @param {number} roomId 房型 ID
  */
-export function getImagesByHotelId(hotelId) {
+export function getImagesByRoomId(roomId) {
     return request({
-        url: `/hotel-image/list/${hotelId}`,
+        url: `/room-image/list/${roomId}`,
         method: 'get',
         params: { _t: new Date().getTime() }
     });
 }
 
 /**
- * 上传酒店图片
- * @param {number} hotelId 酒店 ID
+ * 上传房型图片
+ * @param {number} roomId 房型 ID
  * @param {FormData} formData 包含文件的 FormData
  */
-export function uploadHotelImage(hotelId, formData) {
+export function uploadRoomImage(roomId, formData) {
     return request({
-        url: `/hotel-image/upload/${hotelId}`,
+        url: `/room-image/upload/${roomId}`,
         method: 'post',
         data: formData,
         headers: {
@@ -29,23 +29,23 @@ export function uploadHotelImage(hotelId, formData) {
 }
 
 /**
- * 删除酒店图片
+ * 删除房型图片
  * @param {number} imageId 图片 ID
  */
-export function deleteHotelImage(imageId) {
+export function deleteRoomImage(imageId) {
     return request({
-        url: `/hotel-image/${imageId}`,
+        url: `/room-image/${imageId}`,
         method: 'delete'
     });
 }
 
 /**
- * 批量保存酒店图片
+ * 批量保存房型图片
  * @param {Array} images 图片列表
  */
-export function batchSaveHotelImages(images) {
+export function batchSaveRoomImages(images) {
     return request({
-        url: '/hotel-image/batch',
+        url: '/room-image/batch',
         method: 'post',
         data: images
     });
@@ -57,7 +57,7 @@ export function batchSaveHotelImages(images) {
  */
 export function batchUpdateSort(images) {
     return request({
-        url: '/hotel-image/batch/sort',
+        url: '/room-image/batch/sort',
         method: 'put',
         data: images
     });

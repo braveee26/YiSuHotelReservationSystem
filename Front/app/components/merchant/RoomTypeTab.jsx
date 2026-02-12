@@ -3,6 +3,8 @@ import { Plus, Edit, Trash2, Bed, Users, DollarSign, Image, X, Save, Tag, Coffee
 import { message } from 'antd';
 import ConfirmModal from './ConfirmModal';
 import { getRoomsByHotelId, createRoom, updateRoom, deleteRoom } from '../../api/base/roomTypeApi';
+import { uploadRoomImage, deleteRoomImage, getImagesByRoomId } from '../../api/base/roomImageApi';
+import ImageUploader from '../common/ImageUploader';
 
 export default function RoomTypeTab({ hotelId }) {
   const [showModal, setShowModal] = useState(false);
@@ -22,6 +24,7 @@ export default function RoomTypeTab({ hotelId }) {
     includeBreakfast: false,
     maxPeople: 2,
     description: '',
+    images: [],
   });
 
   // 搜索和筛选状态
@@ -75,13 +78,26 @@ export default function RoomTypeTab({ hotelId }) {
       includeBreakfast: false,
       maxPeople: 2,
       description: '',
+      images: [],
     });
     setShowModal(true);
   };
 
-  const handleEdit = (room) => {
+  const handleEdit = async (room) => {
     setEditingRoom(room);
-    setFormData(room);
+    setFormData({ ...room, images: [] });
+    
+    // 加载房型图片
+    if (room.id) {
+      try {
+        const res = await getImagesByRoomId(room.id);
+        if (res.code === 200 && res.data) {
+          setFormData(prev => ({ ...prev, images: res.data }));
+        }
+      } catch (err) {
+        console.error('获取房型图片失败');
+      }
+    }
     setShowModal(true);
   };
 
@@ -145,6 +161,36 @@ export default function RoomTypeTab({ hotelId }) {
 
   const updateField = (field, value) => {
     setFormData({ ...formData, [field]: value });
+  };
+
+  // 处理图片上传
+  const handleImageUpload = async (file) => {
+    if (!editingRoom || !editingRoom.id) {
+      message.error('请先保存房型基本信息后再上传图片');
+      return;
+    }
+    
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('sortOrder', (formData.images?.length || 0) + 1);
+
+    const res = await uploadRoomImage(editingRoom.id, fd);
+    if (res.code === 200 && res.data) {
+      updateField('images', [...(formData.images || []), res.data]);
+    } else {
+      throw new Error(res.msg || '上传失败');
+    }
+  };
+
+  // 处理图片删除
+  const handleImageDelete = async (image) => {
+    const res = await deleteRoomImage(image.imageId);
+    if (res.code === 200) {
+      updateField('images', formData.images.filter(img => img.imageId !== image.imageId));
+      message.success('删除成功');
+    } else {
+      message.error('删除失败');
+    }
   };
 
   // 筛选和排序逻辑
@@ -640,13 +686,19 @@ export default function RoomTypeTab({ hotelId }) {
                     <div className="w-1.5 h-5 bg-cyan-600 rounded-full mr-3"></div>
                     房型图片
                   </h4>
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer group">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                      <Image className="w-8 h-8 text-blue-600" />
+                  {editingRoom ? (
+                    <ImageUploader
+                      images={formData.images}
+                      onUpload={handleImageUpload}
+                      onDelete={handleImageDelete}
+                      maxCount={5}
+                      maxSize={10}
+                    />
+                  ) : (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                      <p className="text-yellow-800 text-sm">请先保存房型基本信息后再上传图片</p>
                     </div>
-                    <p className="text-gray-700 font-medium mb-1">点击或拖拽上传房型图片</p>
-                    <p className="text-sm text-gray-500">支持 JPG、PNG 格式，建议尺寸 1200x800，最多上传 5 张</p>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>

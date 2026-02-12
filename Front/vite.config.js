@@ -25,6 +25,14 @@ export default defineConfig({
       '/hotel-attribute': {
         target: 'http://localhost:8080',
         changeOrigin: true,
+      },
+      '/hotel-attr-relation': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/room-image': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
       }
     }
   }

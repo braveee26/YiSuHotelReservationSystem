@@ -1,27 +1,22 @@
 spring:
   application:
     name: YiSuSystem
+
   datasource:
-    # 替换为 Supabase 连接信息
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://db.lpkvkwrfbjlpbrvvrhzl.supabase.co:5432/postgres
     username: postgres
     password: "jWez3RnM8B!t8-%"
-#  datasource:
-#    url: jdbc:mysql://localhost:3306/yisuhotel?useSSL=false&serverTimezone=UTC&characterEncoding=utf8
-#    username: root
-#    password: 123456
-#    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-#    hibernate:
-#      ddl-auto: update
-#    show-sql: true
-#    properties:
-#      hibernate:
-#        dialect: org.hibernate.dialect.MySQLDialect
-#        format_sql: true
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 50MB
+      file-size-threshold: 2KB
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
@@ -36,3 +31,11 @@ mybatis-plus:
 
 server:
   port: 8080
+
+# Supabase Storage 配置
+supabase:
+  url: https://lpkvkwrfbjlpbrvvrhzl.supabase.co
+  api-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxwa3Zrd3JmYmpscGJydnZyaHpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDE4Njg4NywiZXhwIjoyMDg1NzYyODg3fQ.PeUUzLgz2k_gfGCGWK17545jJj0e7UMV2foYEhNuhug # 建议不要把真实 key 提交到 Git
+  storage:
+    bucket-name: hotel-assets
+    max-file-size: 10485760

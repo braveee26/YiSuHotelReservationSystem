@@ -19,6 +19,34 @@ api[0].list[0].list.push({
     methodId: '14d0d5a0581b07c4f1bd970452d11813',
     desc: '获取指定酒店的全部图片  &lt;p&gt;  根据酒店 ID 查询该酒店关联的所有图片，并按排序字段升序排列。  &lt;/p&gt;',
 });
+api[0].list[0].list.push({
+    order: '2',
+    deprecated: 'false',
+    url: 'http://localhost:8080/hotel-image/upload/{hotelId}',
+    methodId: 'f9000144143676a15da733c2d8e20e07',
+    desc: '上传酒店图片  &lt;p&gt;  上传单张图片到 Supabase Storage，并将图片 URL 保存到数据库。  &lt;/p&gt;',
+});
+api[0].list[0].list.push({
+    order: '3',
+    deprecated: 'false',
+    url: 'http://localhost:8080/hotel-image/batch',
+    methodId: '95b00d66a8a9a690587c2633d1927e0b',
+    desc: '批量保存酒店图片  &lt;p&gt;  用于前端一次性提交多个已上传的图片 URL。  &lt;/p&gt;',
+});
+api[0].list[0].list.push({
+    order: '4',
+    deprecated: 'false',
+    url: 'http://localhost:8080/hotel-image/{imageId}',
+    methodId: 'cb40b260abaa7aa85fe2d19613c690cf',
+    desc: '删除酒店图片  &lt;p&gt;  从数据库删除图片记录，并从 Supabase Storage 删除文件。  &lt;/p&gt;',
+});
+api[0].list[0].list.push({
+    order: '5',
+    deprecated: 'false',
+    url: 'http://localhost:8080/hotel-image/batch/sort',
+    methodId: 'b0501a196b543041ec577da612df5bcc',
+    desc: '批量更新图片排序  &lt;p&gt;  更新多张图片的排序字段。  &lt;/p&gt;',
+});
 api[0].list.push({
     alias: 'HotelAttributeController',
     order: '3',
@@ -55,34 +83,76 @@ api[0].list[1].list.push({
     desc: '删除设施/属性  &lt;p&gt;  根据 ID 删除指定的设施/属性。  &lt;/p&gt;',
 });
 api[0].list.push({
-    alias: 'RoomTypeController',
+    alias: 'RoomImageController',
     order: '4',
+    link: '&amp;lt;p&amp;gt;  存储房型详情图（支持多图展示）_前端控制器  &amp;lt;/p&amp;gt;',
+    desc: '&amp;lt;p&amp;gt;  存储房型详情图（支持多图展示） 前端控制器  &amp;lt;/p&amp;gt;',
+    list: []
+})
+api[0].list[2].list.push({
+    order: '1',
+    deprecated: 'false',
+    url: 'http://localhost:8080/room-image/list/{roomId}',
+    methodId: 'dccbb777c562ecf6ec7bfb57568d5c65',
+    desc: '获取指定房型的全部图片',
+});
+api[0].list[2].list.push({
+    order: '2',
+    deprecated: 'false',
+    url: 'http://localhost:8080/room-image/upload/{roomId}',
+    methodId: '7e29934f6950428c7b78399b8cf33f7b',
+    desc: '上传房型图片',
+});
+api[0].list[2].list.push({
+    order: '3',
+    deprecated: 'false',
+    url: 'http://localhost:8080/room-image/batch',
+    methodId: 'cafac174f0c0699133ec65e2147dfa6d',
+    desc: '批量保存房型图片',
+});
+api[0].list[2].list.push({
+    order: '4',
+    deprecated: 'false',
+    url: 'http://localhost:8080/room-image/{imageId}',
+    methodId: '79fd8c348cd53ecf96df632414410e3c',
+    desc: '删除房型图片',
+});
+api[0].list[2].list.push({
+    order: '5',
+    deprecated: 'false',
+    url: 'http://localhost:8080/room-image/batch/sort',
+    methodId: 'da24cee082c81cf2a3d335507fe7719d',
+    desc: '批量更新图片排序',
+});
+api[0].list.push({
+    alias: 'RoomTypeController',
+    order: '5',
     link: '酒店房型控制器',
     desc: '酒店房型控制器',
     list: []
 })
-api[0].list[2].list.push({
+api[0].list[3].list.push({
     order: '1',
     deprecated: 'false',
     url: 'http://localhost:8080/room-type/list/{hotelId}',
     methodId: 'e59477a2eafe8d31c21b484d8343c878',
     desc: '获取指定酒店的全部房型  &lt;p&gt;  根据酒店 ID 查询该酒店下的所有房型列表。  &lt;/p&gt;',
 });
-api[0].list[2].list.push({
+api[0].list[3].list.push({
     order: '2',
     deprecated: 'false',
     url: 'http://localhost:8080/room-type',
     methodId: '1d5e0112322f1774e1c79a0295a543dd',
     desc: '新建房型  &lt;p&gt;  为指定酒店创建一个新的房型。  &lt;/p&gt;',
 });
-api[0].list[2].list.push({
+api[0].list[3].list.push({
     order: '3',
     deprecated: 'false',
     url: 'http://localhost:8080/room-type/{id}',
     methodId: '23b9a9042075f3558c8cccf2e893f78f',
     desc: '编辑房型  &lt;p&gt;  更新已有房型的信息。  &lt;/p&gt;',
 });
-api[0].list[2].list.push({
+api[0].list[3].list.push({
     order: '4',
     deprecated: 'false',
     url: 'http://localhost:8080/room-type/{id}',
@@ -91,54 +161,54 @@ api[0].list[2].list.push({
 });
 api[0].list.push({
     alias: 'HotelController',
-    order: '5',
+    order: '6',
     link: '酒店核心信息控制器',
     desc: '酒店核心信息控制器',
     list: []
 })
-api[0].list[3].list.push({
+api[0].list[4].list.push({
     order: '1',
     deprecated: 'false',
     url: 'http://localhost:8080/hotel/{id}',
     methodId: 'f3ed2dc898c83e9e22ca77616d0bc6e6',
     desc: '根据 ID 获取酒店详情',
 });
-api[0].list[3].list.push({
+api[0].list[4].list.push({
     order: '2',
     deprecated: 'false',
     url: 'http://localhost:8080/hotel',
     methodId: '4927ae0efd5f5bc374495445c7b36a24',
     desc: '新建酒店  &lt;p&gt;  创建新的酒店记录。如果当前用户是商户，会自动将商户 ID 关联到酒店信息中。  &lt;/p&gt;',
 });
-api[0].list[3].list.push({
+api[0].list[4].list.push({
     order: '3',
     deprecated: 'false',
     url: 'http://localhost:8080/hotel/{id}',
     methodId: '54970e3797bf059c69bfeedd849576f4',
     desc: '编辑酒店信息',
 });
-api[0].list[3].list.push({
+api[0].list[4].list.push({
     order: '4',
     deprecated: 'false',
     url: 'http://localhost:8080/hotel/merchant/{merchantId}',
     methodId: '5f4801aba9cf2bfe93634db0e704c24a',
     desc: '根据商户 ID 获取其所有酒店列表',
 });
-api[0].list[3].list.push({
+api[0].list[4].list.push({
     order: '5',
     deprecated: 'false',
     url: 'http://localhost:8080/hotel/{id}/online-status',
     methodId: 'ceefa35caa2d927537dff81d1561db28',
     desc: '切换酒店上/下线状态',
 });
-api[0].list[3].list.push({
+api[0].list[4].list.push({
     order: '6',
     deprecated: 'false',
     url: 'http://localhost:8080/hotel/{id}/submit-audit',
     methodId: '7acdde7b941960bf58413ce21234afde',
     desc: '商户提交酒店审核',
 });
-api[0].list[3].list.push({
+api[0].list[4].list.push({
     order: '7',
     deprecated: 'false',
     url: 'http://localhost:8080/hotel/merchant/{merchantId}/stats',
@@ -152,28 +222,28 @@ api[0].list.push({
     desc: '存储所有角色用户信息（商户、管理员） 前端控制器',
     list: []
 })
-api[0].list[4].list.push({
+api[0].list[5].list.push({
     order: '1',
     deprecated: 'false',
     url: 'http://localhost:8080/user/getUser',
     methodId: '4c7eb1d24f1461861d7b7b222f04ab77',
     desc: '根据 ID 获取用户信息  &lt;p&gt;  获取指定用户的详细信息，包括用户名、角色等。  &lt;/p&gt;',
 });
-api[0].list[4].list.push({
+api[0].list[5].list.push({
     order: '2',
     deprecated: 'false',
     url: 'http://localhost:8080/user/currentInfo',
     methodId: 'a09a6b6d485e2270d75006fd185d170e',
     desc: '获取当前登录用户信息  &lt;p&gt;  从 SecurityContext 中获取当前认证用户的详细信息。  &lt;/p&gt;',
 });
-api[0].list[4].list.push({
+api[0].list[5].list.push({
     order: '3',
     deprecated: 'false',
     url: 'http://localhost:8080/user/register',
     methodId: '75a1d9ffbf34c2b8aff029bf644f60c1',
     desc: '用户注册  &lt;p&gt;  注册新用户，支持商户和普通用户注册。  &lt;/p&gt;',
 });
-api[0].list[4].list.push({
+api[0].list[5].list.push({
     order: '4',
     deprecated: 'false',
     url: 'http://localhost:8080/user/login',

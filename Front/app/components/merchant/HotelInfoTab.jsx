@@ -5,6 +5,8 @@ import ConfirmModal from './ConfirmModal';
 import AreaSelector from './AreaSelector';
 import { getHotelById, createHotel, updateHotel } from '../../api/base/hotelApi';
 import { getAllAttributes } from '../../api/base/hotelAttributeApi';
+import { uploadHotelImage, deleteHotelImage, getImagesByHotelId } from '../../api/base/hotelImageApi';
+import ImageUploader from '../common/ImageUploader';
 
 export default function HotelInfoTab({ hotelId, onSaveSuccess }) {
   const [currentStep, setCurrentStep] = useState(1);
@@ -27,10 +29,12 @@ export default function HotelInfoTab({ hotelId, onSaveSuccess }) {
 
   useEffect(() => {
     if (hotelId) {
+      // 加载酒店基本信息
       getHotelById(hotelId).then(res => {
         if (res.code === 200 && res.data) {
           const h = res.data;
-          setFormData({
+          setFormData(prev => ({
+            ...prev,
             hotelNameCn: h.hotelNameCn || '',
             hotelNameEn: h.hotelNameEn || '',
             province: h.province || '',
@@ -44,13 +48,21 @@ export default function HotelInfoTab({ hotelId, onSaveSuccess }) {
             trafficInfo: h.trafficInfo || '',
             mallInfo: h.mallInfo || '',
             facilities: [],
-            images: [],
-          });
+          }));
         } else {
           message.error(res.msg || '获取酒店信息失败');
         }
       }).catch(() => {
         message.error('获取酒店信息失败');
+      });
+
+      // 加载酒店图片
+      getImagesByHotelId(hotelId).then(res => {
+        if (res.code === 200 && res.data) {
+          updateField('images', res.data);
+        }
+      }).catch(() => {
+        console.error('获取酒店图片失败');
       });
     }
   }, [hotelId]);
@@ -64,6 +76,31 @@ export default function HotelInfoTab({ hotelId, onSaveSuccess }) {
       updateField('facilities', formData.facilities.filter((f) => f !== facility));
     } else {
       updateField('facilities', [...formData.facilities, facility]);
+    }
+  };
+
+  // 处理图片上传
+  const handleImageUpload = async (file) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('sortOrder', (formData.images?.length || 0) + 1);
+
+    const res = await uploadHotelImage(hotelId, fd);
+    if (res.code === 200 && res.data) {
+      updateField('images', [...(formData.images || []), res.data]);
+    } else {
+      throw new Error(res.msg || '上传失败');
+    }
+  };
+
+  // 处理图片删除
+  const handleImageDelete = async (image) => {
+    const res = await deleteHotelImage(image.imageId);
+    if (res.code === 200) {
+      updateField('images', formData.images.filter(img => img.imageId !== image.imageId));
+      message.success('删除成功');
+    } else {
+      message.error('删除失败');
     }
   };
 
@@ -247,11 +284,19 @@ export default function HotelInfoTab({ hotelId, onSaveSuccess }) {
 
             <div>
               <label className="text-sm text-gray-700 mb-2 block">酒店图片</label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-600 hover:bg-blue-50 transition-all cursor-pointer">
-                <Upload className="w-12 h-12 text-blue-600 mx-auto mb-3" />
-                <p className="text-gray-600 mb-1">点击或拖拽上传图片</p>
-                <p className="text-sm text-gray-400">支持 JPG、PNG 格式，最多上传10张</p>
-              </div>
+              {hotelId ? (
+                <ImageUploader
+                  images={formData.images}
+                  onUpload={handleImageUpload}
+                  onDelete={handleImageDelete}
+                  maxCount={10}
+                  maxSize={10}
+                />
+              ) : (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                  <p className="text-yellow-800 text-sm">请先保存酒店基本信息后再上传图片</p>
+                </div>
+              )}
             </div>
           </div>
         )}
