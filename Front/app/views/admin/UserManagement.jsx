@@ -185,6 +185,62 @@ export default function UserManagement() {
       status: 'active',
       registerDate: '2023-04-10',
     },
+    // 客户用户数据
+    {
+      id: '16',
+      username: 'customer_001',
+      email: 'customer001@gmail.com',
+      phone: '13900139001',
+      role: 'customer',
+      company: '个人用户',
+      hotelCount: 0,
+      status: 'active',
+      registerDate: '2023-07-15',
+    },
+    {
+      id: '17',
+      username: 'customer_002',
+      email: 'customer002@qq.com',
+      phone: '13900139002',
+      role: 'customer',
+      company: '个人用户',
+      hotelCount: 0,
+      status: 'active',
+      registerDate: '2023-08-22',
+    },
+    {
+      id: '18',
+      username: 'customer_003',
+      email: 'customer003@163.com',
+      phone: '13900139003',
+      role: 'customer',
+      company: '个人用户',
+      hotelCount: 0,
+      status: 'inactive',
+      registerDate: '2023-10-05',
+    },
+    {
+      id: '19',
+      username: 'customer_004',
+      email: 'customer004@hotmail.com',
+      phone: '13900139004',
+      role: 'customer',
+      company: '个人用户',
+      hotelCount: 0,
+      status: 'active',
+      registerDate: '2023-11-12',
+    },
+    {
+      id: '20',
+      username: 'customer_005',
+      email: 'customer005@sina.com',
+      phone: '13900139005',
+      role: 'customer',
+      company: '个人用户',
+      hotelCount: 0,
+      status: 'active',
+      registerDate: '2023-12-03',
+    },
   ];
 
   const filteredUsers = users.filter((user) => {
@@ -255,15 +311,19 @@ export default function UserManagement() {
 
   const confirmToggleStatus = () => {
     const action = statusConfirm.currentStatus === 'active' ? '禁用' : '启用';
-    if (confirm(`确定要${action}用户 ${statusConfirm.username} 吗？`)) {
-      alert(`用户 ${statusConfirm.username} 已${action}`);
-      setStatusConfirm({
-        isOpen: false,
-        userId: '',
-        currentStatus: '',
-        username: '',
-      });
-    }
+    // 执行用户状态切换操作
+    console.log(`用户 ${statusConfirm.username} 已${action}`);
+    
+    // 关闭确认弹窗
+    setStatusConfirm({
+      isOpen: false,
+      userId: '',
+      currentStatus: '',
+      username: '',
+    });
+    
+    // 这里可以添加实际的状态更新逻辑
+    // 例如调用API更新用户状态
   };
 
   const cancelToggleStatus = () => {
@@ -316,13 +376,13 @@ export default function UserManagement() {
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-2">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+              <User className="w-6 h-6 text-green-600" />
             </div>
             <span className="text-2xl font-semibold text-gray-800">
-              {users.filter(u => u.status === 'active').length}
+              {users.filter(u => u.role === 'customer').length}
             </span>
           </div>
-          <div className="text-gray-600">活跃用户</div>
+          <div className="text-gray-600">客户</div>
         </div>
       </div>
 
@@ -430,13 +490,21 @@ export default function UserManagement() {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => handleToggleStatus(user.id, user.status, user.username)}
-                          className={`btn-outline btn-sm ${
-                            user.status === 'active'
-                              ? 'btn-secondary'
-                              : 'btn-secondary'
-                          }`}
+                          className={user.status === 'active' ? 'btn-status-disable btn-sm' : 'btn-status-enable btn-sm'}
+                          style={{ padding: '5px 6px' }}
+                          title={user.status === 'active' ? '禁用用户' : '启用用户'}
                         >
-                          {user.status === 'active' ? '禁用' : '启用'}
+                          {user.status === 'active' ? (
+                            <>
+                              <Ban className="w-3 h-3 inline mr-1" />
+                              禁用
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="w-3 h-3 inline mr-1" />
+                              启用
+                            </>
+                          )}
                         </button>
                       </div>
                     </td>

@@ -24,16 +24,24 @@ export default function LoginView() {
     }
 
     try {
+      console.log('尝试登录:', { username, password }); // 调试信息
+      
       // 调用后端登录API
       const response = await login({
         userName: username,
         password: password
       });
 
+      console.log('登录响应:', response); // 调试信息
+
       if (response.code === 200) {
         // 登录成功，解析JWT token获取用户信息
         const token = response.data;
+        console.log('获取到token:', token); // 调试信息
+        
         const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('JWT payload:', payload); // 调试信息
+        
         const userRole = payload.role;
         const userUsername = payload.username;
         
@@ -43,14 +51,17 @@ export default function LoginView() {
           role: userRole.toLowerCase()
         };
         
+        console.log('保存用户信息:', userInfo); // 调试信息
         storeLogin(userInfo, token);
         
         message.success('登录成功');
         
         // 根据角色跳转到对应页面
         if (userRole.toLowerCase() === 'admin') {
+          console.log('跳转到管理员页面'); // 调试信息
           navigate('/admin');
         } else {
+          console.log('跳转到商户页面'); // 调试信息
           navigate('/merchant');
         }
       } else {

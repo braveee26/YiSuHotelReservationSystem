@@ -1,24 +1,72 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, Mail, Phone, Building2, Calendar, Save, Camera, Shield, CreditCard, Hotel, CheckCircle, Clock, XCircle, Award, TrendingUp } from 'lucide-react';
+import { User, Mail, Phone, Building2, Calendar, Save, Camera, Shield, CreditCard, Hotel, CheckCircle, Clock, XCircle, Award, TrendingUp, Loader } from 'lucide-react';
 import ConfirmModal from '../../components/merchant/ConfirmModal';
+import { getCurrentUserInfo } from '../../api/base/userApi';
+import { useUserStore } from '../../store/useUserStore';
+import { message } from 'antd';
 
 export default function Profile() {
   const [currentUser, setCurrentUser] = useState({});
+  const [loading, setLoading] = useState(true);
   const fileInputRef = useRef(null);
+  const { updateUserInfo } = useUserStore();
 
   // 模拟从数据库获取的用户数据
   const [userData, setUserData] = useState({
-    user_id: '100001',
+    user_id: '',
     user_name: '',
-    role: 'merchant', // 'merchant' or 'admin'
-    avatar: '', // 用户头像 URL
-    real_name: '张晓明',
-    phone: '13800138000',
-    email: 'zhangxm@yisu.com',
-    id_card: '110101199001011234', // 身份证号（脱敏显示）
-    create_time: '2023-06-15 10:30:00',
-    update_time: '2024-02-04 14:20:00',
+    role: 'merchant',
+    avatar: '',
+    real_name: '',
+    phone: '',
+    email: '',
+    id_card: '',
+    create_time: '',
+    update_time: '',
   });
+
+  // 获取当前用户信息
+  const fetchCurrentUserInfo = async () => {
+    try {
+      setLoading(true);
+      const response = await getCurrentUserInfo();
+      
+      if (response && response.code === 200) {
+        const userInfo = response.data;
+        
+        // 更新用户数据
+        setUserData({
+          user_id: userInfo.userId || '',
+          user_name: userInfo.userName || '',
+          role: userInfo.role?.toLowerCase() || 'merchant',
+          avatar: userInfo.avatar || '',
+          real_name: userInfo.realName || '',
+          phone: userInfo.phone || '',
+          email: userInfo.email || '',
+          id_card: userInfo.idCard || '',
+          create_time: userInfo.createTime || '',
+          update_time: userInfo.updateTime || '',
+        });
+        
+        // 更新全局用户状态
+        updateUserInfo({
+          username: userInfo.userName,
+          role: userInfo.role?.toLowerCase(),
+          userId: userInfo.userId,
+          realName: userInfo.realName,
+          avatar: userInfo.avatar
+        });
+        
+      } else {
+        message.error(response?.msg || '获取用户信息失败');
+      }
+    } catch (error) {
+      console.error('获取用户信息失败:', error);
+      message.error('获取用户信息失败，请稍后重试');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 只在客户端环境访问 localStorage
   useEffect(() => {
@@ -28,16 +76,14 @@ export default function Profile() {
         try {
           const user = JSON.parse(storedUser);
           setCurrentUser(user);
-          setUserData(prev => ({
-            ...prev,
-            user_name: user.username || 'merchant001',
-            role: user.role || 'merchant'
-          }));
         } catch (error) {
           console.error('解析用户信息失败:', error);
         }
       }
     }
+    
+    // 获取当前用户信息
+    fetchCurrentUserInfo();
   }, []);
 
   // 商户的酒店统计数据（仅商户角色显示）
@@ -50,9 +96,18 @@ export default function Profile() {
   });
 
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState(userData.avatar);
+  const [avatarPreview, setAvatarPreview] = useState('');
 
   const updateField = (field, value) => {
+    // 对身份证号进行特殊处理，只允许数字和X
+    if (field === 'id_card') {
+      // 只允许输入数字和X，且长度不超过18位
+      const cleanedValue = value.replace(/[^0-9Xx]/g, '').toUpperCase();
+      if (cleanedValue.length <= 18) {
+        setUserData({ ...userData, [field]: cleanedValue });
+      }
+      return;
+    }
     setUserData({ ...userData, [field]: value });
   };
 
@@ -81,13 +136,15 @@ export default function Profile() {
     if (avatarPreview) {
       setUserData({ ...userData, avatar: avatarPreview });
     }
-    alert('个人信息更新成功！');
-  };
-
-  // 脱敏身份证号
-  const maskIdCard = (idCard) => {
-    if (!idCard || idCard.length < 18) return idCard;
-    return idCard.substring(0, 6) + '********' + idCard.substring(14);
+    
+    // 验证身份证号格式
+    if (userData.id_card && userData.id_card.length !== 18) {
+      message.error('请输入完整的18位身份证号码');
+      return;
+    }
+    
+    message.success('个人信息更新成功！');
+    setShowSaveConfirm(false);
   };
 
   const getRoleName = (role) => {
@@ -101,6 +158,18 @@ export default function Profile() {
   const getRoleBadgeColor = (role) => {
     return role === 'merchant' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700';
   };
+
+  // 加载状态显示
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <Loader className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">正在加载用户信息...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -308,10 +377,20 @@ export default function Profile() {
                 </label>
                 <input
                   type="text"
-                  value={maskIdCard(userData.id_card)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
-                  disabled
+                  value={userData.id_card}
+                  onChange={(e) => updateField('id_card', e.target.value)}
+                  placeholder="请输入18位身份证号码"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                 />
+                {userData.id_card && (
+                  <div className="mt-1 text-xs text-gray-500">
+                    {userData.id_card.length === 18 ? (
+                      <span className="text-green-600">✓ 格式正确</span>
+                    ) : (
+                      <span className="text-orange-600">请输入完整的18位身份证号码</span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

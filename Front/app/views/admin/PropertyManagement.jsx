@@ -208,12 +208,12 @@ export default function PropertyManagement() {
                           <span className="font-semibold text-gray-800 truncate max-w-[120px]" title={facility.name}>{facility.name}</span>
                         </div>
                         <div className="flex space-x-1">
-                          <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors">
+                          <button className="btn-icon btn-icon-edit">
                             <Edit className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => handleDelete(facility.id, facility.name)}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                            className="btn-icon btn-icon-delete"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
