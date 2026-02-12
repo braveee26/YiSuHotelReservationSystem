@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, Building2, Bed } from 'lucide-react';
+import { message } from 'antd';
 import HotelInfoTab from './HotelInfoTab';
 import RoomTypeTab from './RoomTypeTab';
+import { getHotelById } from '../../api/base/hotelApi';
 
 export default function HotelDetail({ hotelId, onBack, initialTab = 'info' }) {
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -9,8 +11,17 @@ export default function HotelDetail({ hotelId, onBack, initialTab = 'info' }) {
 
   useEffect(() => {
     if (hotelId) {
-      // 模拟加载酒店名称
-      setHotelName('北京王府井大酒店');
+      getHotelById(hotelId).then(res => {
+        if (res.code === 200 && res.data) {
+          setHotelName(res.data.hotelNameCn || '酒店详情');
+        } else {
+          message.error(res.msg || '获取酒店信息失败');
+          setHotelName('酒店详情');
+        }
+      }).catch(() => {
+        message.error('获取酒店信息失败');
+        setHotelName('酒店详情');
+      });
     } else {
       setHotelName('新建酒店');
     }

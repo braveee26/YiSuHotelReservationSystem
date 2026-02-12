@@ -6,6 +6,7 @@ import Profile from './Profile';
 import { useNavigate } from 'react-router';
 import { getCurrentUserInfo } from '../../api/base/userApi';
 import { useUserStore } from '../../store/useUserStore';
+import { getMerchantHotelStats } from '../../api/base/hotelApi';
 import { message } from 'antd';
 
 export default function MerchantLayout() {
@@ -15,7 +16,26 @@ export default function MerchantLayout() {
   const [selectedHotelId, setSelectedHotelId] = useState(null);
   const [currentUser, setCurrentUser] = useState({});
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ total: 0, approved: 0, auditing: 0, pending: 0, online: 0, roomTypeCount: 0 });
+  const [statsLoading, setStatsLoading] = useState(false);
   const { updateUserInfo, logout } = useUserStore();
+
+  // 获取 merchantId (从 currentUser 或 userStore 获取)
+  const merchantId = currentUser.userId || currentUser.user_id;
+
+  // 加载商户统计数据
+  useEffect(() => {
+    if (!merchantId) return;
+    setStatsLoading(true);
+    getMerchantHotelStats(merchantId)
+      .then(res => {
+        if (res.code === 200 && res.data) {
+          setStats(res.data);
+        }
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setStatsLoading(false));
+  }, [merchantId, currentPage]);
 
   // 获取当前用户信息
   const fetchCurrentUserInfo = async () => {
@@ -141,6 +161,8 @@ export default function MerchantLayout() {
     );
   };
 
+  // Duplicate merchantId definition removed
+
   const renderContent = () => {
     switch (currentPage) {
       case 'home':
@@ -168,11 +190,13 @@ export default function MerchantLayout() {
                       <Hotel className="w-7 h-7 text-white"/>
                     </div>
                   </div>
-                  <div className="text-3xl font-bold text-gray-800 mb-1">12</div>
+                  <div className="text-3xl font-bold text-gray-800 mb-1">
+                    {statsLoading ? <Loader className="w-6 h-6 animate-spin inline" /> : stats.total}
+                  </div>
                   <div className="text-sm text-gray-600 mb-2">酒店总数</div>
                   <div className="flex items-center text-xs text-green-600">
                     <TrendingUp className="w-3 h-3 mr-1"/>
-                    <span>较上月 +2</span>
+                    <span>审核通过 {stats.approved}</span>
                   </div>
                 </div>
 
@@ -184,11 +208,13 @@ export default function MerchantLayout() {
                       <Menu className="w-7 h-7 text-white"/>
                     </div>
                   </div>
-                  <div className="text-3xl font-bold text-gray-800 mb-1">48</div>
+                  <div className="text-3xl font-bold text-gray-800 mb-1">
+                    {statsLoading ? <Loader className="w-6 h-6 animate-spin inline" /> : (stats.roomTypeCount || 0)}
+                  </div>
                   <div className="text-sm text-gray-600 mb-2">房型总数</div>
                   <div className="flex items-center text-xs text-green-600">
                     <TrendingUp className="w-3 h-3 mr-1"/>
-                    <span>较上月 +5</span>
+                    <span>关联酒店 {stats.total}</span>
                   </div>
                 </div>
 
@@ -200,7 +226,9 @@ export default function MerchantLayout() {
                       <Clock className="w-7 h-7 text-white"/>
                     </div>
                   </div>
-                  <div className="text-3xl font-bold text-gray-800 mb-1">3</div>
+                  <div className="text-3xl font-bold text-gray-800 mb-1">
+                    {statsLoading ? <Loader className="w-6 h-6 animate-spin inline" /> : stats.pending}
+                  </div>
                   <div className="text-sm text-gray-600 mb-2">待审核</div>
                   <div className="flex items-center text-xs text-orange-600">
                     <Clock className="w-3 h-3 mr-1"/>
@@ -257,7 +285,7 @@ export default function MerchantLayout() {
         );
       case 'hotels':
         return <HotelManagement onView={handleViewHotel} onCreate={handleCreateHotel}
-                                onRoomTypeSettings={handleRoomTypeSettings}/>;
+                                onRoomTypeSettings={handleRoomTypeSettings} merchantId={merchantId} />;
       case 'hotel-detail':
         return <HotelDetail hotelId={selectedHotelId} onBack={handleBackToHotels} initialTab="info"/>;
       case 'room-types':

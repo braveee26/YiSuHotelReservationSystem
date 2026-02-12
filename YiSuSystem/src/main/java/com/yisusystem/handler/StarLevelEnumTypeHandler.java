@@ -23,8 +23,9 @@ import java.sql.SQLException;
 public class StarLevelEnumTypeHandler extends BaseTypeHandler<Hotel.StarLevelEnum> {
 
     @Override
-    public void setNonNullParameter(PreparedStatement ps, int i, Hotel.StarLevelEnum parameter, JdbcType jdbcType) throws SQLException {
-        ps.setString(i, parameter.name());
+    public void setNonNullParameter(PreparedStatement ps, int i, Hotel.StarLevelEnum parameter, JdbcType jdbcType)
+            throws SQLException {
+        ps.setObject(i, String.valueOf(parameter.getValue()), java.sql.Types.OTHER);
     }
 
     @Override
@@ -53,7 +54,7 @@ public class StarLevelEnumTypeHandler extends BaseTypeHandler<Hotel.StarLevelEnu
         if (value == null) {
             return null;
         }
-        
+
         try {
             // 首先尝试按枚举名称解析
             return Hotel.StarLevelEnum.valueOf(value.toUpperCase());
@@ -62,12 +63,18 @@ public class StarLevelEnumTypeHandler extends BaseTypeHandler<Hotel.StarLevelEnu
             try {
                 int numericValue = Integer.parseInt(value);
                 switch (numericValue) {
-                    case 1: return Hotel.StarLevelEnum.ONE;
-                    case 2: return Hotel.StarLevelEnum.TWO;
-                    case 3: return Hotel.StarLevelEnum.THREE;
-                    case 4: return Hotel.StarLevelEnum.FOUR;
-                    case 5: return Hotel.StarLevelEnum.FIVE;
-                    default: return null;
+                    case 1:
+                        return Hotel.StarLevelEnum.ONE;
+                    case 2:
+                        return Hotel.StarLevelEnum.TWO;
+                    case 3:
+                        return Hotel.StarLevelEnum.THREE;
+                    case 4:
+                        return Hotel.StarLevelEnum.FOUR;
+                    case 5:
+                        return Hotel.StarLevelEnum.FIVE;
+                    default:
+                        return null;
                 }
             } catch (NumberFormatException ex) {
                 return null;

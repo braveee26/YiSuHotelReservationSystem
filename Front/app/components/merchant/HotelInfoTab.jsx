@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, Save, MapPin, Building2, Star, Calendar, Globe } from 'lucide-react';
+import { message } from 'antd';
 import ConfirmModal from './ConfirmModal';
 import AreaSelector from './AreaSelector';
+import { getHotelById, createHotel, updateHotel } from '../../api/base/hotelApi';
+import { getAllAttributes } from '../../api/base/hotelAttributeApi';
 
 export default function HotelInfoTab({ hotelId, onSaveSuccess }) {
   const [currentStep, setCurrentStep] = useState(1);
@@ -24,22 +27,30 @@ export default function HotelInfoTab({ hotelId, onSaveSuccess }) {
 
   useEffect(() => {
     if (hotelId) {
-      // 模拟加载现有酒店数据
-      setFormData({
-        hotelNameCn: '北京王府井大酒店',
-        hotelNameEn: 'Beijing Wangfujing Hotel',
-        province: '北京市',
-        city: '北京市',
-        district: '东城区',
-        detailAddress: '王府井大街100号',
-        starLevel: 5,
-        openDate: '2020-01-15',
-        description: '位于北京市中心的豪华酒店，毗邻王府井步行街',
-        nearbyAttractions: '故宫、天安门广场、王府井步行街',
-        trafficInfo: '地铁1号线王府井站A口步行5分钟',
-        mallInfo: '北京apm购物中心,王府中环',
-        facilities: ['免费WiFi', '健身房', '游泳池', '餐厅'],
-        images: [],
+      getHotelById(hotelId).then(res => {
+        if (res.code === 200 && res.data) {
+          const h = res.data;
+          setFormData({
+            hotelNameCn: h.hotelNameCn || '',
+            hotelNameEn: h.hotelNameEn || '',
+            province: h.province || '',
+            city: h.city || '',
+            district: h.district || '',
+            detailAddress: h.detailAddress || '',
+            starLevel: h.starLevel ? (typeof h.starLevel === 'object' ? h.starLevel.value : h.starLevel) : 3,
+            openDate: h.openDate || '',
+            description: h.description || '',
+            nearbyAttractions: h.nearbyAttractions || '',
+            trafficInfo: h.trafficInfo || '',
+            mallInfo: h.mallInfo || '',
+            facilities: [],
+            images: [],
+          });
+        } else {
+          message.error(res.msg || '获取酒店信息失败');
+        }
+      }).catch(() => {
+        message.error('获取酒店信息失败');
       });
     }
   }, [hotelId]);
@@ -60,16 +71,51 @@ export default function HotelInfoTab({ hotelId, onSaveSuccess }) {
     setShowSaveConfirm(true);
   };
 
-  const confirmSave = () => {
-    console.log('Saving hotel data:', formData);
-    alert('酒店信息保存成功！');
-    onSaveSuccess();
+  const confirmSave = async () => {
+    try {
+      const payload = {
+        hotelNameCn: formData.hotelNameCn,
+        hotelNameEn: formData.hotelNameEn,
+        province: formData.province,
+        city: formData.city,
+        district: formData.district,
+        detailAddress: formData.detailAddress,
+        starLevel: formData.starLevel,
+        openDate: formData.openDate,
+        description: formData.description,
+        nearbyAttractions: formData.nearbyAttractions,
+        trafficInfo: formData.trafficInfo,
+        mallInfo: formData.mallInfo,
+      };
+      let res;
+      if (hotelId) {
+        res = await updateHotel(hotelId, payload);
+      } else {
+        res = await createHotel(payload);
+      }
+      if (res.code === 200) {
+        message.success('酒店信息保存成功！');
+        onSaveSuccess();
+      } else {
+        message.error(res.msg || '保存失败');
+      }
+    } catch (err) {
+      message.error('保存失败，请检查网络连接');
+    }
+    setShowSaveConfirm(false);
   };
 
-  const facilityOptions = [
-    '免费WiFi', '停车场', '健身房', '游泳池', '餐厅', '会议室',
-    '商务中心', '洗衣服务', '接送服务', '儿童乐园', 'SPA', '酒吧'
-  ];
+  const [facilityOptions, setFacilityOptions] = useState([]);
+
+  useEffect(() => {
+    getAllAttributes().then(res => {
+      if (res.code === 200 && res.data) {
+        setFacilityOptions(res.data.map(attr => attr.attrName));
+      }
+    }).catch(() => {
+      console.error('获取设施列表失败');
+    });
+  }, []);
 
   const steps = [
     { number: 1, title: '基本信息' },

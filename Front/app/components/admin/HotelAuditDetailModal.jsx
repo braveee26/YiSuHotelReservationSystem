@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { XCircle, MapPin, Star, Calendar, Hotel, MessageSquare, CheckCircle, Image, Camera, Globe, Building2, Clock, Navigation } from 'lucide-react';
 import ConfirmModal from '../merchant/ConfirmModal';
+import { getImagesByHotelId } from '../../api/base/hotelImageApi';
 
 export default function HotelAuditDetailModal({
   hotel,
@@ -21,16 +22,25 @@ export default function HotelAuditDetailModal({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
 
-  if (!isOpen || !hotel) return null;
+  // 从后端加载酒店图片
+  const [hotelImages, setHotelImages] = useState([]);
 
-  // 模拟酒店图片数据（实际应该从数据库获取）
-  const hotelImages = [
-    'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop'
-  ];
+  useEffect(() => {
+    if (isOpen && hotel?.id) {
+      getImagesByHotelId(hotel.id).then(res => {
+        if (res.code === 200 && res.data && res.data.length > 0) {
+          setHotelImages(res.data.map(img => img.imageUrl));
+        } else {
+          setHotelImages([]);
+        }
+      }).catch(() => {
+        setHotelImages([]);
+      });
+      setCurrentImageIndex(0);
+    }
+  }, [isOpen, hotel?.id]);
+
+  if (!isOpen || !hotel) return null;
 
   const getStatusBadge = (status) => {
     switch (status) {

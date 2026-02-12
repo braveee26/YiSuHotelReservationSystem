@@ -78,13 +78,13 @@ public class RoomType implements Serializable {
      * 是否含早
      */
     @TableField("include_breakfast")
-    private String includeBreakfast;
+    private Integer includeBreakfast;
 
     /**
      * 最大入住人数（如 2、3）
      */
     @TableField("max_people")
-    private Boolean maxPeople;
+    private Integer maxPeople;
 
     /**
      * 房型描述（如 “独立卫浴、免费 WiFi”）
@@ -101,6 +101,6 @@ public class RoomType implements Serializable {
     /**
      * 修改时间
      */
-    @TableField(value = "update_time", typeHandler = LocalDateTimeTypeHandler.class)
+    @TableField(exist = false)
     private LocalDateTime updateTime;
 }

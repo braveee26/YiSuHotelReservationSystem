@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 存储所有角色用户信息（商户、管理员） 前端控制器
+ * 
  * @order 1
  *
  * @author liufuming
@@ -25,19 +26,26 @@ public class UserController {
     IUserService userService;
 
     /**
-     * 根据用户 ID 获取用户信息
+     * 根据 ID 获取用户信息
+     * <p>
+     * 获取指定用户的详细信息，包括用户名、角色等。
+     * </p>
+     * 
      * @param id 用户 ID
-     * @return 用户信息
-     * @apiNote 获取指定 ID 的用户详细信息
+     * @return 包含用户详细信息的响应对象
      */
     @GetMapping("/getUser")
     public Response<User> getUser(@RequestParam("id") Integer id) {
         return Response.success(userService.getUserById(id));
     }
+
     /**
      * 获取当前登录用户信息
-     * @return 当前用户信息
-     * @apiNote 获取当前登录用户的详细信息
+     * <p>
+     * 从 SecurityContext 中获取当前认证用户的详细信息。
+     * </p>
+     * 
+     * @return 包含当前登录用户信息的响应对象
      */
     @GetMapping("/currentInfo")
     public Response<UserInfoRes> getCurrentUserInfo() {
@@ -46,10 +54,12 @@ public class UserController {
 
     /**
      * 用户注册
+     * <p>
+     * 注册新用户，支持商户和普通用户注册。
+     * </p>
      *
-     * @param userRegisterReq 用户注册信息
-     * @return 注册结果
-     * @apiNote 用户注册接口，返回注册成功或失败信息
+     * @param userRegisterReq 用户注册请求对象，包含用户名、密码、角色等信息
+     * @return 注册结果消息
      */
     @PostMapping("/register")
     public Response<String> register(@RequestBody @Valid UserRegisterReq userRegisterReq) {
@@ -63,9 +73,12 @@ public class UserController {
 
     /**
      * 用户登录
-     * @param userLoginReq 用户登录信息
-     * @return 登录结果
-     * @apiNote 用户登录接口，返回JWT令牌
+     * <p>
+     * 用户凭证校验，校验通过后返回 JWT 令牌。
+     * </p>
+     * 
+     * @param userLoginReq 用户登录请求对象，包含用户名和密码
+     * @return 包含 JWT 令牌的响应结果
      */
     @PostMapping("/login")
     public Response<String> login(@RequestBody UserLoginReq userLoginReq) {

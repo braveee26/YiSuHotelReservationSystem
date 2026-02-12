@@ -45,8 +45,11 @@ export default function LoginView() {
         const userRole = payload.role;
         const userUsername = payload.username;
         
+        const userId = payload.sub; // subject contains userId
+        
         // 保存用户信息到状态管理
         const userInfo = {
+          userId: userId,
           username: userUsername,
           role: userRole.toLowerCase()
         };

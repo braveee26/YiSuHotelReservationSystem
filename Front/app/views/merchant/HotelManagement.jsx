@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
-import { Search, Plus, MapPin, Star, Calendar, Edit2, Hotel, AlertCircle, ToggleLeft, ToggleRight, X, Send, BedDouble, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Plus, MapPin, Star, Calendar, Edit2, Hotel, AlertCircle, ToggleLeft, ToggleRight, X, Send, BedDouble, Info, Loader2 } from 'lucide-react';
 import ConfirmModal from '../../components/merchant/ConfirmModal';
+import { getHotelsByMerchantId, toggleOnlineStatus, submitAudit } from '../../api/base/hotelApi';
+import { message } from 'antd';
 
-export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }) {
+export default function HotelManagement({ onView, onCreate, onRoomTypeSettings, merchantId }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [auditStatusFilter, setAuditStatusFilter] = useState('all');
   const [onlineStatusFilter, setOnlineStatusFilter] = useState('all');
   const [showRejectReasonModal, setShowRejectReasonModal] = useState(false);
   const [selectedRejectReason, setSelectedRejectReason] = useState('');
+  const [loading, setLoading] = useState(false);
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
     hotelId: '',
@@ -21,78 +24,31 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
     hotelName: '',
   });
 
-  // 模拟酒店数据
-  const [hotels, setHotels] = useState([
-    {
-      id: '1',
-      hotel_name_cn: '北京王府井大酒店',
-      hotel_name_en: 'Beijing Wangfujing Hotel',
-      address: '北京市东城区王府井大街',
-      starLevel: 5,
-      openDate: '2020-01-15',
-      auditStatus: 'approved',
-      isOnline: true,
-      rejectReason: '',
-      photo: 'https://images.unsplash.com/photo-1720540244592-b4124532b318?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBob3RlbCUyMGxvYmJ5fGVufDF8fHx8MTc3MDE0ODUzNnww&ixlib=rb-4.1.0&q=80&w=1080',
-      services: ['免费WiFi', '早餐', '停车场', '健身房', '游泳池'],
-    },
-    {
-      id: '2',
-      hotel_name_cn: '上海外滩精品酒店',
-      hotel_name_en: 'Shanghai Bund Boutique Hotel',
-      address: '上海市黄浦区中山东一路',
-      starLevel: 4,
-      openDate: '2019-06-20',
-      auditStatus: 'approved',
-      isOnline: false,
-      rejectReason: '',
-      photo: 'https://images.unsplash.com/photo-1762417422532-7bdaaf7d457a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxib3V0aXF1ZSUyMGhvdGVsJTIwZXh0ZXJpb3J8ZW58MXx8fHwxNzcwMTgwODQ5fDA&ixlib=rb-4.1.0&q=80&w=1080',
-      services: ['免费WiFi', '早餐', '咖啡厅'],
-    },
-    {
-      id: '3',
-      hotel_name_cn: '杭州西湖度假酒店',
-      hotel_name_en: 'Hangzhou West Lake Resort',
-      address: '浙江省杭州市西湖区',
-      starLevel: 5,
-      openDate: '2021-03-10',
-      auditStatus: 'pending',
-      isOnline: false,
-      rejectReason: '',
-      photo: 'https://images.unsplash.com/photo-1729717949948-56b52db111dd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXNvcnQlMjBob3RlbCUyMHBvb2x8ZW58MXx8fHwxNzcwMTE1NzMxfDA&ixlib=rb-4.1.0&q=80&w=1080',
-      services: ['免费WiFi', '早餐', '停车场', '游泳池', '餐厅', '健身房'],
-    },
-    {
-      id: '4',
-      hotel_name_cn: '深圳湾商务酒店',
-      hotel_name_en: 'Shenzhen Bay Business Hotel',
-      address: '广东省深圳市南山区',
-      starLevel: 4,
-      openDate: '2022-08-05',
-      auditStatus: 'rejected',
-      isOnline: false,
-      rejectReason: '酒店资质信息不完整，请补充营业执照和卫生许可证扫描件。酒店图片需要至少上传5张清晰的实景照片。',
-      photo: 'https://images.unsplash.com/photo-1546034746-25df3092cc5d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMGhvdGVsJTIwcm9vbXxlbnwxfHx8fDE3NzAxNTM5MDB8MA&ixlib=rb-4.1.0&q=80&w=1080',
-      services: ['免费WiFi', '停车场', '餐厅'],
-    },
-    {
-      id: '5',
-      hotel_name_cn: '成都宽窄巷子酒店',
-      hotel_name_en: 'Chengdu Kuanzhai Alley Hotel',
-      address: '四川省成都市青羊区',
-      starLevel: 4,
-      openDate: '2023-12-20',
-      auditStatus: 'not_submitted',
-      isOnline: false,
-      rejectReason: '',
-      photo: '', // 没有照片，显示默认图标
-      services: ['免费WiFi', '早餐'],
-    },
-  ]);
+  const [hotels, setHotels] = useState([]);
+
+  // 从后端加载商户的酒店列表
+  const loadHotels = () => {
+    if (!merchantId) return;
+    setLoading(true);
+    getHotelsByMerchantId(merchantId)
+      .then(res => {
+        if (res.code === 200 && res.data) {
+          setHotels(res.data);
+        } else {
+          message.error(res.msg || '获取酒店列表失败');
+        }
+      })
+      .catch(() => message.error('获取酒店列表失败'))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadHotels();
+  }, [merchantId]);
 
   const getAuditStatusBadge = (status) => {
     switch (status) {
-      case 'not_submitted':
+      case 'pending':
         return (
           <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
             未审核
@@ -104,7 +60,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
             已通过
           </span>
         );
-      case 'pending':
+      case 'auditing':
         return (
           <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
             审核中
@@ -122,24 +78,29 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
   };
 
   const handleToggleOnline = (hotelId) => {
-    const hotel = hotels.find(h => h.id === hotelId);
+    const hotel = hotels.find(h => (h.hotelId || h.id) === hotelId);
     if (!hotel || hotel.auditStatus !== 'approved') return;
 
     setConfirmModal({
       isOpen: true,
       hotelId,
-      action: hotel.isOnline ? 'offline' : 'online',
-      hotelName: hotel.hotel_name_cn,
+      action: hotel.onlineStatus === 'online' ? 'offline' : 'online',
+      hotelName: hotel.hotelNameCn || hotel.hotel_name_cn,
     });
   };
 
   const confirmToggleOnline = () => {
-    setHotels(hotels.map(hotel => {
-      if (hotel.id === confirmModal.hotelId && hotel.auditStatus === 'approved') {
-        return { ...hotel, isOnline: !hotel.isOnline };
-      }
-      return hotel;
-    }));
+    toggleOnlineStatus(confirmModal.hotelId)
+      .then(res => {
+        if (res.code === 200) {
+          message.success(confirmModal.action === 'online' ? '酒店已上线' : '酒店已下线');
+          loadHotels();
+        } else {
+          message.error(res.msg || '操作失败');
+        }
+      })
+      .catch(() => message.error('操作失败'));
+    setConfirmModal({ ...confirmModal, isOpen: false });
   };
 
   const showRejectReason = (reason) => {
@@ -148,38 +109,45 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
   };
 
   const handleSubmitAudit = (hotelId) => {
-    const hotel = hotels.find(h => h.id === hotelId);
+    const hotel = hotels.find(h => (h.hotelId || h.id) === hotelId);
     if (!hotel) return;
 
     setAuditConfirmModal({
       isOpen: true,
       hotelId,
-      hotelName: hotel.hotel_name_cn,
+      hotelName: hotel.hotelNameCn || hotel.hotel_name_cn,
     });
   };
 
   const confirmSubmitAudit = () => {
-    setHotels(hotels.map(hotel => {
-      if (hotel.id === auditConfirmModal.hotelId) {
-        return { ...hotel, auditStatus: 'pending', rejectReason: '' };
-      }
-      return hotel;
-    }));
+    submitAudit(auditConfirmModal.hotelId)
+      .then(res => {
+        if (res.code === 200) {
+          message.success('已提交审核');
+          loadHotels();
+        } else {
+          message.error(res.msg || '提交审核失败');
+        }
+      })
+      .catch(() => message.error('提交审核失败'));
     setAuditConfirmModal({ isOpen: false, hotelId: '', hotelName: '' });
   };
 
   const filteredHotels = hotels.filter((hotel) => {
-    // 安全检查字段是否存在
-    const hotelNameCn = hotel.hotel_name_cn || '';
-    const hotelNameEn = hotel.hotel_name_en || '';
+    const hotelNameCn = hotel.hotelNameCn || hotel.hotel_name_cn || '';
+    const hotelNameEn = hotel.hotelNameEn || hotel.hotel_name_en || '';
     
     const matchesSearch =
       hotelNameCn.toLowerCase().includes(searchTerm.toLowerCase()) ||
       hotelNameEn.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesAuditStatus = auditStatusFilter === 'all' || hotel.auditStatus === auditStatusFilter;
-    const matchesOnlineStatus = onlineStatusFilter === 'all' || (onlineStatusFilter === 'online' ? hotel.isOnline : !hotel.isOnline);
+    const isOnline = hotel.onlineStatus === 'online';
+    const matchesOnlineStatus = onlineStatusFilter === 'all' || (onlineStatusFilter === 'online' ? isOnline : !isOnline);
     return matchesSearch && matchesAuditStatus && matchesOnlineStatus;
   });
+
+  // 辅助：获取酒店字段（兼容驼峰和下划线命名）
+  const getField = (hotel, camel, snake) => hotel[camel] ?? hotel[snake] ?? '';
 
   return (
     <div className="flex flex-col h-[calc(100vh-180px)]">
@@ -215,8 +183,8 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
             <div className="flex gap-2">
               {[
                 { value: 'all', label: '全部' },
-                { value: 'not_submitted', label: '未审核' },
-                { value: 'pending', label: '审核中' },
+                { value: 'pending', label: '未审核' },
+                { value: 'auditing', label: '审核中' },
                 { value: 'approved', label: '已通过' },
                 { value: 'rejected', label: '未通过' },
               ].map((filter) => (
@@ -257,19 +225,37 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
         </div>
       </div>
 
+      {/* Loading */}
+      {loading && (
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+        </div>
+      )}
+
       {/* Hotels List - Scrollable Container */}
+      {!loading && (
       <div className="flex-1 overflow-y-auto pr-1" style={{ minHeight: '620px' }}>
         <div className="space-y-3 pb-2">
-          {filteredHotels.map((hotel) => (
-            <div key={hotel.id} className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:border-blue-300">
+          {filteredHotels.map((hotel) => {
+            const hotelId = hotel.hotelId || hotel.id;
+            const hotelNameCn = getField(hotel, 'hotelNameCn', 'hotel_name_cn');
+            const hotelNameEn = getField(hotel, 'hotelNameEn', 'hotel_name_en');
+            const address = hotel.detailAddress || hotel.address || [hotel.province, hotel.city, hotel.district].filter(Boolean).join('');
+            const starLevel = typeof hotel.starLevel === 'object' ? hotel.starLevel?.value : hotel.starLevel;
+            const isOnline = hotel.onlineStatus === 'online';
+            const photo = hotel.photo || '';
+            const services = hotel.services || [];
+
+            return (
+            <div key={hotelId} className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:border-blue-300">
               <div className="flex h-44">
                 {/* Image */}
                 <div className="w-52 h-full flex-shrink-0 relative overflow-hidden group">
-                  {hotel.photo ? (
+                  {photo ? (
                     <>
                       <img 
-                        src={hotel.photo} 
-                        alt={hotel.hotel_name_cn} 
+                        src={photo} 
+                        alt={hotelNameCn} 
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
                       />
                       <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -287,16 +273,17 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                   <div className="flex-1 pr-5 flex flex-col justify-between min-w-0">
                     <div>
                       <div className="mb-2">
-                        <h3 className="text-lg font-semibold text-gray-800 truncate mb-1">{hotel.hotel_name_cn}</h3>
-                        <p className="text-sm text-gray-500 truncate">{hotel.hotelNameEn}</p>
+                        <h3 className="text-lg font-semibold text-gray-800 truncate mb-1">{hotelNameCn}</h3>
+                        <p className="text-sm text-gray-500 truncate">{hotelNameEn}</p>
                       </div>
                       <div className="flex items-center text-sm text-gray-600 mb-3">
                         <MapPin className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" />
-                        <span className="truncate">{hotel.address}</span>
+                        <span className="truncate">{address}</span>
                       </div>
                       {/* Service Tags */}
+                      {services.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
-                        {hotel.services.map((service, index) => (
+                        {services.map((service, index) => (
                           <span 
                             key={index} 
                             className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-md text-xs font-medium"
@@ -305,17 +292,22 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                           </span>
                         ))}
                       </div>
+                      )}
                     </div>
                     {/* Star and Date - 放在底部 */}
                     <div className="flex items-center space-x-4 mt-2">
+                      {starLevel && (
                       <div className="flex items-center text-sm text-gray-700 font-medium">
                         <Star className="w-4 h-4 text-yellow-500 fill-current mr-1" />
-                        <span>{hotel.starLevel}星级</span>
+                        <span>{starLevel}星级</span>
                       </div>
+                      )}
+                      {hotel.openDate && (
                       <div className="flex items-center text-sm text-gray-600">
                         <Calendar className="w-4 h-4 text-blue-500 mr-1" />
                         <span>{hotel.openDate}</span>
                       </div>
+                      )}
                     </div>
                   </div>
 
@@ -325,9 +317,9 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                     <div>
                       <div className="flex items-center space-x-2 mb-2">
                         <div className="text-sm text-gray-600 font-medium">审核状态</div>
-                        {(hotel.auditStatus === 'not_submitted' || hotel.auditStatus === 'rejected') && (
+                        {(hotel.auditStatus === 'pending' || hotel.auditStatus === 'rejected') && (
                           <button
-                            onClick={() => handleSubmitAudit(hotel.id)}
+                            onClick={() => handleSubmitAudit(hotelId)}
                             className="btn-warning flex items-center space-x-0 shadow-sm text-xs font-medium"
                             style={{ padding: '4px 8px', fontSize: '14px' }}
                           >
@@ -342,7 +334,7 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                         
                         {hotel.auditStatus === 'rejected' && (
                           <button
-                            onClick={() => showRejectReason(hotel.rejectReason)}
+                            onClick={() => showRejectReason(hotel.auditInfo || hotel.rejectReason || '暂无详细原因')}
                             className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
                             title="查看驳回原因"
                             style={{ color: 'red' }}
@@ -358,12 +350,12 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                       <div className="text-sm text-gray-600 font-medium mb-2">上线状态</div>
                       {hotel.auditStatus === 'approved' ? (
                         <button
-                          onClick={() => handleToggleOnline(hotel.id)}
+                          onClick={() => handleToggleOnline(hotelId)}
                           className={`btn-success btn-sm inline-flex items-center space-x-1.5 rounded-full text-sm font-medium ${
-                            hotel.isOnline ? '' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            isOnline ? '' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                         >
-                          {hotel.isOnline ? (
+                          {isOnline ? (
                             <>
                               <ToggleRight className="w-4 h-4" />
                               <span>已上线</span>
@@ -386,14 +378,14 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                   {/* Right: Actions - 两个按钮 */}
                   <div className="flex flex-col justify-center space-y-2.5 gap-4">
                     <button
-                      onClick={() => onRoomTypeSettings(hotel.id)}
+                      onClick={() => onRoomTypeSettings(hotelId)}
                       className="btn-secondary flex items-center space-x-2 shadow-md text-sm font-medium"
                     >
                       <BedDouble className="w-4 h-4" />
                       <span>设置房型</span>
                     </button>
                     <button
-                      onClick={() => onView(hotel.id)}
+                      onClick={() => onView(hotelId)}
                       className="btn-primary flex items-center space-x-2 shadow-md text-sm font-medium"
                     >
                       <Info className="w-4 h-4" />
@@ -403,11 +395,13 @@ export default function HotelManagement({ onView, onCreate, onRoomTypeSettings }
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
+      )}
 
-      {filteredHotels.length === 0 && (
+      {!loading && filteredHotels.length === 0 && (
         <div className="bg-white rounded-xl p-16 text-center border border-gray-200">
           <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
             <Hotel className="w-12 h-12 text-gray-400" />
