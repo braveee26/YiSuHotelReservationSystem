@@ -21,7 +21,9 @@ router.post('/register', async (req, res) => {
         console.log('[Register] Step 3: Hash complete');
 
         console.log('[Register] Step 4: Supabase insert initiating...');
-        const roleValue = (role === 1 || role === '1') ? 'admin' : 'merchant';
+        // Correcting default role to 'customer' as per latest requirements
+        const roleValue = (role === 1 || role === '1' || role === 'admin') ? 'admin' :
+            (role === 'merchant') ? 'merchant' : 'customer';
 
         const { data, error } = await supabase
             .from('user')
@@ -81,6 +83,15 @@ router.post('/login', async (req, res) => {
             }
         }
 
+        // APP Role Access Control: Only allow 'customer'
+        if (user.role !== 'customer') {
+            console.log(`[Login] Access Denied: Role ${user.role} is not permitted on APP.`);
+            return res.status(403).json({
+                error: '权限不足',
+                message: 'APP 端仅限客户登录，商家或管理员请使用管理后台。'
+            });
+        }
+
         delete user.password;
         delete user.salt;
 
@@ -88,6 +99,37 @@ router.post('/login', async (req, res) => {
         res.json({ message: 'Login successful', user: user });
     } catch (err) {
         console.error('[Login] CRITICAL EXCEPTION:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Update profile
+router.put('/profile/:id', async (req, res) => {
+    const { id } = req.params;
+    const { real_name, email, avatar } = req.body;
+    console.log(`[Profile Update] User: ${id}, Data:`, { real_name, email });
+
+    try {
+        const { data, error } = await supabase
+            .from('user')
+            .update({
+                real_name: real_name,
+                email: email,
+                avatar: avatar
+            })
+            .eq('user_id', id)
+            .select('user_id, user_name, role, avatar, real_name, phone, email, id_card')
+            .single();
+
+        if (error) {
+            console.error('[Profile Update] Error:', error.message);
+            return res.status(400).json({ error: error.message });
+        }
+
+        console.log('[Profile Update] Success for:', id);
+        res.json({ message: 'Profile updated successfully', user: data });
+    } catch (err) {
+        console.error('[Profile Update] Exception:', err.message);
         res.status(500).json({ error: err.message });
     }
 });

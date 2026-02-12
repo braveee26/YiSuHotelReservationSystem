@@ -30,7 +30,12 @@ const useAuthStore = create(
           const errorMsg = error.response?.data?.error || error.message || 'Login failed'
           return { success: false, error: errorMsg }
         }
-      }
+      },
+
+      // Update local user info
+      updateUserInfo: (info) => set((state) => ({
+        userInfo: { ...state.userInfo, ...info }
+      }))
     }),
     {
       name: 'auth-storage',
