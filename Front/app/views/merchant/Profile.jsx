@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { User, Mail, Phone, Building2, Calendar, Save, Camera, Shield, CreditCard, Hotel, CheckCircle, Clock, XCircle, Award, TrendingUp, Loader } from 'lucide-react';
 import ConfirmModal from '../../components/merchant/ConfirmModal';
 import { getCurrentUserInfo } from '../../api/base/userApi';
+import { getMerchantHotelStats } from '../../api/base/hotelApi';
 import { useUserStore } from '../../store/useUserStore';
 import { message } from 'antd';
 
@@ -57,6 +58,11 @@ export default function Profile() {
           avatar: userInfo.avatar
         });
         
+        // 如果是商户角色，获取酒店统计数据
+        if (userInfo.role?.toLowerCase() === 'merchant' && userInfo.userId) {
+          fetchHotelStats(userInfo.userId);
+        }
+        
       } else {
         message.error(response?.msg || '获取用户信息失败');
       }
@@ -65,6 +71,47 @@ export default function Profile() {
       message.error('获取用户信息失败，请稍后重试');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 获取商户酒店统计数据
+  const fetchHotelStats = async (merchantId) => {
+    try {
+      setStatsLoading(true);
+      const response = await getMerchantHotelStats(merchantId);
+      
+      if (response && response.code === 200) {
+        const stats = response.data || {};
+        setHotelStats({
+          total: stats.total || 0,
+          approved: stats.approved || 0,
+          auditing: stats.auditing || 0,
+          rejected: stats.rejected || 0,
+          online: stats.online || 0,
+        });
+      } else {
+        console.warn('获取酒店统计数据失败:', response?.msg);
+        // 使用默认值
+        setHotelStats({
+          total: 0,
+          approved: 0,
+          auditing: 0,
+          rejected: 0,
+          online: 0,
+        });
+      }
+    } catch (error) {
+      console.error('获取酒店统计数据失败:', error);
+      // 使用默认值
+      setHotelStats({
+        total: 0,
+        approved: 0,
+        auditing: 0,
+        rejected: 0,
+        online: 0,
+      });
+    } finally {
+      setStatsLoading(false);
     }
   };
 
@@ -88,12 +135,13 @@ export default function Profile() {
 
   // 商户的酒店统计数据（仅商户角色显示）
   const [hotelStats, setHotelStats] = useState({
-    total: 12,
-    approved: 8,
-    auditing: 2,
-    rejected: 1,
-    online: 6,
+    total: 0,
+    approved: 0,
+    auditing: 0,
+    rejected: 0,
+    online: 0,
   });
+  const [statsLoading, setStatsLoading] = useState(false);
 
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState('');
@@ -233,7 +281,13 @@ export default function Profile() {
             <div className="flex items-center justify-between mb-2">
               <Hotel className="w-8 h-8 text-blue-600" />
             </div>
-            <div className="text-3xl font-bold text-blue-700 mb-1">{hotelStats.total}</div>
+            <div className="text-3xl font-bold text-blue-700 mb-1">
+              {statsLoading ? (
+                <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                hotelStats.total
+              )}
+            </div>
             <div className="text-sm text-blue-600 font-medium">酒店总数</div>
           </div>
 
@@ -241,7 +295,13 @@ export default function Profile() {
             <div className="flex items-center justify-between mb-2">
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
-            <div className="text-3xl font-bold text-green-700 mb-1">{hotelStats.approved}</div>
+            <div className="text-3xl font-bold text-green-700 mb-1">
+              {statsLoading ? (
+                <div className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                hotelStats.approved
+              )}
+            </div>
             <div className="text-sm text-green-600 font-medium">已通过</div>
           </div>
 
@@ -249,7 +309,13 @@ export default function Profile() {
             <div className="flex items-center justify-between mb-2">
               <Clock className="w-8 h-8 text-orange-600" />
             </div>
-            <div className="text-3xl font-bold text-orange-700 mb-1">{hotelStats.auditing}</div>
+            <div className="text-3xl font-bold text-orange-700 mb-1">
+              {statsLoading ? (
+                <div className="w-8 h-8 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                hotelStats.auditing
+              )}
+            </div>
             <div className="text-sm text-orange-600 font-medium">审核中</div>
           </div>
 
@@ -257,7 +323,13 @@ export default function Profile() {
             <div className="flex items-center justify-between mb-2">
               <XCircle className="w-8 h-8 text-red-600" />
             </div>
-            <div className="text-3xl font-bold text-red-700 mb-1">{hotelStats.rejected}</div>
+            <div className="text-3xl font-bold text-red-700 mb-1">
+              {statsLoading ? (
+                <div className="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                hotelStats.rejected
+              )}
+            </div>
             <div className="text-sm text-red-600 font-medium">已驳回</div>
           </div>
 
@@ -265,7 +337,13 @@ export default function Profile() {
             <div className="flex items-center justify-between mb-2">
               <TrendingUp className="w-8 h-8 text-cyan-600" />
             </div>
-            <div className="text-3xl font-bold text-cyan-700 mb-1">{hotelStats.online}</div>
+            <div className="text-3xl font-bold text-cyan-700 mb-1">
+              {statsLoading ? (
+                <div className="w-8 h-8 border-2 border-cyan-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                hotelStats.online
+              )}
+            </div>
             <div className="text-sm text-cyan-600 font-medium">已上线</div>
           </div>
         </div>

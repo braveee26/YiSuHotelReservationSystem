@@ -82,3 +82,41 @@ export function getMerchantHotelStats(merchantId) {
         params: { _t: new Date().getTime() }
     });
 }
+
+/**
+ * 管理员获取所有酒店列表
+ */
+export function getAllHotelsForAdmin(params) {
+    return request({
+        url: '/hotel/admin/hotel-list',
+        method: 'get',
+        params: { ...params, _t: new Date().getTime() }
+    });
+}
+
+/**
+ * 管理员审核酒店
+ */
+export function adminAuditHotel(id, auditStatus, auditInfo) {
+    return request({
+        url: `/hotel/admin/${id}/audit`,
+        method: 'put',
+        params: {
+            auditStatus: auditStatus,
+            auditInfo: auditInfo
+        }
+    });
+}
+
+/**
+ * 管理员获取酒店审核状态统计
+ */
+export function getHotelStatsForAdmin() {
+    return request({
+        url: '/hotel/admin/hotel-stats',
+        method: 'get',
+        params: { _t: new Date().getTime() }
+    });
+}
+
+

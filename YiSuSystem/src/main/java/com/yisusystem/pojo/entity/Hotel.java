@@ -80,11 +80,11 @@ public class Hotel implements Serializable {
     /**
      * 星级：1 = 一星～5 = 五星（核心筛选字段）
      */
-    @TableField(value = "start_level", typeHandler = StarLevelEnumTypeHandler.class)
+    @TableField(value = "star_level", typeHandler = StarLevelEnumTypeHandler.class)
     private StarLevelEnum starLevel;
 
     /**
-     * 开业时间（必须字段）
+     * 开业时间（必须字段）S
      */
     @TableField("open_date")
     private LocalDate openDate;

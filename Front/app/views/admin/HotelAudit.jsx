@@ -1,15 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Eye, CheckCircle, XCircle, Hotel, MapPin, Star, Calendar, MessageSquare, Filter, Settings } from 'lucide-react';
-import { Pagination } from 'antd';
+import { Pagination, message } from 'antd';
 import HotelAuditDetailModal from '../../components/admin/HotelAuditDetailModal';
 import AreaSelector from '../../components/merchant/AreaSelector';
 import FacilityManagementModal from '../../components/admin/FacilityManagementModal';
+import { getAllHotelsForAdmin, adminAuditHotel } from '../../api/base/hotelApi';
 
 export default function HotelAudit() {
   const [searchTerm, setSearchTerm] = useState('');
   // 移除重复的状态筛选，只保留详细审核状态
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [hotels, setHotels] = useState([]);
+  const [loading, setLoading] = useState(false);
+  
+  // 添加商户信息映射
+  const [merchants, setMerchants] = useState({});
+
   const [approveConfirm, setApproveConfirm] = useState({
     isOpen: false,
     hotelId: '',
@@ -31,311 +38,89 @@ export default function HotelAudit() {
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(8); // 每页显示8条数据
-
-  // 模拟酒店数据（根据数据库表结构）
-  const hotels = [
-    {
-      id: '1',
-      hotelNameCn: '北京王府井大酒店',
-      hotelNameEn: 'Beijing Wangfujing Hotel',
-      merchant: '北京易宿酒店管理有限公司',
-      address: '北京市东城区王府井大街100号',
-      province: '北京市',
-      city: '北京市',
-      district: '东城区',
-      detailAddress: '王府井大街100号',
-      starLevel: 5,
-      openDate: '2020-01-15',
-      status: 'pending',
-      auditStatus: 'auditing',
-      onlineStatus: 'offline',
-      submitDate: '2026-02-03',
-      createTime: '2026-02-01 10:00:00',
-      updateTime: '2026-02-03 15:30:00',
-      description: '位于北京市中心的豪华五星级酒店，毗邻王府井步行街，地理位置优越。酒店拥有各类客房300余间，配备完善的会议设施和餐饮服务。',
-      nearbyAttractions: '故宫博物院,天安门广场,王府井步行街,景山公园',
-      trafficInfo: '地铁1号线王府井站A出口步行5分钟，距北京首都国际机场28公里',
-      mallInfo: '北京apm购物中心,王府中环,东方新天地',
-      auditInfo: ''
-    },
-    {
-      id: '2',
-      hotelNameCn: '上海外滩精品酒店',
-      hotelNameEn: 'Shanghai Bund Boutique Hotel',
-      merchant: '上海外滩酒店集团',
-      address: '上海市黄浦区中山东一路200号',
-      province: '上海市',
-      city: '上海市',
-      district: '黄浦区',
-      detailAddress: '中山东一路200号',
-      starLevel: 4,
-      openDate: '2019-06-20',
-      status: 'approved',
-      auditStatus: 'approved',
-      onlineStatus: 'online',
-      submitDate: '2026-02-02',
-      approveDate: '2026-02-02',
-      createTime: '2026-01-28 09:15:00',
-      updateTime: '2026-02-02 14:20:00',
-      description: '外滩江景精品酒店，坐拥黄浦江一线江景，尽享都市繁华与宁静的完美结合。酒店设计融合现代与古典元素，提供高品质的住宿体验。',
-      nearbyAttractions: '外滩,南京路步行街,豫园,上海博物馆,东方明珠塔',
-      trafficInfo: '地铁10号线豫园站步行8分钟，距上海浦东国际机场35公里',
-      mallInfo: '南京东路步行街,来福士广场,世茂广场',
-      auditInfo: '资质齐全，符合上线标准'
-    },
-    {
-      id: '3',
-      hotelNameCn: '深圳湾商务酒店',
-      hotelNameEn: 'Shenzhen Bay Business Hotel',
-      merchant: '深圳商旅酒店有限公司',
-      address: '广东省深圳市南山区深圳湾路',
-      province: '广东省',
-      city: '深圳市',
-      district: '南山区',
-      detailAddress: '深圳湾路88号',
-      starLevel: 4,
-      openDate: '2022-08-05',
-      status: 'rejected',
-      auditStatus: 'rejected',
-      onlineStatus: 'offline',
-      submitDate: '2026-02-01',
-      rejectDate: '2026-02-02',
-      createTime: '2026-01-25 11:30:00',
-      updateTime: '2026-02-02 16:45:00',
-      rejectReason: '酒店资质信息不完整，请补充营业执照和卫生许可证。酒店图片需要至少上传5张清晰的实景照片，当前只有3张。',
-      description: '深圳湾畔高端商务酒店，面向深圳湾体育中心，是商务出行和休闲度假的理想选择。酒店拥有现代化的会议设施和健身中心。',
-      nearbyAttractions: '深圳湾公园,深圳湾体育中心,海岸城购物中心',
-      trafficInfo: '地铁2号线登良站B出口步行10分钟，距深圳宝安国际机场25公里',
-      mallInfo: '海岸城购物中心,保利文化广场,天利中央广场',
-      auditInfo: '资质材料不全，需补充相关证件'
-    },
-    // 添加更多酒店数据用于分页测试
-    {
-      id: '4',
-      hotelNameCn: '广州白云国际机场酒店',
-      hotelNameEn: 'Guangzhou Baiyun Airport Hotel',
-      merchant: '广州机场酒店管理有限公司',
-      address: '广东省广州市白云区机场路123号',
-      province: '广东省',
-      city: '广州市',
-      district: '白云区',
-      detailAddress: '机场路123号',
-      starLevel: 4,
-      openDate: '2021-03-10',
-      status: 'approved',
-      auditStatus: 'approved',
-      onlineStatus: 'online',
-      submitDate: '2026-02-05',
-      approveDate: '2026-02-05',
-      createTime: '2026-02-01 09:00:00',
-      updateTime: '2026-02-05 11:20:00',
-      description: '紧邻广州白云国际机场，为旅客提供便捷舒适的住宿服务。酒店设有多种房型，24小时前台服务，免费机场接送。',
-      nearbyAttractions: '白云山风景区,陈家祠,沙面岛',
-      trafficInfo: '地铁3号线机场南站步行5分钟，距市中心30公里',
-      mallInfo: '白云万达广场,凯德广场,太阳城购物中心',
-      auditInfo: '机场合作酒店，资质齐全'
-    },
-    {
-      id: '5',
-      hotelNameCn: '成都宽窄巷子精品酒店',
-      hotelNameEn: 'Chengdu Kuanzhai Alley Boutique Hotel',
-      merchant: '成都文化旅游发展集团',
-      address: '四川省成都市青羊区宽窄巷子456号',
-      province: '四川省',
-      city: '成都市',
-      district: '青羊区',
-      detailAddress: '宽窄巷子456号',
-      starLevel: 5,
-      openDate: '2020-11-20',
-      status: 'pending',
-      auditStatus: 'auditing',
-      onlineStatus: 'offline',
-      submitDate: '2026-02-06',
-      createTime: '2026-02-02 14:30:00',
-      updateTime: '2026-02-06 09:15:00',
-      description: '位于成都著名的历史文化街区宽窄巷子，融合川西民居建筑风格与现代设计理念，让客人体验地道的成都慢生活。',
-      nearbyAttractions: '宽窄巷子,锦里古街,武侯祠,杜甫草堂',
-      trafficInfo: '地铁4号线宽窄巷子站A出口步行3分钟',
-      mallInfo: 'IFS国际金融中心,太古里,春熙路步行街',
-      auditInfo: ''
-    },
-    {
-      id: '6',
-      hotelNameCn: '西安大雁塔文化酒店',
-      hotelNameEn: 'Xi\'an Big Wild Goose Pagoda Cultural Hotel',
-      merchant: '西安大唐文化旅游有限公司',
-      address: '陕西省西安市雁塔区大雁塔南广场789号',
-      province: '陕西省',
-      city: '西安市',
-      district: '雁塔区',
-      detailAddress: '大雁塔南广场789号',
-      starLevel: 4,
-      openDate: '2019-08-15',
-      status: 'approved',
-      auditStatus: 'approved',
-      onlineStatus: 'online',
-      submitDate: '2026-01-28',
-      approveDate: '2026-02-01',
-      createTime: '2026-01-20 16:45:00',
-      updateTime: '2026-02-01 10:30:00',
-      description: '毗邻世界文化遗产大雁塔，酒店设计融入盛唐文化元素，为客人提供独特的文化体验和优质的服务。',
-      nearbyAttractions: '大雁塔,大唐芙蓉园,陕西历史博物馆,曲江池遗址公园',
-      trafficInfo: '地铁3号线大雁塔站B出口步行8分钟',
-      mallInfo: '赛格国际购物中心,曲江书城,银泰城',
-      auditInfo: '文物保护区域合作酒店'
-    },
-    {
-      id: '7',
-      hotelNameCn: '杭州西湖国宾馆',
-      hotelNameEn: 'Hangzhou West Lake State Guesthouse',
-      merchant: '杭州西湖国宾馆管理有限公司',
-      address: '浙江省杭州市西湖区南山路333号',
-      province: '浙江省',
-      city: '杭州市',
-      district: '西湖区',
-      detailAddress: '南山路333号',
-      starLevel: 5,
-      openDate: '2018-05-18',
-      status: 'rejected',
-      auditStatus: 'rejected',
-      onlineStatus: 'offline',
-      submitDate: '2026-01-30',
-      rejectDate: '2026-02-03',
-      createTime: '2026-01-25 13:20:00',
-      updateTime: '2026-02-03 14:45:00',
-      rejectReason: '酒店消防安全设施不符合国家标准，需整改后重新申请。',
-      description: '坐落于西湖风景区核心区域，依山傍水，环境优美。曾接待过多位国家领导人，具有深厚的历史底蕴。',
-      nearbyAttractions: '西湖十景,雷峰塔,灵隐寺,苏堤春晓',
-      trafficInfo: '公交K7路南山路站下车即到，距杭州东站25公里',
-      mallInfo: '湖滨银泰in77,武林广场,钱江新城万象城',
-      auditInfo: '消防设施需升级'
-    },
-    {
-      id: '8',
-      hotelNameCn: '三亚海棠湾度假酒店',
-      hotelNameEn: 'Sanya Haitang Bay Resort Hotel',
-      merchant: '三亚海棠湾国际度假村有限公司',
-      address: '海南省三亚市海棠区海棠湾路666号',
-      province: '海南省',
-      city: '三亚市',
-      district: '海棠区',
-      detailAddress: '海棠湾路666号',
-      starLevel: 5,
-      openDate: '2022-12-01',
-      status: 'approved',
-      auditStatus: 'approved',
-      onlineStatus: 'online',
-      submitDate: '2026-02-04',
-      approveDate: '2026-02-04',
-      createTime: '2026-01-28 11:10:00',
-      updateTime: '2026-02-04 15:30:00',
-      description: '面朝海棠湾一线海景，拥有私人沙滩和丰富的水上娱乐设施。酒店提供全方位的度假服务，是家庭出游的理想选择。',
-      nearbyAttractions: '蜈支洲岛,亚龙湾,天涯海角,南山文化旅游区',
-      trafficInfo: '三亚凤凰国际机场车程30分钟，高铁三亚站车程40分钟',
-      mallInfo: '海棠湾免税购物中心,鲁能三亚湾商街',
-      auditInfo: '海滨度假资质认证通过'
-    },
-    {
-      id: '9',
-      hotelNameCn: '重庆解放碑商务酒店',
-      hotelNameEn: 'Chongqing Jiefangbei Business Hotel',
-      merchant: '重庆渝中商业酒店集团',
-      address: '重庆市渝中区解放碑步行街888号',
-      province: '重庆市',
-      city: '重庆市',
-      district: '渝中区',
-      detailAddress: '解放碑步行街888号',
-      starLevel: 4,
-      openDate: '2021-07-12',
-      status: 'pending',
-      auditStatus: 'auditing',
-      onlineStatus: 'offline',
-      submitDate: '2026-02-07',
-      createTime: '2026-02-03 09:45:00',
-      updateTime: '2026-02-07 13:20:00',
-      description: '位于重庆核心商圈解放碑，交通便利，购物方便。酒店设计现代时尚，配备智能化客房设施。',
-      nearbyAttractions: '解放碑,洪崖洞,长江索道,朝天门码头',
-      trafficInfo: '轻轨1号线小什字站步行5分钟，距重庆北站20公里',
-      mallInfo: '解放碑购物广场,大都会广场,协信星光时代',
-      auditInfo: ''
-    },
-    {
-      id: '10',
-      hotelNameCn: '厦门鼓浪屿海景酒店',
-      hotelNameEn: 'Xiamen Gulangyu Seaview Hotel',
-      merchant: '厦门鼓浪屿旅游发展有限公司',
-      address: '福建省厦门市思明区鼓浪屿龙头路999号',
-      province: '福建省',
-      city: '厦门市',
-      district: '思明区',
-      detailAddress: '鼓浪屿龙头路999号',
-      starLevel: 4,
-      openDate: '2020-04-25',
-      status: 'approved',
-      auditStatus: 'approved',
-      onlineStatus: 'online',
-      submitDate: '2026-01-29',
-      approveDate: '2026-02-02',
-      createTime: '2026-01-22 15:30:00',
-      updateTime: '2026-02-02 11:15:00',
-      description: '坐落在世界文化遗产鼓浪屿上，推窗即见碧海蓝天。酒店保留了闽南传统建筑特色，让客人感受海岛悠闲时光。',
-      nearbyAttractions: '鼓浪屿,日光岩,菽庄花园,钢琴博物馆',
-      trafficInfo: '轮渡厦门码头至鼓浪屿约20分钟',
-      mallInfo: '鼓浪屿商业街,鹿礁路特色店铺',
-      auditInfo: '文化遗产保护区特许经营'
-    },
-    {
-      id: '11',
-      hotelNameCn: '青岛五四广场海景酒店',
-      hotelNameEn: 'Qingdao May Fourth Square Seaview Hotel',
-      merchant: '青岛海滨酒店管理集团',
-      address: '山东省青岛市市南区香港中路555号',
-      province: '山东省',
-      city: '青岛市',
-      district: '市南区',
-      detailAddress: '香港中路555号',
-      starLevel: 5,
-      openDate: '2022-03-08',
-      status: 'rejected',
-      auditStatus: 'rejected',
-      onlineStatus: 'offline',
-      submitDate: '2026-01-31',
-      rejectDate: '2026-02-04',
-      createTime: '2026-01-26 10:15:00',
-      updateTime: '2026-02-04 16:30:00',
-      rejectReason: '环保评估未达标，靠近海岸线建设需加强环境保护措施。',
-      description: '位于青岛地标五四广场旁，一线海景尽收眼底。酒店设计现代简约，提供高品质的海滨度假体验。',
-      nearbyAttractions: '五四广场,栈桥,八大关,崂山风景区',
-      trafficInfo: '地铁3号线五四广场站直达，距流亭国际机场35公里',
-      mallInfo: '海信广场,万象城,海天 Mall',
-      auditInfo: '需补充环保评估报告'
-    },
-    {
-      id: '12',
-      hotelNameCn: '大连星海湾海景度假村',
-      hotelNameEn: 'Dalian Xinghai Bay Seaview Resort',
-      merchant: '大连星海湾旅游度假开发公司',
-      address: '辽宁省大连市沙河口区星海湾广场111号',
-      province: '辽宁省',
-      city: '大连市',
-      district: '沙河口区',
-      detailAddress: '星海湾广场111号',
-      starLevel: 4,
-      openDate: '2019-10-30',
-      status: 'approved',
-      auditStatus: 'approved',
-      onlineStatus: 'online',
-      submitDate: '2026-02-01',
-      approveDate: '2026-02-03',
-      createTime: '2026-01-27 12:40:00',
-      updateTime: '2026-02-03 09:50:00',
-      description: '坐拥星海湾绝佳海景，拥有超大的观景平台和完善的康体设施。是商务会议和休闲度假的完美结合。',
-      nearbyAttractions: '星海湾广场,老虎滩海洋公园,滨海路,森林动物园',
-      trafficInfo: '地铁1号线星海广场站步行10分钟，距周水子国际机场15公里',
-      mallInfo: '百年汇购物中心,柏威年广场',
-      auditInfo: '海滨旅游资质认证通过'
-    },
-  ];
+  
+  // 获取商户信息（模拟数据）
+  const fetchMerchants = () => {
+    // 模拟商户数据
+    const mockMerchants = {
+      1: '上海锦江国际集团',
+      2: '北京首旅如家',
+      3: '华住酒店集团',
+      4: '亚朵酒店集团',
+      5: '桔子水晶酒店',
+      6: '全季酒店',
+      7: '汉庭酒店',
+      8: '维也纳酒店',
+      9: '7天酒店',
+      10: '如家酒店'
+    };
+    setMerchants(mockMerchants);
+  };
+  
+  // 获取酒店列表
+  const fetchHotels = async () => {
+    setLoading(true);
+    try {
+      // 构造筛选参数
+      const params = {};
+      
+      // 地区筛选
+      if (areaFilter.province) params.province = areaFilter.province;
+      if (areaFilter.city) params.city = areaFilter.city;
+      if (areaFilter.district) params.district = areaFilter.district;
+      
+      // 星级筛选（如果有且只有一个选择）
+      if (starFilters.length === 1) {
+        params.starLevel = starFilters[0];
+      }
+      
+      // 审核状态筛选（如果有且只有一个选择）
+      if (auditStatusFilters.length === 1) {
+        params.auditStatus = auditStatusFilters[0];
+      }
+      
+      // 上线状态筛选（如果有且只有一个选择）
+      if (onlineStatusFilters.length === 1) {
+        params.onlineStatus = onlineStatusFilters[0];
+      }
+      
+      const response = await getAllHotelsForAdmin(params);
+      
+      if (response.code === 200) {
+        // 处理酒店数据，添加商户信息
+        const processedHotels = response.data.map(hotel => ({
+          ...hotel,
+          id: hotel.hotelId,
+          merchant: merchants[hotel.merchantId] || `商户${hotel.merchantId}`,
+          address: hotel.detailAddress,
+          submitDate: hotel.createTime ? new Date(hotel.createTime).toLocaleDateString() : '-',
+          status: hotel.auditStatus
+        }));
+        
+        setHotels(processedHotels);
+      } else {
+        message.error(response.msg || '获取酒店列表失败');
+      }
+    } catch (error) {
+      console.error('获取酒店列表失败:', error);
+      message.error('获取酒店列表失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // 组件挂载时获取数据
+  useEffect(() => {
+    fetchMerchants();
+    fetchHotels();
+  }, []);
+  
+  // 筛选条件变化时重新获取数据
+  useEffect(() => {
+    if (hotels.length > 0) { // 避免首次加载时重复请求
+      fetchHotels();
+    }
+  }, [areaFilter, starFilters, auditStatusFilters, onlineStatusFilters]);
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -383,21 +168,42 @@ export default function HotelAudit() {
     currentPage * pageSize
   );
 
-  const handleApprove = (hotelId) => {
-    console.log('Approving hotel:', hotelId);
-    alert('酒店审核通过！');
-    setSelectedHotel(null);
+  const handleApprove = async (hotelId) => {
+    try {
+      const response = await adminAuditHotel(hotelId, 'approved', '审核通过');
+      if (response.code === 200) {
+        message.success('酒店审核通过！');
+        setSelectedHotel(null);
+        fetchHotels(); // 重新获取数据
+      } else {
+        message.error(response.msg || '审核失败');
+      }
+    } catch (error) {
+      console.error('审核失败:', error);
+      message.error('审核失败');
+    }
   };
 
-  const handleReject = (hotelId) => {
+  const handleReject = async (hotelId) => {
     if (!rejectReason.trim()) {
-      alert('请填写驳回原因');
+      message.warning('请填写驳回原因');
       return;
     }
-    console.log('Rejecting hotel:', hotelId, 'Reason:', rejectReason);
-    alert('酒店审核已驳回');
-    setSelectedHotel(null);
-    setRejectReason('');
+    
+    try {
+      const response = await adminAuditHotel(hotelId, 'rejected', rejectReason);
+      if (response.code === 200) {
+        message.success('酒店审核已驳回');
+        setSelectedHotel(null);
+        setRejectReason('');
+        fetchHotels(); // 重新获取数据
+      } else {
+        message.error(response.msg || '驳回失败');
+      }
+    } catch (error) {
+      console.error('驳回失败:', error);
+      message.error('驳回失败');
+    }
   };
 
   const handleAreaChange = (province, city, district) => {
@@ -410,6 +216,8 @@ export default function HotelAudit() {
     setStarFilters([]);
     setOnlineStatusFilters([]);
     setAuditStatusFilters([]);
+    // 重置后重新获取数据
+    setTimeout(() => fetchHotels(), 0);
   };
 
   // 处理多选框变化

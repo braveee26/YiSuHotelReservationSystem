@@ -7,10 +7,12 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
- * 酒店核心信息控制器
- *
+ * 酒店核心信息管理 前端控制器
+ * @order 2
  * @author liufuming
  * @since 2026-02-04
  */
@@ -38,10 +40,6 @@ public class HotelController {
 
     /**
      * 新建酒店
-     * <p>
-     * 创建新的酒店记录。如果当前用户是商户，会自动将商户 ID 关联到酒店信息中。
-     * </p>
-     *
      * @param hotel 酒店实体对象，包含酒店名称、地址、描述等基本信息
      * @return 包含创建成功的酒店对象的响应结果
      */
@@ -66,7 +64,6 @@ public class HotelController {
 
     /**
      * 编辑酒店信息
-     *
      * @param id    酒店 ID
      * @param hotel 酒店信息
      * @return 更新结果
@@ -84,7 +81,6 @@ public class HotelController {
 
     /**
      * 根据商户 ID 获取其所有酒店列表
-     *
      * @param merchantId 商户 ID
      * @return 酒店列表
      */
@@ -99,7 +95,6 @@ public class HotelController {
 
     /**
      * 切换酒店上/下线状态
-     *
      * @param id 酒店 ID
      * @return 操作结果
      */
@@ -123,7 +118,6 @@ public class HotelController {
 
     /**
      * 商户提交酒店审核
-     *
      * @param id 酒店 ID
      * @return 操作结果
      */
@@ -149,9 +143,6 @@ public class HotelController {
 
     /**
      * 获取商户酒店统计数据
-     * <p>
-     * 统计指定商户下的酒店总数、审核状态分布（通过、审核中、待审核/拒绝）、上线状态以及关联的房型总数。
-     * </p>
      *
      * @param merchantId 商户 ID
      * @return 包含各项统计数据的 Map，Key 为统计项名称，Value 为数量
@@ -195,6 +186,48 @@ public class HotelController {
         stats.put("pending", pending);
         stats.put("online", online);
         stats.put("roomTypeCount", roomTypeCount);
+        return Response.success(stats);
+    }
+
+    /**
+     * 管理员获取所有酒店列表（支持筛选）
+     */
+    @GetMapping("/admin/hotel-list")
+    public Response<List<Hotel>> getAllHotelsForAdmin(
+            @RequestParam(required = false) String province,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String district,
+            @RequestParam(required = false) Hotel.StarLevelEnum starLevel,
+            @RequestParam(required = false) Hotel.AuditStatusEnum auditStatus,
+            @RequestParam(required = false) Hotel.OnlineStatusEnum onlineStatus
+    ) {
+        // 调用服务层方法
+        List<Hotel> hotels = hotelService.getAllHotelsForAdmin(province, city, district, starLevel, auditStatus, onlineStatus);
+        return Response.success(hotels);
+    }
+
+    /**
+     * 管理员审核酒店
+     */
+    @PutMapping("/admin/{id}/audit")
+    public Response<Boolean> adminAuditHotel(
+            @PathVariable("id") Long id,
+            @RequestParam Hotel.AuditStatusEnum auditStatus,
+            @RequestParam(required = false) String auditInfo
+    ) {
+        Boolean result = hotelService.auditHotel(id, auditStatus, auditInfo);
+        if (result) {
+            return Response.success(true);
+        }
+        return Response.error(500, "审核失败");
+    }
+
+    /**
+     * 管理员分状态获取所有酒店统计数据
+     */
+    @GetMapping("/admin/hotel-stats")
+    public Response<Map<String, Long>> getHotelStatsForAdmin() {
+        Map<String, Long> stats = hotelService.getAllHotelStatistics();
         return Response.success(stats);
     }
 }

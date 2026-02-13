@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 酒店属性（设施）控制器
- *
+ * 酒店属性（设施）管理 前端控制器
+ * @order 6
  * @author liufuming
  * @since 2026-02-04
  */
@@ -23,10 +23,6 @@ public class HotelAttributeController {
 
     /**
      * 获取全部设施/属性列表
-     * <p>
-     * 查询系统支持的所有酒店设施/属性列表（如：WiFi、停车场、餐厅等）。
-     * </p>
-     *
      * @return 包含设施/属性列表的响应对象
      */
     @GetMapping("/list")
@@ -37,10 +33,6 @@ public class HotelAttributeController {
 
     /**
      * 新建设施/属性
-     * <p>
-     * 创建新的酒店设施/属性项。
-     * </p>
-     *
      * @param attribute 设施/属性实体对象，包含名称、图标等信息
      * @return 包含创建成功的设施/属性对象的响应结果
      */
@@ -55,10 +47,6 @@ public class HotelAttributeController {
 
     /**
      * 编辑设施/属性
-     * <p>
-     * 更新已有的酒店设施/属性信息。
-     * </p>
-     *
      * @param id        设施/属性 ID
      * @param attribute 包含更新信息的设施/属性实体对象
      * @return 包含更新后的设施/属性对象的响应结果
@@ -75,11 +63,7 @@ public class HotelAttributeController {
     }
 
     /**
-     * 删除设施/属性
-     * <p>
      * 根据 ID 删除指定的设施/属性。
-     * </p>
-     *
      * @param id 设施/属性 ID
      * @return 删除操作的响应结果
      */

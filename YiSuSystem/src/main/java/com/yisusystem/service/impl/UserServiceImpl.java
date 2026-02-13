@@ -18,14 +18,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p>
- * 存储所有角色用户信息（商户、管理员） 服务实现类
- * </p>
  *
  * @author liufuming
  * @since 2026-02-04
@@ -106,6 +102,52 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         } else {
             return null;
         }
+    }
+
+    @Override
+    public java.util.List<User> getAllUsers(User.UserRoleEnum role) {
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<User> queryWrapper = 
+                new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<User>()
+                        .orderByDesc("create_time");
+        
+        if (role != null) {
+            queryWrapper.eq("role", role);
+        }
+        
+        return this.list(queryWrapper);
+    }
+
+    @Override
+    public Boolean updateUserStatus(Integer id, Boolean isActive) {
+        User user = this.getById(id);
+        if (user == null) {
+            return false;
+        }
+        user.setIsActive(isActive);
+        user.setUpdateTime(java.time.LocalDateTime.now());
+        return this.updateById(user);
+    }
+
+    @Override
+    public java.util.Map<String, Object> getUserStatistics() {
+        long totalUsers = this.count();
+        long activeUsers = this.count(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<User>()
+                .eq("is_active", true));
+        long merchants = this.count(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<User>()
+                .eq("role", User.UserRoleEnum.merchant));
+        long admins = this.count(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<User>()
+                .eq("role", User.UserRoleEnum.admin));
+        long customers = this.count(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<User>()
+                .eq("role", User.UserRoleEnum.customer));
+
+        java.util.Map<String, Object> stats = new java.util.LinkedHashMap<>();
+        stats.put("totalUsers", totalUsers);
+        stats.put("activeUsers", activeUsers);
+        stats.put("merchants", merchants);
+        stats.put("admins", admins);
+        stats.put("customers", customers);
+        
+        return stats;
     }
 
 }

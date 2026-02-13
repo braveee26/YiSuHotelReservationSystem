@@ -1,6 +1,7 @@
-package com.yisusystem.service;
+package com.yisusystem.service.impl;
 
 import com.yisusystem.config.SupabaseStorageConfig;
+import com.yisusystem.service.ISupabaseStorageService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -13,14 +14,14 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Supabase Storage 文件上传服务
+ * Supabase Storage 文件上传服务实现类
  *
  * @author liufuming
  * @since 2026-02-12
  */
 @Slf4j
 @Service
-public class SupabaseStorageService {
+public class SupabaseStorageServiceImpl implements ISupabaseStorageService {
 
     @Resource
     private SupabaseStorageConfig config;
@@ -47,6 +48,7 @@ public class SupabaseStorageService {
      * @return 文件的公开访问 URL
      * @throws IOException 上传失败时抛出异常
      */
+    @Override
     public String uploadFile(MultipartFile file, String folder) throws IOException {
         // 验证文件
         validateFile(file);
@@ -93,6 +95,7 @@ public class SupabaseStorageService {
      * @param fileUrl 文件的完整 URL
      * @return 是否删除成功
      */
+    @Override
     public boolean deleteFile(String fileUrl) {
         if (fileUrl == null || fileUrl.isEmpty()) {
             return false;

@@ -6,6 +6,8 @@ import UserManagement from './UserManagement';
 import Profile from './Profile';
 import { useNavigate } from 'react-router';
 import { getCurrentUserInfo } from '../../api/base/userApi';
+import { getUserStatistics } from '../../api/base/userApi';
+import { getHotelStatsForAdmin } from '../../api/base/hotelApi';
 import { useUserStore } from '../../store/useUserStore';
 import { message } from 'antd';
 
@@ -15,6 +17,24 @@ export default function AdminLayout() {
   const [currentPage, setCurrentPage] = useState('home');
   const [currentUser, setCurrentUser] = useState({});
   const [loading, setLoading] = useState(true);
+  
+  // 统计数据状态
+  const [userStats, setUserStats] = useState({
+    totalUsers: 0,
+    merchants: 0,
+    admins: 0,
+    customers: 0
+  });
+  
+  const [hotelStats, setHotelStats] = useState({
+    pending: 0,
+    rejected: 0,
+    auditing: 0,
+    approved: 0
+  });
+  
+  const [statsLoading, setStatsLoading] = useState(false);
+  
   const { updateUserInfo, logout, isLoggedIn, getToken } = useUserStore();
 
   // 检查用户登录状态
@@ -97,6 +117,98 @@ export default function AdminLayout() {
     }
   }, [isLoggedIn, getToken]);
 
+  // 获取用户统计数据
+  const fetchUserStatistics = async () => {
+    try {
+      const response = await getUserStatistics();
+      
+      if (response && response.code === 200) {
+        const stats = response.data || {};
+        setUserStats({
+          totalUsers: stats.totalUsers || 0,
+          merchants: stats.merchants || 0,
+          admins: stats.admins || 0,
+          customers: stats.customers || 0
+        });
+      } else {
+        console.warn('获取用户统计数据失败:', response?.msg);
+        // 使用默认值
+        setUserStats({
+          totalUsers: 0,
+          merchants: 0,
+          admins: 0,
+          customers: 0
+        });
+      }
+    } catch (error) {
+      console.error('获取用户统计数据失败:', error);
+      // 使用默认值
+      setUserStats({
+        totalUsers: 0,
+        merchants: 0,
+        admins: 0,
+        customers: 0
+      });
+    }
+  };
+
+  // 获取酒店统计数据
+  const fetchHotelStatistics = async () => {
+    try {
+      const response = await getHotelStatsForAdmin();
+      
+      if (response && response.code === 200) {
+        const stats = response.data || {};
+        setHotelStats({
+          pending: stats.pending || 0,
+          rejected: stats.rejected || 0,
+          auditing: stats.auditing || 0,
+          approved: stats.approved || 0
+        });
+      } else {
+        console.warn('获取酒店统计数据失败:', response?.msg);
+        // 使用默认值
+        setHotelStats({
+          pending: 0,
+          rejected: 0,
+          auditing: 0,
+          approved: 0
+        });
+      }
+    } catch (error) {
+      console.error('获取酒店统计数据失败:', error);
+      // 使用默认值
+      setHotelStats({
+        pending: 0,
+        rejected: 0,
+        auditing: 0,
+        approved: 0
+      });
+    }
+  };
+
+  // 获取所有统计数据
+  const fetchAllStatistics = async () => {
+    setStatsLoading(true);
+    try {
+      await Promise.all([
+        fetchUserStatistics(),
+        fetchHotelStatistics()
+      ]);
+    } catch (error) {
+      console.error('获取统计数据失败:', error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  // 在用户信息获取完成后获取统计数据
+  useEffect(() => {
+    if (isLoggedIn() && getToken() && Object.keys(currentUser).length > 0) {
+      fetchAllStatistics();
+    }
+  }, [isLoggedIn, getToken, currentUser]);
+
   const menuItems = [
     { id: 'home', icon: Home, label: '首页' },
     { id: 'audit', icon: CheckSquare, label: '酒店审核' },
@@ -142,42 +254,70 @@ export default function AdminLayout() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              {/* 待审核酒店 */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <CheckSquare className="w-6 h-6 text-blue-600" />
                   </div>
-                  <span className="text-2xl font-semibold text-gray-800">8</span>
+                  <span className="text-2xl font-semibold text-gray-800">
+                    {statsLoading ? (
+                      <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      hotelStats.pending
+                    )}
+                  </span>
                 </div>
                 <div className="text-gray-600">待审核</div>
               </div>
 
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              {/* 已通过酒店 */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <CheckSquare className="w-6 h-6 text-green-600" />
                   </div>
-                  <span className="text-2xl font-semibold text-gray-800">156</span>
+                  <span className="text-2xl font-semibold text-gray-800">
+                    {statsLoading ? (
+                      <div className="w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      hotelStats.approved
+                    )}
+                  </span>
                 </div>
                 <div className="text-gray-600">已通过</div>
               </div>
 
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              {/* 已驳回酒店 */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
                     <CheckSquare className="w-6 h-6 text-red-600" />
                   </div>
-                  <span className="text-2xl font-semibold text-gray-800">12</span>
+                  <span className="text-2xl font-semibold text-gray-800">
+                    {statsLoading ? (
+                      <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      hotelStats.rejected
+                    )}
+                  </span>
                 </div>
                 <div className="text-gray-600">已驳回</div>
               </div>
 
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              {/* 商户总数 */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <Users className="w-6 h-6 text-purple-600" />
                   </div>
-                  <span className="text-2xl font-semibold text-gray-800">89</span>
+                  <span className="text-2xl font-semibold text-gray-800">
+                    {statsLoading ? (
+                      <div className="w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      userStats.merchants
+                    )}
+                  </span>
                 </div>
                 <div className="text-gray-600">商户总数</div>
               </div>

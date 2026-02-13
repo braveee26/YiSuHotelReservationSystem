@@ -4,9 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * <p>
  * 解决酒店与属性的多对多关系 前端控制器
- * </p>
  *
  * @author liufuming
  * @since 2026-02-04

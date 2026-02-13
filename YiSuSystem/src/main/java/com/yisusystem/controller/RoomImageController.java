@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yisusystem.common.Response;
 import com.yisusystem.pojo.entity.RoomImage;
 import com.yisusystem.service.IRoomImageService;
-import com.yisusystem.service.SupabaseStorageService;
+import com.yisusystem.service.ISupabaseStorageService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,10 +13,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * <p>
- * 存储房型详情图（支持多图展示） 前端控制器
- * </p>
- *
+ * 存储房型详情图前端控制器
+ *  @order 5
  * @author liufuming
  * @since 2026-02-04
  */
@@ -28,7 +26,7 @@ public class RoomImageController {
     IRoomImageService roomImageService;
 
     @Resource
-    SupabaseStorageService storageService;
+    ISupabaseStorageService storageService;
 
     /**
      * 获取指定房型的全部图片

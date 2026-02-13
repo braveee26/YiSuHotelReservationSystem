@@ -7,9 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**
- * <p>
  * 存储酒店详情页轮播图（Banner） 服务实现类
- * </p>
  *
  * @author liufuming
  * @since 2026-02-04
