@@ -5,6 +5,7 @@ import { Button, Input, Popup, Tabs } from '@taroify/core'
 import { PhoneOutlined, CommentOutlined, LockOutlined } from '@taroify/icons'
 import logoSvg from '../../../assets/login/logo.svg'
 import useAuthStore from '../../../store/auth'
+import CustomNavBar from '../../../components/CustomNavBar'
 import './index.scss'
 
 export default function Login() {
@@ -98,12 +99,12 @@ export default function Login() {
 
         {/* 优化后的按钮区域 - 位置上移 */}
         <View className="action-buttons">
-      <View className="guest-entry" onClick={handleGuestLogin}>
-        <Text>不想登录？</Text>
-        <Text className="highlight">直接看 -&gt;</Text>
-      </View>
-      <Button
-        className="btn-login"
+          <View className="guest-entry" onClick={handleGuestLogin}>
+            <Text>不想登录？</Text>
+            <Text className="highlight">直接看 -&gt;</Text>
+          </View>
+          <Button
+            className="btn-login"
             block
             shape="round"
             onClick={() => setShowLoginModal(true)}

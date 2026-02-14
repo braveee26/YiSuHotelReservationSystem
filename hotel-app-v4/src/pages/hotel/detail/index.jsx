@@ -5,6 +5,7 @@ import { Tabs, Loading } from '@taroify/core'
 import { LocationOutlined } from '@taroify/icons'
 import useSearchStore from '../../../store/search'
 import { getHotelDetail } from '../../../services/api'
+import CustomNavBar from '../../../components/CustomNavBar'
 import RoomList from './RoomList'
 import './index.scss'
 
@@ -28,10 +29,10 @@ export default function HotelDetail() {
     try {
       const data = await getHotelDetail(hotelId)
       // Transform data for display
-      const images = data.hotel_image?.length > 0 
+      const images = data.hotel_image?.length > 0
         ? data.hotel_image.sort((a, b) => a.sort_order - b.sort_order).map(img => img.image_url)
         : ['https://images.unsplash.com/photo-1566073771259-6a8506099945?fit=crop&w=800&h=600']
-      
+
       // Parse nearby_attractions as review keywords
       let reviewKeywords = []
       if (data.nearby_attractions) {
@@ -88,6 +89,7 @@ export default function HotelDetail() {
 
   return (
     <View className="hotel-detail">
+      <CustomNavBar title="酒店详情" transparent />
       {/* Gallery Swiper */}
       <Swiper className="gallery-swiper" indicatorDots circular autoplay>
         {hotel.images.map((img, index) => (
@@ -117,66 +119,66 @@ export default function HotelDetail() {
         </View>
 
         <View className="facilities-grid">
-           {hotel.facilities.map((fac, i) => (
-             <View key={i} className="fac-item">
-               <Text className="fac-icon">{fac.icon}</Text>
-               <Text className="fac-label">{fac.label}</Text>
-             </View>
-           ))}
+          {hotel.facilities.map((fac, i) => (
+            <View key={i} className="fac-item">
+              <Text className="fac-icon">{fac.icon}</Text>
+              <Text className="fac-label">{fac.label}</Text>
+            </View>
+          ))}
         </View>
 
         {/* Rating & Location */}
         <View className="review-box">
           <View className="score-badge">4.5</View>
           <View className="review-info">
-             <View className="keywords">
-               {hotel.reviewKeywords.map((k, i) => (
-                 <Text key={i} className="k-tag">{k}</Text>
-               ))}
-             </View>
-             <Text className="count">暂无评论</Text>
+            <View className="keywords">
+              {hotel.reviewKeywords.map((k, i) => (
+                <Text key={i} className="k-tag">{k}</Text>
+              ))}
+            </View>
+            <Text className="count">暂无评论</Text>
           </View>
         </View>
 
         <View className="location-box">
-           <View className="loc-icon-bg">📍</View>
-           <View>
-             <Text className="addr">{hotel.address}</Text>
-             <Text className="dist">{hotel.distance}</Text>
-           </View>
+          <View className="loc-icon-bg">📍</View>
+          <View>
+            <Text className="addr">{hotel.address}</Text>
+            <Text className="dist">{hotel.distance}</Text>
+          </View>
         </View>
       </View>
 
       {/* Tabs & Content */}
       <View className="tabs-container">
-         <View className="check-in-info">
-           <Text className="date">{searchParams.checkIn} 至 {searchParams.checkOut}</Text>
-           <Text className="nights">共{searchParams.nights}晚</Text>
-         </View>
+        <View className="check-in-info">
+          <Text className="date">{searchParams.checkIn} 至 {searchParams.checkOut}</Text>
+          <Text className="nights">共{searchParams.nights}晚</Text>
+        </View>
 
-         <Tabs active={activeTab} onChange={({eventKey}) => setActiveTab(eventKey)} sticky>
-           <Tabs.TabPane title="房型">
-             <RoomList hotelId={hotelId} roomTypes={hotel.roomTypes} />
-           </Tabs.TabPane>
-           <Tabs.TabPane title="设施">
-             <View className="content-pad">
-                <Text>设施详情暂未开发</Text>
-             </View>
-           </Tabs.TabPane>
-           <Tabs.TabPane title="政策">
-             <View className="content-pad">
-               <View className="policy-group">
-                 <Text className="p-title">入住/退房</Text>
-                 <Text className="p-desc">入住：15:00后 | 退房：12:00前</Text>
-               </View>
-             </View>
-           </Tabs.TabPane>
-           <Tabs.TabPane title="评价">
-             <View className="content-pad">
-               <Text>评价列表暂未开发</Text>
-             </View>
-           </Tabs.TabPane>
-         </Tabs>
+        <Tabs active={activeTab} onChange={({ eventKey }) => setActiveTab(eventKey)} sticky>
+          <Tabs.TabPane title="房型">
+            <RoomList hotelId={hotelId} roomTypes={hotel.roomTypes} />
+          </Tabs.TabPane>
+          <Tabs.TabPane title="设施">
+            <View className="content-pad">
+              <Text>设施详情暂未开发</Text>
+            </View>
+          </Tabs.TabPane>
+          <Tabs.TabPane title="政策">
+            <View className="content-pad">
+              <View className="policy-group">
+                <Text className="p-title">入住/退房</Text>
+                <Text className="p-desc">入住：15:00后 | 退房：12:00前</Text>
+              </View>
+            </View>
+          </Tabs.TabPane>
+          <Tabs.TabPane title="评价">
+            <View className="content-pad">
+              <Text>评价列表暂未开发</Text>
+            </View>
+          </Tabs.TabPane>
+        </Tabs>
       </View>
     </View>
   )

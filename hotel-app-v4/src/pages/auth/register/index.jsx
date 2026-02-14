@@ -5,6 +5,7 @@ import { Button, Input } from '@taroify/core'
 import { PhoneOutlined, LockOutlined, CommentOutlined } from '@taroify/icons'
 import logoSvg from '../../../assets/login/logo.svg'
 import { register } from '../../../services/api'
+import CustomNavBar from '../../../components/CustomNavBar'
 import './index.scss'
 
 export default function Register() {

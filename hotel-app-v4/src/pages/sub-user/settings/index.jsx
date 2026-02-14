@@ -1,16 +1,18 @@
 import React from 'react'
 import { View } from '@tarojs/components'
 import { Cell, Switch } from '@taroify/core'
+import CustomNavBar from '../../../components/CustomNavBar'
 import './index.scss'
 
 const Settings = () => {
   return (
     <View className="settings-page">
+      <CustomNavBar title="设置" />
       <Cell.Group title="通知设置">
         <Cell title="订单通知" rightIcon={<Switch size={20} />} />
         <Cell title="优惠推送" rightIcon={<Switch size={20} />} />
       </Cell.Group>
-      
+
       <Cell.Group title="其他">
         <Cell title="清除缓存" isLink />
         <Cell title="关于我们" isLink />

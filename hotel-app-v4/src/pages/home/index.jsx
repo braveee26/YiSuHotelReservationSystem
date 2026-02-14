@@ -1,13 +1,15 @@
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
-import { View, Text, Button } from '@tarojs/components'
-import { Tag, Loading } from '@taroify/core'
+import { View, Text } from '@tarojs/components'
+import { Loading } from '@taroify/core'
+import { Replay } from '@taroify/icons'
 import BannerCarousel from './BannerCarousel'
 import SearchCard from './SearchCard'
+import CustomNavBar from '../../components/CustomNavBar'
 import HotelCard from '../../components/HotelCard'
 import CustomTabBar from '../../components/CustomTabBar'
 import PageFadeIn from '../../components/PageFadeIn'
-import { getHotelList, getHotelAttributes } from '../../services/api'
+import { getHotelRecommendations, getHotelAttributes } from '../../services/api'
 import './index.scss'
 
 export default function Home() {
@@ -16,9 +18,9 @@ export default function Home() {
   const [hotels, setHotels] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Fetch hotels and hot tags from API on mount
+  // Fetch recommendations and hot tags from API on mount
   useEffect(() => {
-    fetchHotels()
+    fetchRecommendations()
     fetchHotTags()
   }, [])
 
@@ -33,25 +35,26 @@ export default function Home() {
     }
   }
 
-  const fetchHotels = async () => {
+  const fetchRecommendations = async (isManual = false) => {
+    if (isManual) {
+      Taro.showLoading({ title: '重刷推荐中...' })
+    }
     setLoading(true)
     try {
-      const data = await getHotelList()
+      const data = await getHotelRecommendations()
       // Transform backend data to match HotelCard expected props
       const transformedHotels = data.map(hotel => {
         // Parse nearby_attractions as tags if available
         let tags = []
         if (hotel.nearby_attractions) {
-          // Split by comma or semicolon
           tags = hotel.nearby_attractions.split(/[,;，；]/).map(t => t.trim()).filter(Boolean).slice(0, 3)
         }
         if (tags.length === 0) {
-          // Fallback to generic tags based on star level
           if (hotel.star_level >= 5) tags = ['五星体验', '设施完善']
           else if (hotel.star_level >= 4) tags = ['品质住宿', '交通便利']
           else tags = ['经济实惠']
         }
-        
+
         return {
           id: hotel.hotel_id,
           name: hotel.hotel_name_cn,
@@ -66,17 +69,18 @@ export default function Home() {
       })
       setHotels(transformedHotels)
     } catch (error) {
-      console.error('Failed to fetch hotels:', error)
-      Taro.showToast({ title: '加载失败', icon: 'none' })
+      console.error('Failed to fetch recommendations:', error)
+      Taro.showToast({ title: '加载推荐失败', icon: 'none' })
     } finally {
       setLoading(false)
+      if (isManual) Taro.hideLoading()
     }
   }
 
   const toggleTag = (tag) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag) 
+    setSelectedTags(prev =>
+      prev.includes(tag)
+        ? prev.filter(t => t !== tag)
         : [...prev, tag]
     )
   }
@@ -99,69 +103,77 @@ export default function Home() {
 
   return (
     <>
-    <PageFadeIn>
-    <View className="home-page">
-      <View className="scroll-content">
-         {/* Banner */}
-        <BannerCarousel onBannerClick={() => handleHotelClick(1)} />
+      <CustomNavBar title="宜宿酒店" showBack={false} transparent />
+      <PageFadeIn>
+        <View className="home-page" style={{ paddingTop: 0 }}>
+          <View className="scroll-content">
+            {/* Banner */}
+            <BannerCarousel
+              data={hotels.slice(0, 5)}
+              onBannerClick={handleHotelClick}
+            />
 
-        {/* Search Card */}
-        <SearchCard onSearch={handleSearch} />
+            {/* Search Card */}
+            <SearchCard onSearch={handleSearch} />
 
-        {/* Hot Tags */}
-        <View className="section-container">
-          <View className="section-header">
-            <Text className="icon">🔥</Text>
-            <Text className="title">热门搜索</Text>
-          </View>
-          <View className="tags-list">
-            {hotTags.map((tag, index) => (
-              <View 
-                key={index} 
-                className={`hot-tag ${selectedTags.includes(tag) ? 'active' : ''}`}
-                onClick={() => toggleTag(tag)}
-              >
-                {tag}
+            {/* Hot Tags */}
+            <View className="section-container">
+              <View className="section-header">
+                <Text className="icon">🔥</Text>
+                <Text className="title">热门搜索</Text>
               </View>
-            ))}
+              <View className="tags-list">
+                {hotTags.map((tag, index) => (
+                  <View
+                    key={index}
+                    className={`hot-tag ${selectedTags.includes(tag) ? 'active' : ''}`}
+                    onClick={() => toggleTag(tag)}
+                  >
+                    {tag}
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {/* Recommendations */}
+            <View className="section-container">
+              <View className="section-header jb">
+                <Text className="title">为你推荐</Text>
+                <View className="refresh-box" onClick={() => fetchRecommendations(true)}>
+                  <Replay className="refresh-icon" />
+                  <Text className="refresh-text">换一批</Text>
+                </View>
+              </View>
+              <View className="hotel-list">
+                {loading ? (
+                  <View style={{ textAlign: 'center', padding: '40px 0' }}>
+                    <Loading type="spinner" />
+                    <Text style={{ display: 'block', marginTop: '10px', color: '#999' }}>加载中...</Text>
+                  </View>
+                ) : hotels.length > 0 ? (
+                  hotels.map(hotel => (
+                    <HotelCard
+                      key={hotel.id}
+                      hotel={hotel}
+                      onClick={() => handleHotelClick(hotel.id)}
+                    />
+                  ))
+                ) : (
+                  <View style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
+                    <Text>暂无酒店数据</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* Placeholder for bottom spacing */}
+            <View style={{ height: '120px' }}></View>
           </View>
         </View>
+      </PageFadeIn>
 
-        {/* Recommendations */}
-        <View className="section-container">
-          <View className="section-header">
-             <Text className="title">为你推荐</Text>
-          </View>
-          <View className="hotel-list">
-            {loading ? (
-              <View style={{ textAlign: 'center', padding: '40px 0' }}>
-                <Loading type="spinner" />
-                <Text style={{ display: 'block', marginTop: '10px', color: '#999' }}>加载中...</Text>
-              </View>
-            ) : hotels.length > 0 ? (
-              hotels.map(hotel => (
-                <HotelCard 
-                  key={hotel.id} 
-                  hotel={hotel} 
-                  onClick={() => handleHotelClick(hotel.id)} 
-                />
-              ))
-            ) : (
-              <View style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
-                <Text>暂无酒店数据</Text>
-              </View>
-            )}
-          </View>
-        </View>
-        
-        {/* Placeholder for bottom spacing */}
-        <View style={{ height: '120px' }}></View>
-      </View>
-    </View>
-    </PageFadeIn>
-
-    {/* CustomTabBar 必须在 PageFadeIn 外面，否则 transform 会导致 fixed 失效 */}
-    <CustomTabBar />
+      {/* CustomTabBar 必须在 PageFadeIn 外面，否则 transform 会导致 fixed 失效 */}
+      <CustomTabBar />
     </>
   )
 }
