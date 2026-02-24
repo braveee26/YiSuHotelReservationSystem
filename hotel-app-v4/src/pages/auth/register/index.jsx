@@ -92,6 +92,7 @@ export default function Register() {
               className="custom-input"
               type="number"
               placeholder="手机号码"
+              placeholderClass="placeholder-class"
               value={phone}
               onInput={(e) => setPhone(e.detail.value)}
             />
@@ -104,6 +105,7 @@ export default function Register() {
                 className="custom-input"
                 type="number"
                 placeholder="验证码 (123456)"
+                placeholderClass="placeholder-class"
                 value={code}
                 onInput={(e) => setCode(e.detail.value)}
               />
@@ -124,6 +126,7 @@ export default function Register() {
               className="custom-input"
               password
               placeholder="设置登录密码 (≥6位)"
+              placeholderClass="placeholder-class"
               value={password}
               onInput={(e) => setPassword(e.detail.value)}
             />
@@ -135,6 +138,7 @@ export default function Register() {
               className="custom-input"
               password
               placeholder="确认登录密码"
+              placeholderClass="placeholder-class"
               value={confirmPassword}
               onInput={(e) => setConfirmPassword(e.detail.value)}
             />

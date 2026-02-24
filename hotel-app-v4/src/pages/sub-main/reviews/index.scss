@@ -29,6 +29,17 @@
       background: #fff;
       border-radius: 20rpx;
       box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+
+      .taroify-tabs__tab {
+        font-size: 28rpx !important;
+        /* 缩小选项卡文字 */
+        color: #64748b;
+
+        &--active {
+          color: #1e293b !important;
+          font-weight: 700;
+        }
+      }
     }
   }
 
@@ -126,12 +137,16 @@
         justify-content: flex-end;
 
         .action-btn {
-          border-radius: 100rpx;
+          border-radius: 12rpx;
+          /* 改为长方形 */
           font-size: 24rpx;
-          padding: 8rpx 32rpx;
+          height: 72rpx;
+          line-height: 72rpx;
+          padding: 0 40rpx;
           background: #385e72;
           color: #fff;
           border: none;
+          font-weight: 600;
         }
       }
     }

@@ -1,14 +1,17 @@
 .hotel-list-page {
   background-color: #f7f8fa;
   min-height: 100vh;
+  /* 预留导航栏高度，防止被覆盖 */
+  padding-top: calc(88rpx + env(safe-area-inset-top));
 }
 
 .sticky-header {
   position: sticky;
-  top: 0;
+  /* 位于自定义导航栏下方 */
+  top: calc(88rpx + env(safe-area-inset-top));
   z-index: 50;
   background: #fff;
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.05);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
 }
 
 .search-summary {
@@ -16,18 +19,18 @@
   display: flex;
   align-items: center;
   border-bottom: 2rpx solid #f5f5f5;
-  
+
   .city {
     font-size: 32rpx;
     font-weight: bold;
     color: #047857;
   }
-  
+
   .dot {
     margin: 0 16rpx;
     color: #ccc;
   }
-  
+
   .info {
     font-size: 28rpx;
     color: #666;
@@ -38,13 +41,13 @@
   white-space: nowrap;
   padding: 20rpx 0;
   background: #fff;
-  
+
   .filter-item-wrapper {
     display: inline-flex;
     padding: 0 32rpx;
     gap: 16rpx;
   }
-  
+
   .sort-btn {
     background: #4a8ca8;
     color: #fff;
@@ -54,24 +57,24 @@
     display: flex;
     align-items: center;
     gap: 8rpx;
-    
+
     .text {
       font-size: 24rpx;
     }
   }
-  
+
   .filter-btn {
     padding: 16rpx 28rpx;
     border-radius: 32rpx;
     font-size: 24rpx;
     transition: all 0.2s ease;
-    
+
     &.normal {
       background: #f5f5f5;
       color: #666;
       border: 2rpx solid #e5e5e5;
     }
-    
+
     &.active {
       background: #4a8ca8;
       color: #fff;
@@ -82,7 +85,7 @@
 
 .list-container {
   padding: 32rpx;
-  
+
   .list-count {
     font-size: 24rpx;
     color: #999;
@@ -94,7 +97,7 @@
 .sort-popup {
   padding: 32rpx 0;
   background: #fff;
-  
+
   .popup-title {
     text-align: center;
     font-size: 32rpx;
@@ -102,24 +105,24 @@
     padding: 0 32rpx 32rpx;
     border-bottom: 2rpx solid #f5f5f5;
   }
-  
+
   .sort-option {
     padding: 32rpx;
     display: flex;
     justify-content: space-between;
     font-size: 28rpx;
     color: #333;
-    
+
     &:active {
       background: #f9f9f9;
     }
-    
+
     &.active {
       color: #047857;
       background: #f0fdf4;
       font-weight: 500;
     }
-    
+
     .check {
       color: #047857;
     }
