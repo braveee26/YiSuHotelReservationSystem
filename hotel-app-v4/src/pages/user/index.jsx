@@ -154,9 +154,6 @@ export default function User() {
                 </View>
 
                 <View className="user-profile-card">
-                  <View className="avatar-box">
-                    <Image className="avatar-img" src={userInfo?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?fit=crop&w=100&h=100"} />
-                  </View>
                   <View className="user-info">
                     <Text className="name">{userInfo?.real_name || userInfo?.user_name || '用户'}</Text>
                     <Text className="email">{userInfo?.email || '未设置邮箱'}</Text>
@@ -267,6 +264,7 @@ export default function User() {
                             </View>
                             <View className="g-action">
                               <Text className="edit-btn">编辑</Text>
+                              <Text className="delete-btn">删除</Text>
                             </View>
                           </View>
                         ))}

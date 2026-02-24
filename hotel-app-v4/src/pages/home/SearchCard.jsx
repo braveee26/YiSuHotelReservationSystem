@@ -124,14 +124,15 @@ export default function SearchCard({ onSearch }) {
       </View>
 
       {/* Search Button */}
-      <Button
-        block
-        color="#385e72"
-        className="search-btn"
-        onClick={() => onSearch && onSearch(searchParams)}
-      >
-        搜索酒店
-      </Button>
+      <View className="search-btn-container">
+        <Button
+          color="#385e72"
+          className="search-btn"
+          onClick={() => onSearch && onSearch(searchParams)}
+        >
+          搜索酒店
+        </Button>
+      </View>
 
       {/* City Picker Cascader */}
       <Popup

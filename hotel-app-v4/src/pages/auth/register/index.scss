@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 .login-page {
   min-height: 100vh;
   position: relative;
@@ -19,7 +21,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.5) 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 100%);
   z-index: 1;
 }
 
@@ -35,7 +37,7 @@
 /* 优化后的顶部logo区域 */
 .logo-section {
   text-align: left;
-  padding: 100rpx 0 40rpx;
+  padding: 120rpx 0 40rpx;
 }
 
 .logo-box {
@@ -65,39 +67,46 @@
 .app-slogan {
   display: block;
   font-size: 26rpx;
-  color: #fff;
+  color: #ffffff !important;
+  /* 确保纯白 */
   margin-top: 12rpx;
   letter-spacing: 1rpx;
-  opacity: 0.9;
+  opacity: 1 !important;
+  /* 移除透明度 */
 }
 
 /* 优化后的表单区域 */
 .register-content {
-  background: rgba(255, 255, 255, 1);
+  background: #ffffff;
   border-radius: 32rpx;
   padding: 56rpx 40rpx;
-  box-shadow: 0 12rpx 48rpx rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12rpx 48rpx rgba(0, 0, 0, 0.2);
 }
 
 .form-title {
   display: block;
-  font-size: 40rpx;
+  font-size: 52rpx;
   font-weight: 800;
-  color: #1e293b;
+  color: #d4af37;
+  /* 金色 */
   margin-bottom: 48rpx;
-  letter-spacing: 1rpx;
+  letter-spacing: 2rpx;
 }
 
-/* 修复输入框样式 - 解决双边框问题 */
+/* 修复输入框样式 - 去除两端竖线并缩小占位符 */
 .input-wrapper {
   margin-bottom: 28rpx;
 
   .custom-input {
     background: #f8fafc;
     border-radius: 16rpx;
-    border: 2rpx solid #e2e8f0;
+    /* 去除左右竖线：只保留底部边框或完全去除边框 */
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 2rpx solid #e2e8f0;
     transition: all 0.3s ease;
-    padding: 0 24rpx;
+    padding: 0 8rpx;
     height: 100rpx;
     display: flex;
     align-items: center;
@@ -109,10 +118,17 @@
       padding: 0 !important;
       width: 100%;
       height: 100%;
+      font-size: 28rpx;
+    }
+
+    /* 针对 Taro 占位符样式 */
+    .placeholder-class {
+      font-size: 24rpx !important;
+      color: #94a3b8;
     }
 
     &:focus-within {
-      border-color: #385e72;
+      border-bottom-color: #d4af37;
       background: #fff;
     }
   }

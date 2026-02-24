@@ -63,7 +63,7 @@ export default {
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#fff',
-    navigationBarTitleText: 'Hotel App',
+    navigationBarTitleText: '易宿酒店预订平台',
     navigationBarTextStyle: 'black'
   }
 }
