@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { View, Text, Input } from '@tarojs/components'
 import { Button, Popup, Toast } from '@taroify/core'
 import { Plus, Edit, Delete } from '@taroify/icons'
+import CustomNavBar from '../../../components/CustomNavBar'
 import TabBar from '../../../components/TabBar'
 import './index.scss'
 
@@ -46,17 +47,8 @@ const Contacts = () => {
 
   return (
     <View className="contacts-page">
-      <View className="page-header">
-        <View className="header-content">
-          <Text className="title">常用入住人</Text>
-          <Text className="desc">管理预订时常用的入住信息</Text>
-        </View>
-        <View className="add-icon-btn" onClick={handleAdd}>
-          <Plus size="24" color="#fff" />
-        </View>
-      </View>
-
-      <View className="contacts-list">
+      <CustomNavBar title="常用入住人" />
+      <View className="contacts-list" style={{ paddingTop: '10px' }}>
         {contacts.length === 0 ? (
           <View className="empty-state">
             <View className="empty-icon">📂</View>

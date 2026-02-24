@@ -32,7 +32,8 @@ router.post('/register', async (req, res) => {
                 password: hashedPassword,
                 phone,
                 salt: saltBuffer,
-                role: roleValue
+                role: roleValue,
+                is_active: true // New users are active by default
             }])
             .select();
 
@@ -81,6 +82,15 @@ router.post('/login', async (req, res) => {
                 console.log('[Login] Password mismatch');
                 return res.status(401).json({ error: 'Invalid password' });
             }
+        }
+
+        // Account Activation Check
+        if (user.is_active === false) {
+            console.log(`[Login] Access Denied: Account ${user.user_name} is disabled.`);
+            return res.status(403).json({
+                error: '账号已被禁用',
+                message: '您的账号已被管理员禁用，请联系客服。'
+            });
         }
 
         // APP Role Access Control: Only allow 'customer'

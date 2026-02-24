@@ -1,25 +1,24 @@
 .search-card {
   background: #fff;
-  border-radius: 24rpx;
-  padding: 32rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
-  margin: -80rpx 32rpx 0;
-  /* Move up to overlap banner */
+  border-radius: 20rpx;
+  padding: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+  margin: -60rpx 24rpx 0;
   position: relative;
   z-index: 10;
 }
 
 .business-tabs {
   display: flex;
-  margin-bottom: 32rpx;
-  border-bottom: 2rpx solid #f0f0f0;
-  padding-bottom: 16rpx;
+  margin-bottom: 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  padding-bottom: 12rpx;
 
   .tab-item {
-    padding: 12rpx 24rpx;
-    font-size: 28rpx;
+    padding: 8rpx 20rpx;
+    font-size: 24rpx;
     color: #666;
-    border-radius: 32rpx;
+    border-radius: 24rpx;
 
     &.active {
       color: #385e72;
@@ -32,37 +31,37 @@
 .location-section {
   display: flex;
   align-items: center;
-  margin-bottom: 24rpx;
-  padding-bottom: 24rpx;
-  border-bottom: 2rpx solid #f5f5f5;
+  margin-bottom: 20rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f5f5f5;
 
   .city-box {
-    flex: 0 0 200rpx;
-    border-right: 2rpx solid #f0f0f0;
+    flex: 0 0 220rpx;
+    border-right: 1rpx solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    padding-right: 12rpx;
 
-    .city-name {
-      font-size: 36rpx;
+    .city-text {
+      font-size: 28rpx;
       font-weight: bold;
       color: #333;
-      display: block;
-    }
-
-    .current-location {
-      font-size: 20rpx;
-      color: #999;
-      display: flex;
-      align-items: center;
-      margin-top: 8rpx;
+      margin: 0 8rpx;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
     }
   }
 
   .input-box {
     flex: 1;
-    padding-left: 24rpx;
+    padding-left: 20rpx;
 
     .search-input {
-      font-size: 28rpx;
-      color: #999;
+      font-size: 26rpx;
+      color: #333;
+      width: 100%;
     }
   }
 }
@@ -71,41 +70,47 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24rpx;
-  padding-bottom: 24rpx;
-  border-bottom: 2rpx solid #f5f5f5;
+  margin-bottom: 20rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f5f5f5;
 
   .date-item {
+    flex: 1;
+
     .label {
-      font-size: 20rpx;
+      font-size: 18rpx;
       color: #999;
       display: block;
-      margin-bottom: 4rpx;
+      margin-bottom: 2rpx;
     }
 
     .date-val {
+      display: flex;
+      align-items: baseline;
+
       .date {
-        font-size: 32rpx;
+        font-size: 28rpx;
         font-weight: 600;
         color: #333;
-        margin-right: 8rpx;
+        margin-right: 4rpx;
       }
 
       .week {
-        font-size: 20rpx;
+        font-size: 18rpx;
         color: #666;
       }
     }
   }
 
   .nights {
-    border: 2rpx solid #f0f0f0;
-    border-radius: 20rpx;
-    padding: 4rpx 16rpx;
+    border: 1rpx solid #eee;
+    border-radius: 16rpx;
+    padding: 2rpx 12rpx;
+    background: #fcfcfc;
 
     .text {
-      font-size: 20rpx;
-      color: #333;
+      font-size: 18rpx;
+      color: #385e72;
     }
   }
 }
@@ -114,112 +119,72 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24rpx 0;
-  margin-bottom: 32rpx;
+  padding: 16rpx 0;
+  margin-bottom: 24rpx;
 
   .val {
-    font-size: 28rpx;
+    font-size: 26rpx;
     color: #333;
     font-weight: 500;
   }
 }
 
-.border-bottom {
-  border-bottom: 2rpx solid #f5f5f5;
-}
-
 .search-btn {
-  font-size: 32rpx;
+  font-size: 28rpx;
   font-weight: 600;
-  border-radius: 16rpx;
-  height: 88rpx;
+  border-radius: 12rpx;
+  height: 80rpx;
+  background-color: #385e72 !important;
+  color: #fff !important;
 }
 
-.picker-content {
-  padding: 40rpx;
+// Cascader Overrides
+.taroify-cascader {
+  &__header {
+    font-size: 28rpx !important;
+    padding: 24rpx !important;
+  }
+
+  &__tab {
+    font-size: 26rpx !important;
+  }
+
+  &__option {
+    font-size: 26rpx !important;
+    padding: 20rpx 24rpx !important;
+  }
+}
+
+// Calendar Overrides
+.calendar-popup {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   background: #fff;
 
-  .picker-header {
-    text-align: center;
-    font-size: 32rpx;
-    font-weight: 600;
-    margin-bottom: 40rpx;
-  }
-
-  .counter-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32rpx;
-
-    .label {
-      font-size: 28rpx;
-      color: #333;
+  .taroify-calendar {
+    &__header-title {
+      font-size: 28rpx !important;
     }
 
-    .stepper {
-      display: flex;
-      align-items: center;
-      gap: 24rpx;
-
-      .count {
-        width: 48rpx;
-        text-align: center;
-      }
-    }
-  }
-
-  .confirm-btn {
-    margin-top: 40rpx;
-  }
-}
-
-.calendar-center-popup {
-  width: 92%;
-  max-width: 680rpx;
-  overflow: hidden;
-  border-radius: 32rpx !important;
-  box-shadow: 0 12rpx 48rpx rgba(0, 0, 0, 0.15);
-
-  .calendar-popup {
-    padding: 0;
-    background: #fff;
-    height: 1000rpx;
-    display: flex;
-    flex-direction: column;
-
-    .taroify-calendar {
-      flex: 1;
-      height: 800rpx;
-
-      /* Reset internal fonts and layout to fix distortion */
-      &__header {
-        padding-top: 32rpx;
-      }
-
-      &__day {
-        font-size: 28rpx !important;
-        height: 100rpx !important;
-        line-height: 100rpx !important;
-      }
-
-      &__month-title {
-        font-size: 32rpx !important;
-        margin-top: 24rpx !important;
-        margin-bottom: 16rpx !important;
-        color: #333;
-      }
-
-      &__week-days {
-        height: 64rpx !important;
-        font-size: 24rpx !important;
-      }
+    &__week-day {
+      font-size: 22rpx !important;
+      padding: 16rpx 0 !important;
     }
 
-    .taroify-calendar__footer {
-      padding: 24rpx 32rpx 40rpx;
-      background: #fff;
-      border-top: 2rpx solid #f8fafc;
+    &__month-title {
+      font-size: 26rpx !important;
+      padding: 20rpx 0 !important;
+    }
+
+    &__day {
+      font-size: 24rpx !important;
+      height: 80rpx !important;
+    }
+
+    &__day-top-info,
+    &__day-bottom-info {
+      font-size: 16rpx !important;
     }
   }
 }

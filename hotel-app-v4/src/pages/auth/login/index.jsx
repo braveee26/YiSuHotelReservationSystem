@@ -5,6 +5,7 @@ import { Button, Input, Popup, Tabs } from '@taroify/core'
 import { PhoneOutlined, CommentOutlined, LockOutlined } from '@taroify/icons'
 import logoSvg from '../../../assets/login/logo.svg'
 import useAuthStore from '../../../store/auth'
+import CustomNavBar from '../../../components/CustomNavBar'
 import './index.scss'
 
 export default function Login() {
@@ -87,7 +88,7 @@ export default function Login() {
           <View className="logo-box">
             <Image src={logoSvg} className="logo-img" mode="aspectFit" />
           </View>
-          <Text className="app-name">悠然酒店</Text>
+          <Text className="app-name">易宿酒店预订平台</Text>
         </View>
 
         {/* 主标题区域 */}
@@ -98,12 +99,8 @@ export default function Login() {
 
         {/* 优化后的按钮区域 - 位置上移 */}
         <View className="action-buttons">
-      <View className="guest-entry" onClick={handleGuestLogin}>
-        <Text>不想登录？</Text>
-        <Text className="highlight">直接看 -&gt;</Text>
-      </View>
-      <Button
-        className="btn-login"
+          <Button
+            className="btn-login"
             block
             shape="round"
             onClick={() => setShowLoginModal(true)}

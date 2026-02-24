@@ -1,9 +1,10 @@
 import Taro from '@tarojs/taro'
 import { useState } from 'react'
 import { View, Text, Input } from '@tarojs/components'
-import { Button, Popup, Calendar } from '@taroify/core'
+import { Button, Popup, Calendar, Cascader } from '@taroify/core'
 import { LocationOutlined, ArrowRight, ArrowDown } from '@taroify/icons'
 import useSearchStore from '../../store/search'
+import { regions } from '../../data/regions'
 import './SearchCard.scss'
 
 export default function SearchCard({ onSearch }) {
@@ -12,9 +13,6 @@ export default function SearchCard({ onSearch }) {
   const [showCalendar, setShowCalendar] = useState(false)
   const [showCityPicker, setShowCityPicker] = useState(false)
   const [calendarSelection, setCalendarSelection] = useState([new Date(searchParams.checkIn), new Date(searchParams.checkOut)])
-
-  // Common cities list
-  const cityList = ['北京', '上海', '广州', '深圳', '杭州', '成都', '重庆', '武汉', '西安', '南京', '苏州', '天津', '大阪', '东京']
 
   // Date helpers
   const formatDate = (dateStr) => {
@@ -29,25 +27,10 @@ export default function SearchCard({ onSearch }) {
   }
 
   const handleDateChange = () => {
-    // Initialize calendar selection with current params when opening
-    if (searchParams.checkIn && searchParams.checkOut) {
-      setCalendarSelection([new Date(searchParams.checkIn), new Date(searchParams.checkOut)])
-    }
     setShowCalendar(true)
   }
 
   const onCalendarSelect = (value) => {
-    if (value) {
-      setCalendarSelection(value)
-    }
-  }
-
-  const handleCalendarConfirm = () => {
-    onCalendarConfirm(calendarSelection)
-  }
-
-  const onCalendarConfirm = (value) => {
-    console.log('Calendar value:', value)
     if (value && value.length === 2 && value[0] && value[1]) {
       const [start, end] = value
       const checkIn = new Date(start)
@@ -60,24 +43,23 @@ export default function SearchCard({ onSearch }) {
       updateSearchParam('checkIn', checkInStr)
       updateSearchParam('checkOut', checkOutStr)
       updateSearchParam('nights', nights)
+      setShowCalendar(false)
     }
-    setShowCalendar(false)
   }
 
-  const handleCitySelect = (city) => {
-    updateSearchParam('city', city)
-    setShowCityPicker(false)
+  const handleCitySelect = (values, options) => {
+    if (values.length === 3) {
+      updateSearchParam('province', values[0])
+      updateSearchParam('city', values[1])
+      updateSearchParam('district', values[2])
+      setShowCityPicker(false)
+    }
   }
 
-  // Calculate nights for button text
-  const getNightsText = () => {
-    if (calendarSelection && calendarSelection.length === 2 && calendarSelection[0] && calendarSelection[1]) {
-      const start = new Date(calendarSelection[0])
-      const end = new Date(calendarSelection[1])
-      const nights = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)))
-      return `完成（${nights}晚）`
-    }
-    return '完成'
+  const getLocationText = () => {
+    if (searchParams.district) return `${searchParams.city}·${searchParams.district}`
+    if (searchParams.city) return searchParams.city
+    return '选择目的地'
   }
 
   return (
@@ -97,15 +79,10 @@ export default function SearchCard({ onSearch }) {
 
       {/* City & Location */}
       <View className="location-section">
-        <View className="city-box">
+        <View className="city-box" onClick={() => setShowCityPicker(true)}>
           <LocationOutlined />
-          <Input
-            className="city-input"
-            placeholder="输入城市名称"
-            value={searchParams.city}
-            onInput={(e) => updateSearchParam('city', e.detail.value)}
-            style={{ flex: 1, marginLeft: '8px' }}
-          />
+          <Text className="city-text">{getLocationText()}</Text>
+          <ArrowDown size="12" color="#666" style={{ marginLeft: '4px' }} />
         </View>
         <View className="input-box">
           <Input
@@ -156,68 +133,38 @@ export default function SearchCard({ onSearch }) {
         搜索酒店
       </Button>
 
-      {/* City Picker Popup */}
+      {/* City Picker Cascader */}
       <Popup
         open={showCityPicker}
         rounded
         placement="bottom"
         onClose={() => setShowCityPicker(false)}
       >
-        <Popup.Close />
-        <View className="picker-content">
-          <View className="picker-header">选择城市</View>
-          <View style={{ display: 'flex', flexWrap: 'wrap', padding: '10px' }}>
-            {cityList.map(city => (
-              <View
-                key={city}
-                style={{
-                  padding: '8px 16px',
-                  margin: '5px',
-                  backgroundColor: searchParams.city === city ? '#385e72' : '#f5f5f5',
-                  color: searchParams.city === city ? '#fff' : '#333',
-                  borderRadius: '20px',
-                  fontSize: '14px'
-                }}
-                onClick={() => handleCitySelect(city)}
-              >
-                {city}
-              </View>
-            ))}
-          </View>
-        </View>
+        <Cascader
+          placeholder="请选择"
+          onSelect={handleCitySelect}
+          options={regions}
+        >
+          <Cascader.Header>选择目的地</Cascader.Header>
+        </Cascader>
       </Popup>
 
       {/* Calendar Popup */}
       <Popup
         open={showCalendar}
         rounded
-        placement="center"
-        className="calendar-center-popup"
+        placement="bottom"
+        style={{ height: '80%' }}
         onClose={() => setShowCalendar(false)}
       >
-        <Popup.Close />
         <View className="calendar-popup">
           <Calendar
-            showTitle={false}
             type="range"
             minDate={new Date()}
             maxDate={new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)}
-            defaultValue={[new Date(searchParams.checkIn), new Date(searchParams.checkOut)]}
             onSelect={onCalendarSelect}
-            onConfirm={onCalendarConfirm} // Keep default confirm for potential internal logic
           >
-            <Calendar.Footer>
-              <View style={{ padding: '10px 16px' }}>
-                <Button
-                  block
-                  color="#1989fa"
-                  shape="round"
-                  onClick={handleCalendarConfirm}
-                >
-                  {getNightsText()}
-                </Button>
-              </View>
-            </Calendar.Footer>
+            <Calendar.Header title="选择日期" />
           </Calendar>
         </View>
       </Popup>

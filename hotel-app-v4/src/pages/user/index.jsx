@@ -106,7 +106,7 @@ export default function User() {
   const mockOrders = [
     {
       id: 1,
-      hotelName: '宜宿精品酒店 (上海店)',
+      hotelName: '易宿精品酒店 (上海店)',
       roomType: '豪华大床房',
       date: '2024-02-15 至 2024-02-16',
       price: 588,
@@ -115,7 +115,7 @@ export default function User() {
     },
     {
       id: 2,
-      hotelName: '宜宿度假村 (南京店)',
+      hotelName: '易宿度假村 (南京店)',
       roomType: '湖景双人房',
       date: '2024-01-10 至 2024-01-12',
       price: 1280,
@@ -331,7 +331,7 @@ export default function User() {
                           { label: '账户与安全', icon: '🔒' },
                           { label: '通知设置', icon: '🔔' },
                           { label: '清除缓存', icon: '🧹' },
-                          { label: '关于宜宿', icon: 'ℹ️' },
+                          { label: '关于易宿', icon: 'ℹ️' },
                           { label: '帮助与反馈', icon: '💬' }
                         ].map((item, id) => (
                           <View key={id} className="setting-row">

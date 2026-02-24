@@ -5,6 +5,7 @@ import { Button, Input } from '@taroify/core'
 import { PhoneOutlined, LockOutlined, CommentOutlined } from '@taroify/icons'
 import logoSvg from '../../../assets/login/logo.svg'
 import { register } from '../../../services/api'
+import CustomNavBar from '../../../components/CustomNavBar'
 import './index.scss'
 
 export default function Register() {
@@ -63,6 +64,7 @@ export default function Register() {
 
   return (
     <View className="login-page">
+      <CustomNavBar title="注册" transparent />
       <Image
         className="bg-image"
         src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80"
@@ -76,13 +78,13 @@ export default function Register() {
           <View className="logo-box">
             <Image src={logoSvg} className="logo-img" mode="aspectFit" />
           </View>
-          <Text className="app-name">悠然酒店</Text>
+          <Text className="app-name">易宿酒店预订平台</Text>
           <Text className="app-slogan">尊享品质住宿体验</Text>
         </View>
 
         {/* 优化后的表单区域 */}
         <View className="register-content">
-          <Text className="form-title">加入悠然会员</Text>
+          <Text className="form-title">加入易宿会员</Text>
 
           {/* 手机号输入 */}
           <View className="input-wrapper">

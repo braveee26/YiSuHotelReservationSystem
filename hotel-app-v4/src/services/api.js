@@ -9,6 +9,7 @@ export const updateUserProfile = (userId, data) => request({ url: `/users/profil
 
 // Hotel
 export const getHotelList = () => request({ url: '/hotels' })
+export const getHotelRecommendations = () => request({ url: '/hotels/recommend' }) // New recommendation API
 export const getHotelDetail = (id) => request({ url: `/hotels/${id}` })
 export const searchHotels = (params) => request({ url: '/hotels/search', data: params })
 export const getHotelAttributes = () => request({ url: '/hotels/attributes' })
