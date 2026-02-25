@@ -13,6 +13,7 @@ export const getHotelRecommendations = () => request({ url: '/hotels/recommend' 
 export const getHotelDetail = (id) => request({ url: `/hotels/${id}` })
 export const searchHotels = (params) => request({ url: '/hotels/search', data: params })
 export const getHotelAttributes = () => request({ url: '/hotels/attributes' })
+export const getSearchSuggestions = (keyword) => request({ url: '/hotels/search/suggestions', data: { keyword } })
 
 // Order
 export const createOrder = (data) => request({ url: '/order/create', method: 'POST', data })

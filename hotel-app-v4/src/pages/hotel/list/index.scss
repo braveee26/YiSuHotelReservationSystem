@@ -1,130 +1,159 @@
 .hotel-list-page {
   background-color: #f7f8fa;
   min-height: 100vh;
-  /* 预留导航栏高度，防止被覆盖 */
-  padding-top: calc(88rpx + env(safe-area-inset-top));
-}
+  padding-top: 0;
 
-.sticky-header {
-  position: sticky;
-  /* 位于自定义导航栏下方 */
-  top: calc(88rpx + env(safe-area-inset-top));
-  z-index: 50;
-  background: #fff;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
-}
+  .list-sticky-filters {
+    position: sticky;
+    top: 104rpx; // 72rpx (capsule) + 16rpx*2 padding
+    z-index: 99;
+    background-color: #fff;
+    padding: 12rpx 0;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
 
-.search-summary {
-  padding: 24rpx 32rpx;
-  display: flex;
-  align-items: center;
-  border-bottom: 2rpx solid #f5f5f5;
+    .filter-bar {
+      white-space: nowrap;
+      padding: 0 24rpx;
 
-  .city {
-    font-size: 32rpx;
-    font-weight: bold;
-    color: #047857;
+      .filter-item-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 16rpx;
+
+        .sort-btn,
+        .filter-btn {
+          flex-shrink: 0;
+          height: 60rpx;
+          padding: 0 28rpx;
+          background-color: #f3f4f6;
+          border-radius: 30rpx;
+          display: flex;
+          align-items: center;
+          font-size: 24rpx;
+          color: #666;
+          transition: all 0.2s;
+
+          &.active {
+            color: #385e72;
+            background-color: rgba(56, 94, 114, 0.1);
+            font-weight: 500;
+            border: 1rpx solid rgba(56, 94, 114, 0.2);
+          }
+
+          .text {
+            margin-right: 4rpx;
+          }
+        }
+      }
+    }
   }
 
-  .dot {
-    margin: 0 16rpx;
-    color: #ccc;
-  }
+  .list-container {
+    padding: 24rpx 30rpx;
 
-  .info {
-    font-size: 28rpx;
-    color: #666;
-  }
-}
-
-.filter-bar {
-  white-space: nowrap;
-  padding: 20rpx 0;
-  background: #fff;
-
-  .filter-item-wrapper {
-    display: inline-flex;
-    padding: 0 32rpx;
-    gap: 16rpx;
-  }
-
-  .sort-btn {
-    background: #4a8ca8;
-    color: #fff;
-    padding: 16rpx 28rpx;
-    border-radius: 32rpx;
-    font-size: 24rpx;
-    display: flex;
-    align-items: center;
-    gap: 8rpx;
-
-    .text {
+    .list-count {
+      display: block;
       font-size: 24rpx;
-    }
-  }
-
-  .filter-btn {
-    padding: 16rpx 28rpx;
-    border-radius: 32rpx;
-    font-size: 24rpx;
-    transition: all 0.2s ease;
-
-    &.normal {
-      background: #f5f5f5;
-      color: #666;
-      border: 2rpx solid #e5e5e5;
+      color: #999;
+      margin-bottom: 20rpx;
+      padding-left: 4rpx;
     }
 
-    &.active {
-      background: #4a8ca8;
-      color: #fff;
-      border: 2rpx solid #4a8ca8;
+    .loading-state,
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 160rpx 0;
+      color: #999;
+      font-size: 26rpx;
+
+      .taroify-loading {
+        margin-bottom: 24rpx;
+      }
     }
-  }
-}
-
-.list-container {
-  padding: 32rpx;
-
-  .list-count {
-    font-size: 24rpx;
-    color: #999;
-    margin-bottom: 24rpx;
-    display: block;
   }
 }
 
 .sort-popup {
-  padding: 32rpx 0;
-  background: #fff;
+  padding: 40rpx 40rpx env(safe-area-inset-bottom);
 
   .popup-title {
-    text-align: center;
     font-size: 32rpx;
-    font-weight: 600;
-    padding: 0 32rpx 32rpx;
-    border-bottom: 2rpx solid #f5f5f5;
+    font-weight: bold;
+    margin-bottom: 40rpx;
+    text-align: center;
+    color: #333;
   }
 
   .sort-option {
-    padding: 32rpx;
+    padding: 36rpx 0;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    border-bottom: 1rpx solid #f1f1f1;
     font-size: 28rpx;
-    color: #333;
+    color: #444;
 
-    &:active {
-      background: #f9f9f9;
+    &:last-child {
+      border-bottom: none;
     }
 
     &.active {
-      color: #047857;
-      background: #f0fdf4;
-      font-weight: 500;
+      color: #385e72;
+      font-weight: bold;
     }
 
     .check {
-      color: #047857;
+      font-size: 32rpx;
+    }
+  }
+}
+
+.calendar-popup-wrap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 32rpx 40rpx;
+    border-bottom: 1rpx solid #eee;
+    background-color: #fff;
+
+    .title {
+      font-size: 32rpx;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .btn-confirm {
+      color: #385e72;
+      font-size: 30rpx;
+      font-weight: 600;
+    }
+  }
+}
+
+// 级联选择器全局样式对齐
+.cascader-wrap {
+  background: #fff;
+  padding-bottom: env(safe-area-inset-bottom);
+
+  .taroify-cascader {
+    --cascader-tab-font-size: 28rpx;
+    --cascader-option-font-size: 26rpx;
+    --cascader-option-active-color: #385e72;
+
+    .taroify-cascader__tabs {
+      border-bottom: 1rpx solid #f1f5f9;
+    }
+
+    .taroify-cascader__option {
+      padding: 24rpx 32rpx !important;
     }
   }
 }
