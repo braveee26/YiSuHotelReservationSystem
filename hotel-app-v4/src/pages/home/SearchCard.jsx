@@ -1,7 +1,7 @@
 import Taro from "@tarojs/taro";
 import { useState, useMemo } from "react";
 import { View, Text } from "@tarojs/components";
-import { Button, Popup, Calendar, Cascader, Radio } from "@taroify/core";
+import { Button, Popup, Calendar, Cascader } from "@taroify/core";
 import { Search, Aim, ArrowDown } from "@taroify/icons";
 import useSearchStore from "../../store/search";
 import { regions } from "../../data/regions";
@@ -212,18 +212,33 @@ export default function SearchCard({ onSearch = () => { } }) {
 
       <Popup open={showStarPicker} rounded placement="bottom" onClose={() => setShowStarPicker(false)}>
         <View className="star-picker-content">
-          <View className="picker-header">选择星级</View>
-          <Radio.Group value={searchParams.stars} onChange={(val) => {
-            updateSearchParam("stars", val);
-            setTimeout(() => setShowStarPicker(false), 200);
-          }}>
-            {starOptions.map((opt) => (
-              <View key={opt.value} className="star-option-item">
-                <Text className="label">{opt.label}</Text>
-                <Radio name={opt.value} shape="square" />
-              </View>
-            ))}
-          </Radio.Group>
+          <View className="picker-header">
+            <Text className="title">选择星级</Text>
+            <Text className="close-btn" onClick={() => setShowStarPicker(false)}>✕</Text>
+          </View>
+          <View className="star-options-list">
+            {starOptions.map((opt) => {
+              const isActive = searchParams.stars === opt.value;
+              return (
+                <View
+                  key={opt.value}
+                  className={`star-option-item ${isActive ? 'active' : ''}`}
+                  onClick={() => {
+                    updateSearchParam("stars", opt.value);
+                    setTimeout(() => setShowStarPicker(false), 200);
+                  }}
+                >
+                  <View className="option-left">
+                    {opt.value ? (
+                      <Text className="stars-icon">{'★'.repeat(Number(opt.value))}</Text>
+                    ) : null}
+                    <Text className="label">{opt.label}</Text>
+                  </View>
+                  {isActive && <Text className="check-icon">✓</Text>}
+                </View>
+              );
+            })}
+          </View>
         </View>
       </Popup>
 

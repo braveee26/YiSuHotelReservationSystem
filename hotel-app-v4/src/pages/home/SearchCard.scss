@@ -209,31 +209,84 @@
 // 星级选择
 .star-picker-content {
   background: #fff;
+  min-height: 80vh;
   padding-bottom: env(safe-area-inset-bottom);
 
   .picker-header {
-    padding: 32rpx;
-    text-align: center;
-    font-size: 30rpx;
-    font-weight: 700;
-    color: #1e293b;
-    border-bottom: 1rpx solid #f1f5f9;
-  }
-
-  .star-option-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 30rpx 40rpx;
-    border-bottom: 1rpx solid #f8fafc;
+    padding: 32rpx 40rpx;
+    border-bottom: 1rpx solid #f1f5f9;
 
-    .label {
-      font-size: 28rpx;
-      color: #334155;
+    .title {
+      font-size: 32rpx;
+      font-weight: 700;
+      color: #1e293b;
     }
 
-    .taroify-radio__control {
-      --radio-checked-color: #385e72;
+    .close-btn {
+      font-size: 32rpx;
+      color: #94a3b8;
+      padding: 8rpx 16rpx;
+
+      &:active {
+        opacity: 0.5;
+      }
+    }
+  }
+
+  .star-options-list {
+    padding: 16rpx 0;
+
+    .star-option-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 28rpx 40rpx;
+      margin: 0 20rpx;
+      border-radius: 16rpx;
+      transition: background 0.2s;
+
+      &:active {
+        background: #f8fafc;
+      }
+
+      &.active {
+        background: #ecf3f7;
+
+        .label {
+          color: #385e72;
+          font-weight: 600;
+        }
+
+        .stars-icon {
+          color: #f59e0b;
+        }
+      }
+
+      .option-left {
+        display: flex;
+        align-items: center;
+        gap: 16rpx;
+
+        .stars-icon {
+          font-size: 24rpx;
+          color: #d4d4d8;
+          letter-spacing: 2rpx;
+        }
+
+        .label {
+          font-size: 30rpx;
+          color: #334155;
+        }
+      }
+
+      .check-icon {
+        font-size: 32rpx;
+        color: #385e72;
+        font-weight: 700;
+      }
     }
   }
 }

@@ -93,5 +93,21 @@
 }
 
 .taroify-calendar__day__bottom {
-    display: none !important;
+    font-size: 30px !important;
+    margin-top: 8px !important;
+} 
+
+// 城市选择 Cascader 字体大小
+.taroify-cascader__option {
+    font-size: 30px !important;  // 选项文字大小
+}
+
+.taroify-cascader__header {
+    font-size: 50px !important;  // 头部"切换城市"标题大小
+}
+
+.taroify-tabs__tab {
+    font-size: 30px !important;  // Tab 标签页（省/市层级）大小
+    padding: 0 32px !important;  // 加宽每个标签的水平内边距
+    min-width: 120px !important; // 最小宽度
 }
