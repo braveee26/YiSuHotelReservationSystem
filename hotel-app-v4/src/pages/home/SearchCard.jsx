@@ -48,44 +48,36 @@ export default function SearchCard({ onSearch = () => { } }) {
     return days[date.getDay()];
   };
 
-  const onCalendarSelect = (value) => {
-    if (value && value.length > 0) {
-      setTempDateRange(value);
-    }
-  };
 
-  // 原子化回填，确保首页 UI 感知到 searchParams 的全等变化
-  const handleConfirmDate = () => {
-    if (tempDateRange && tempDateRange.length === 2 && tempDateRange[0] && tempDateRange[1]) {
-      const [start, end] = tempDateRange;
 
-      const formatToYMD = (date) => {
-        const d = new Date(date);
-        const y = d.getFullYear();
-        const m = (d.getMonth() + 1).toString().padStart(2, '0');
-        const day = d.getDate().toString().padStart(2, '0');
-        return `${y}-${m}-${day}`;
-      };
 
-      const checkInStr = formatToYMD(start);
-      const checkOutStr = formatToYMD(end);
-      const nights = Math.max(
-        1,
-        Math.round((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)),
-      );
+  const handleCalendarConfirm = (dateRange) => {
+    if (!dateRange || dateRange.length < 2) return
+    const [start, end] = dateRange
 
-      // 一键更新，驱动首页刷新
-      setSearchParams({
-        checkIn: checkInStr,
-        checkOut: checkOutStr,
-        nights: nights
-      });
+    const formatToYMD = (date) => {
+      const d = new Date(date);
+      const y = d.getFullYear();
+      const m = (d.getMonth() + 1).toString().padStart(2, '0');
+      const day = d.getDate().toString().padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
 
-      Taro.showToast({ title: '修改日期成功', icon: 'success' });
-      setShowCalendar(false);
-    } else {
-      Taro.showToast({ title: '请先选定时间范围', icon: 'none' });
-    }
+    const checkInStr = formatToYMD(start);
+    const checkOutStr = formatToYMD(end);
+    const nights = Math.max(
+      1,
+      Math.round((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)),
+    );
+
+    setSearchParams({
+      checkIn: checkInStr,
+      checkOut: checkOutStr,
+      nights: nights
+    });
+
+    Taro.showToast({ title: '修改日期成功', icon: 'success' });
+    setShowCalendar(false);
   };
 
   const handleCitySelect = (values) => {
@@ -235,22 +227,42 @@ export default function SearchCard({ onSearch = () => { } }) {
         </View>
       </Popup>
 
-      <Popup open={showCalendar} rounded placement="bottom" style={{ height: "70%" }} onClose={() => setShowCalendar(false)}>
-        <View className="calendar-popup-wrap">
-          <View className="popup-header">
-            <Text className="title">选择日期</Text>
-            <Text className="btn-confirm" onClick={handleConfirmDate}>确定</Text>
-          </View>
-          <Calendar
-            key={showCalendar ? 'open' : 'closed'}
-            type="range"
-            minDate={new Date()}
-            defaultValue={tempDateRange}
-            onSelect={onCalendarSelect}
-            activeColor="#385e72"
-          />
+      <Calendar
+        type="range"
+        poppable
+        showPopup={showCalendar}
+        showConfirm={false}
+        onClose={() => setShowCalendar(false)}
+        value={tempDateRange}
+        onChange={(val) => setTempDateRange(val)}
+        onConfirm={handleCalendarConfirm}
+        minDate={new Date()}
+        activeColor="#385e72"
+        rowHeight={56}
+        formatter={(day) => {
+    if (day.type === 'start' || day.type === 'end') {
+      day.bottomInfo = ''; 
+    }
+    return day;
+  }}
+        style={{
+        "--calendar-day-font-size": "14px",           // 日期数字字体大小
+        "--calendar-header-title-font-size": "16px",  // 月份标题字体大小
+        "--calendar-week-day-font-size": "12px",      // 周几标题字体大小
+        "--van-calendar-day-height": "56px",           // 日期高度
+        "--calendar-day-height": "56px",
+        "--calendar-month-title-font-size": "14px",
+        "--calendar-bottom-info-font-size": "10px",
+          }}
+      >
+        {/* 自定义头部 */}
+    <Calendar.Header>
+        <View style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px" }}>
+            <Text style={{ fontSize: "16px", fontWeight: "bold" }}>选择日期</Text>
+            <Text style={{ color: "#385e72", fontSize: "14px" }} onClick={() => handleCalendarConfirm(tempDateRange)}>确定</Text>
         </View>
-      </Popup>
+    </Calendar.Header>
+      </Calendar>
     </View>
   );
 }

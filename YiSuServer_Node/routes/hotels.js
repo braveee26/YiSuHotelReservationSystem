@@ -100,13 +100,37 @@ router.get('/search', async (req, res) => {
         query = query.eq('star_level', Number(stars));
     }
 
-    // Filter by tags (multiple attributes)
+    // Filter by tags (multiple attributes) — 通过关联表查询
     if (tags) {
-        const tagList = Array.isArray(tags) ? tags : [tags];
-        // 假设标签可能是由逗号分隔存储在某些字段，或者匹配周边设施描述
-        // 这里采用简单的 or 匹配作为示例逻辑
-        const tagFilters = tagList.map(tag => `detail_address.ilike.%${tag}%`).join(',');
-        if (tagFilters) query = query.or(tagFilters);
+        const tagList = Array.isArray(tags) ? tags : tags.split(',');
+
+        // 1. 根据标签名查出 attr_id
+        const { data: attrData } = await supabase
+            .from('hotel_attribute')
+            .select('attr_id')
+            .in('attr_name', tagList);
+
+        if (attrData && attrData.length > 0) {
+            const attrIds = attrData.map(a => a.attr_id);
+
+            // 2. 从关联表查出拥有这些标签的 hotel_id
+            const { data: relationData } = await supabase
+                .from('hotel_attr_relation')
+                .select('hotel_id')
+                .in('attr_id', attrIds);
+
+            if (relationData && relationData.length > 0) {
+                const hotelIds = [...new Set(relationData.map(r => r.hotel_id))];
+                // 3. 在主查询中限定范围
+                query = query.in('hotel_id', hotelIds);
+            } else {
+                // 没有酒店拥有这些标签，直接返回空数组
+                return res.json([]);
+            }
+        } else {
+            // 标签名不存在，直接返回空数组
+            return res.json([]);
+        }
     }
 
     // Filter by keyword (search in hotel name, attractions, and mall info)

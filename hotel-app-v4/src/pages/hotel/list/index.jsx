@@ -38,11 +38,11 @@ export default function HotelList() {
   useEffect(() => {
     if (router.params.city || router.params.checkIn) {
       setSearchParams({
-        city: router.params.city || searchParams.city,
-        checkIn: router.params.checkIn || searchParams.checkIn,
-        checkOut: router.params.checkOut || searchParams.checkOut,
+        city: decodeURIComponent(router.params.city || '') || searchParams.city,
+        checkIn: decodeURIComponent(router.params.checkIn || '') || searchParams.checkIn,
+        checkOut: decodeURIComponent(router.params.checkOut || '') || searchParams.checkOut,
         nights: parseInt(router.params.nights) || searchParams.nights,
-        keyword: router.params.keyword || searchParams.keyword
+        keyword: decodeURIComponent(router.params.keyword || '') || searchParams.keyword
       })
     }
     fetchFilters()
@@ -51,11 +51,11 @@ export default function HotelList() {
   // 核心拉取逻辑：依赖 searchParams 变化
   useEffect(() => {
     fetchHotels()
-  }, [searchParams.city, searchParams.checkIn, searchParams.checkOut, searchParams.keyword])
+  }, [searchParams.city, searchParams.checkIn, searchParams.checkOut, searchParams.keyword, activeFilters])
 
   useEffect(() => {
     applyFilters()
-  }, [activeFilters, allHotels, sortBy])
+  }, [allHotels, sortBy])
 
   const fetchFilters = async () => {
     try {
@@ -71,7 +71,21 @@ export default function HotelList() {
     try {
       // 优先从 store 获取当前生效的筛选参数
       const { city, keyword } = searchParams
-      const data = await searchHotels({ city, keyword })
+
+      // 从 activeFilters 中拆分星级和标签
+      const starFilterMap = { '五星级': 5, '四星级': 4, '三星级': 3 }
+      const activeStarFilters = activeFilters.filter(f => starFilters.includes(f))
+      const activeTagFilters = activeFilters.filter(f => !starFilters.includes(f))
+
+      const params = { city, keyword }
+      if (activeStarFilters.length === 1) {
+        params.stars = starFilterMap[activeStarFilters[0]]
+      }
+      if (activeTagFilters.length > 0) {
+        params.tags = activeTagFilters.join(',')
+      }
+
+      const data = await searchHotels(params)
 
       if (!Array.isArray(data)) {
         console.warn('Hotel API result is not an array:', data)
@@ -101,14 +115,8 @@ export default function HotelList() {
 
   const applyFilters = () => {
     let filtered = [...allHotels]
-    const starFilterMap = { '五星级': 5, '四星级': 4, '三星级': 3 }
-    const activeStarFilters = activeFilters.filter(f => starFilters.includes(f))
 
-    if (activeStarFilters.length > 0) {
-      const levels = activeStarFilters.map(f => starFilterMap[f])
-      filtered = filtered.filter(h => levels.includes(h.stars))
-    }
-
+    // 星级和标签筛选已由后端处理，前端只做排序
     if (sortBy === '价格从低到高') filtered.sort((a, b) => a.price - b.price)
     else if (sortBy === '价格从高到低') filtered.sort((a, b) => b.price - a.price)
     else if (sortBy === '评分最高') filtered.sort((a, b) => b.stars - a.stars)
@@ -128,30 +136,20 @@ export default function HotelList() {
     }
   }
 
-  const handleConfirmDate = () => {
-    if (tempDateRange && tempDateRange.length === 2 && tempDateRange[0] && tempDateRange[1]) {
-      const format = (d) => {
-        const date = new Date(d)
-        if (isNaN(date.getTime())) return null;
-        const y = date.getFullYear()
-        const m = (date.getMonth() + 1).toString().padStart(2, "0")
-        const day = date.getDate().toString().padStart(2, "0")
-        return `${y}-${m}-${day}`
-      }
-      const cin = format(tempDateRange[0])
-      const cout = format(tempDateRange[1])
-
-      if (!cin || !cout) {
-        Taro.showToast({ title: '日期格式错误', icon: 'none' })
-        return
-      }
-
-      const nights = Math.max(1, Math.round((new Date(cout.replace(/-/g, '/')) - new Date(cin.replace(/-/g, '/'))) / 86400000))
-
-      setSearchParams({ checkIn: cin, checkOut: cout, nights })
-      setShowCalendar(false)
-      Taro.showToast({ title: "日期更新成功", icon: "success" })
+  const handleCalendarConfirm = (val) => {
+    if (!val || val.length < 2) return
+    const format = (d) => {
+      const y = d.getFullYear()
+      const m = (d.getMonth() + 1).toString().padStart(2, "0")
+      const day = d.getDate().toString().padStart(2, "0")
+      return `${y}-${m}-${day}`
     }
+    const cin = format(val[0])
+    const cout = format(val[1])
+    const nights = Math.max(1, Math.round((val[1] - val[0]) / 86400000))
+    setSearchParams({ checkIn: cin, checkOut: cout, nights })
+    setShowCalendar(false)
+    Taro.showToast({ title: "日期更新成功", icon: "success" })
   }
 
   return (
@@ -235,22 +233,44 @@ export default function HotelList() {
         </View>
       </Popup>
 
-      <Popup open={showCalendar} placement="bottom" rounded onClose={() => setShowCalendar(false)}>
-        <View className="calendar-popup-wrap">
-          <View className="popup-header">
-            <Text className="title">修改入离日期</Text>
-            <Text className="btn-confirm" onClick={handleConfirmDate}>确定</Text>
-          </View>
-          <Calendar
-            key={showCalendar ? 'open' : 'closed'}
-            type="range"
-            minDate={new Date()}
-            defaultValue={tempDateRange}
-            onSelect={(val) => setTempDateRange(val)}
-            activeColor="#385e72"
-          />
+      <Calendar
+        type="range"
+        poppable
+        showPopup={showCalendar}
+        showConfirm={false}
+        onClose={() => setShowCalendar(false)}
+        value={tempDateRange}
+        onChange={(val) => setTempDateRange(val)}
+        onConfirm={handleCalendarConfirm}
+        minDate={new Date()}
+        activeColor="#385e72"
+        rowHeight={56}
+        formatter={(day) => {
+    if (day.type === 'start' || day.type === 'end') {
+      day.bottomInfo = ''; 
+    }
+    return day;
+  }}
+        style={{
+        "--calendar-day-font-size": "14px",           // 日期数字字体大小
+        "--calendar-header-title-font-size": "16px",  // 月份标题字体大小
+        "--calendar-week-day-font-size": "12px",      // 周几标题字体大小
+        "--van-calendar-day-height": "56px",           // 日期高度
+        "--calendar-day-height": "56px",
+        "--van-calendar-month-title-font-size": "14px",
+        "--calendar-month-title-font-size": "14px",
+        "--van-calendar-bottom-info-font-size": "10px",
+    "--calendar-bottom-info-font-size": "10px",
+          }}
+      >
+        {/* 自定义头部 */}
+    <Calendar.Header>
+        <View style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px" }}>
+            <Text style={{ fontSize: "16px", fontWeight: "bold" }}>选择日期</Text>
+            <Text style={{ color: "#385e72", fontSize: "14px" }} onClick={() => handleCalendarConfirm(tempDateRange)}>确定</Text>
         </View>
-      </Popup>
+    </Calendar.Header>
+      </Calendar>
 
       <Popup open={showCityPicker} rounded placement="bottom" onClose={() => setShowCityPicker(false)}>
         <View className="cascader-wrap">
@@ -258,8 +278,7 @@ export default function HotelList() {
             placeholder="请选择城市"
             onSelect={handleCitySelect}
             options={regions}
-            defaultValue={searchParams.city ? [null, searchParams.city] : []}
-          >
+            defaultValue={searchParams.city ? [null, searchParams.city] : []}>
             <Cascader.Header>切换城市</Cascader.Header>
           </Cascader>
         </View>
