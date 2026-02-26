@@ -4,9 +4,11 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://db.lpkvkwrfbjlpbrvvrhzl.supabase.co:5432/postgres
-    username: postgres
-    password: "jWez3RnM8B!t8-%"
+    url: ${DB_URL:jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres}
+    username: ${DB_USER:postgres.lpkvkwrfbjlpbrvvrhzl}
+    password: ${DB_PASSWORD:jWez3RnM8B!t8-%}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -30,12 +32,12 @@ mybatis-plus:
       id-type: auto
 
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 # Supabase Storage 配置
 supabase:
-  url: https://lpkvkwrfbjlpbrvvrhzl.supabase.co
-  api-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxwa3Zrd3JmYmpscGJydnZyaHpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDE4Njg4NywiZXhwIjoyMDg1NzYyODg3fQ.PeUUzLgz2k_gfGCGWK17545jJj0e7UMV2foYEhNuhug # 建议不要把真实 key 提交到 Git
+  url: ${SUPABASE_URL:https://lpkvkwrfbjlpbrvvrhzl.supabase.co}
+  api-key: ${SUPABASE_API_KEY:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxwa3Zrd3JmYmpscGJydnZyaHpsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDE4Njg4NywiZXhwIjoyMDg1NzYyODg3fQ.PeUUzLgz2k_gfGCGWK17545jJj0e7UMV2foYEhNuhug}
   storage:
     bucket-name: hotel-assets
     max-file-size: 10485760

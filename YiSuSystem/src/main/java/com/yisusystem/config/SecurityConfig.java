@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -20,6 +21,7 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
 /**
  * 安全配置类
+ * 
  * @author 代征诚
  */
 @Data
@@ -40,14 +42,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
+        http.cors(Customizer.withDefaults());
 
         // 异常处理器
         http.exceptionHandling(config -> config
-                .authenticationEntryPoint(((request, response, authException) ->
-                                            ServletUtil.rewrite(response, Response.error(HttpStatus.NotLoginForbidden))))
-                .accessDeniedHandler(((request, response, authException) ->
-                                            ServletUtil.rewrite(response, Response.error(HttpStatus.DenyForbidden))))
-        );
+                .authenticationEntryPoint(((request, response, authException) -> ServletUtil.rewrite(response,
+                        Response.error(HttpStatus.NotLoginForbidden))))
+                .accessDeniedHandler(((request, response, authException) -> ServletUtil.rewrite(response,
+                        Response.error(HttpStatus.DenyForbidden)))));
 
         // AuthenticationFilter 认证过滤器
         http.authorizeHttpRequests(authorize -> authorize

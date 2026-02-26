@@ -45,7 +45,7 @@ api[0].list[0].list.push({
     deprecated: 'false',
     url: 'http://localhost:8080/user/admin/all',
     methodId: 'dc82528d06fb47cc9bfa7af160f4dd31',
-    desc: '【管理员接口】获取所有用户列表 支持按角色过滤用户',
+    desc: '【管理员接口】获取所有用户列表  支持按角色过滤用户',
 });
 api[0].list[0].list.push({
     order: '6',
@@ -59,7 +59,7 @@ api[0].list[0].list.push({
     deprecated: 'false',
     url: 'http://localhost:8080/user/admin/statistics',
     methodId: 'f3a98a6d954e1a22db28089344d28588',
-    desc: '【管理员接口】获取平台用户统计数据 包括总用户数、各角色用户数等',
+    desc: '【管理员接口】获取平台用户统计数据  包括总用户数、各角色用户数等',
 });
 api[0].list.push({
     alias: 'HotelController',

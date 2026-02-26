@@ -25,3 +25,11 @@ node_modules/
 
 # OS
 .DS_Store
+
+# Environment files (含敏感信息)
+.env
+.env.local
+.env.production
+
+# Java build output
+target/

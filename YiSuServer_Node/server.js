@@ -13,7 +13,10 @@ app.use(cors({
         'http://localhost',        // Capacitor Android App (HTTP)
         'https://localhost',       // Capacitor Android App (HTTPS, 备用)
         'capacitor://localhost',   // Capacitor iOS App (Optional)
-        'http://192.168.0.102:10086' // 局域网 (可选，用于真机调试)
+        'http://192.168.0.102:10086', // 局域网 (可选，用于真机调试)
+        'https://yisuhotelreservationsystem.gyang5973.workers.dev', // 生产环境
+        /\.pages\.dev$/,           // Cloudflare Pages preview 域名
+        /\.workers\.dev$/          // Cloudflare Workers 域名
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -77,8 +80,12 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error('Reason:', reason);
 });
 
-app.listen(port, () => {
+// Vercel Serverless 模式下不使用 listen，通过 module.exports 导出
+if (process.env.VERCEL !== '1') {
+  app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
     console.log(`API available at http://localhost:${port}/api`);
-});
+  });
+}
 
+module.exports = app;
