@@ -14,6 +14,7 @@ import com.yisusystem.utils.EncryptUtil;
 import com.yisusystem.utils.JwtUtil;
 import com.yisusystem.utils.SecurityUtil;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ import java.util.Map;
  * @since 2026-02-04
  */
 @Service
+@Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
     @Resource
     private UserMapper userMapper;
@@ -69,7 +71,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public Response<String> login(UserLoginReq userLoginFormDTO) {
-        User user = userMapper.getUserByUsername(userLoginFormDTO.getUserName());
+        User user;
+        try {
+            user = userMapper.getUserByUsername(userLoginFormDTO.getUserName());
+        } catch (Exception e) {
+            log.error("数据库连接失败，详细错误信息：", e);
+            
+            // 根据异常类型提供更具体的错误信息
+            String errorMessage;
+            if (e.getMessage().contains("UnknownHostException")) {
+                errorMessage = "无法连接到数据库服务器，请检查网络连接和数据库地址配置";
+                log.error("数据库主机名解析失败: {}", e.getMessage());
+            } else if (e.getMessage().contains("Connection refused")) {
+                errorMessage = "数据库连接被拒绝，请检查数据库服务是否正在运行";
+                log.error("数据库连接被拒绝: {}", e.getMessage());
+            } else if (e.getMessage().contains("password authentication failed")) {
+                errorMessage = "数据库认证失败，请检查用户名和密码配置";
+                log.error("数据库认证失败: {}", e.getMessage());
+            } else if (e.getMessage().contains("database") && e.getMessage().contains("does not exist")) {
+                errorMessage = "指定的数据库不存在，请检查数据库名称配置";
+                log.error("数据库不存在: {}", e.getMessage());
+            } else {
+                errorMessage = "系统暂时不可用，请稍后再试（错误代码：DB_CONN_ERROR）";
+            }
+            
+            return Response.error(500, errorMessage);
+        }
 
         if (user == null || !EncryptUtil.verify(userLoginFormDTO.getPassword(), user.getSalt(), user.getPassword())) {
             return Response.error(HttpStatus.LoginError);

@@ -124,9 +124,11 @@ export default function HotelAudit() {
 
   const getStatusBadge = (status) => {
     switch (status) {
+      case 'pending':
+        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">待审核</span>;
       case 'approved':
         return <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">已通过</span>;
-      case 'pending':
+      case 'auditing':
         return <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">审核中</span>;
       case 'rejected':
         return <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">已驳回</span>;

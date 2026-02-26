@@ -421,7 +421,7 @@ export default function HotelAuditDetailModal({
             )}
 
             {/* Audit Actions for pending status */}
-            {hotel.status === 'pending' && (
+            {hotel.status === 'auditing' && (
               <div className="space-y-4 pt-4 border-t border-gray-200">
                 <div>
                   <label className="block text-sm text-gray-700 mb-2">审核备注（驳回时必填）</label>
