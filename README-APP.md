@@ -247,8 +247,8 @@ YiSuHotelReservationSystem/
 │   │   │   ├── CustomTabBar/    #   自定义底部导航栏
 │   │   │   ├── PageFadeIn/      #   页面进场动画
 │   │   │   ├── HotelCard.jsx    #   酒店卡片
-│   │   │   ├── CitySelector/    #   城市选择器 (TODO)
-│   │   │   └── PriceDisplay/    #   价格展示 (TODO)
+│   │   │   ├── CitySelector/    #   城市选择器
+│   │   │   └── PriceDisplay/    #   价格展示
 │   │   ├── pages/               # 页面目录
 │   │   │   ├── home/            #   首页
 │   │   │   ├── user/            #   个人中心
