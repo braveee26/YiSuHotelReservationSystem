@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.yisusystem.handler.LocalDateTimeTypeHandler;
 import com.yisusystem.handler.StarLevelEnumTypeHandler;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -82,7 +84,7 @@ public class Hotel implements Serializable {
     private StarLevelEnum starLevel;
 
     /**
-     * 开业时间（必须字段）
+     * 开业时间（必须字段）S
      */
     @TableField("open_date")
     private LocalDate openDate;
@@ -121,7 +123,7 @@ public class Hotel implements Serializable {
      * 审核状态
      */
     @TableField("audit_status")
-    private  AuditStatusEnum auditStatus;
+    private AuditStatusEnum auditStatus;
 
     /**
      * 审核备注信息：不通过的审核要附加信息
@@ -138,7 +140,7 @@ public class Hotel implements Serializable {
     /**
      * 修改时间
      */
-    @TableField(value = "update_time", typeHandler = LocalDateTimeTypeHandler.class)
+    @TableField(exist = false)
     private LocalDateTime updateTime;
 
     public enum AuditStatusEnum {
@@ -147,25 +149,37 @@ public class Hotel implements Serializable {
         auditing,
         approved
     }
+
     public enum OnlineStatusEnum {
         online,
         offline
     }
+
     public enum StarLevelEnum {
         ONE(1),
         TWO(2),
         THREE(3),
         FOUR(4),
         FIVE(5);
-        
+
         private final int value;
-        
+
         StarLevelEnum(int value) {
             this.value = value;
         }
-        
+
+        @JsonValue
         public int getValue() {
             return value;
+        }
+
+        @JsonCreator
+        public static StarLevelEnum fromValue(int value) {
+            for (StarLevelEnum e : values()) {
+                if (e.value == value)
+                    return e;
+            }
+            throw new IllegalArgumentException("Invalid star level: " + value);
         }
     }
 }

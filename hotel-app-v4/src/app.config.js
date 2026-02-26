@@ -20,7 +20,8 @@ export default {
       pages: [
         'favorites/index',
         'messages/index',
-        'reviews/index'
+        'reviews/index',
+        'search/index'
       ]
     },
     {
@@ -31,7 +32,8 @@ export default {
       ]
     }
   ],
-  /* Custom TabBar Implementation - Disabling native config
+  // Custom TabBar Implementation - Disabling native config
+  /*
   tabBar: {
     custom: false,
     color: '#999',
@@ -62,7 +64,12 @@ export default {
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#fff',
-    navigationBarTitleText: 'Hotel App',
+    navigationBarTitleText: '易宿酒店预订平台',
     navigationBarTextStyle: 'black'
+  },
+  permission: {
+    'scope.userLocation': {
+      desc: '您的位置信息将用于自动填充城市和为您推荐附近酒店'
+    }
   }
 }

@@ -2,7 +2,9 @@
 import Taro from '@tarojs/taro'
 import useUserStore from '../store/userStore'
 
-const baseUrl = 'http://localhost:3000/api' // Local Backend API
+import { BASE_URL } from '../config'
+
+const baseUrl = BASE_URL // Local Backend API
 
 const request = (options) => {
     const { url, method = 'GET', data, header = {} } = options

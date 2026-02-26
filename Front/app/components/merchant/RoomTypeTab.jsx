@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Bed, Users, DollarSign, Image, X, Save, Tag, Coffee, Maximize, AlignLeft, Search, Filter } from 'lucide-react';
+import { message } from 'antd';
 import ConfirmModal from './ConfirmModal';
+import { getRoomsByHotelId, createRoom, updateRoom, deleteRoom } from '../../api/base/roomTypeApi';
+import { uploadRoomImage, deleteRoomImage, getImagesByRoomId } from '../../api/base/roomImageApi';
+import ImageUploader from '../common/ImageUploader';
 
 export default function RoomTypeTab({ hotelId }) {
   const [showModal, setShowModal] = useState(false);
@@ -20,6 +24,7 @@ export default function RoomTypeTab({ hotelId }) {
     includeBreakfast: false,
     maxPeople: 2,
     description: '',
+    images: [],
   });
 
   // 搜索和筛选状态
@@ -30,64 +35,37 @@ export default function RoomTypeTab({ hotelId }) {
   const [peopleFilter, setPeopleFilter] = useState('all');
   const [sortBy, setSortBy] = useState('default');
 
-  // 模拟房型数据（根据数据库表结构）
-  const [rooms, setRooms] = useState([
-    {
-      id: '1',
-      roomName: '豪华大床房',
-      price: 688,
-      bedType: '1.8m 大床',
-      area: 35.5,
-      stock: 15,
-      includeBreakfast: true,
-      maxPeople: 2,
-      description: '独立卫浴、免费WiFi、55寸智能电视、迷你吧、保险箱',
-    },
-    {
-      id: '2',
-      roomName: '行政套房',
-      price: 1288,
-      bedType: '2.0m 大床 + 1.2m 单床',
-      area: 65.0,
-      stock: 8,
-      includeBreakfast: true,
-      maxPeople: 3,
-      description: '独立客厅、双卫浴、免费WiFi、65寸智能电视、迷你吧、保险箱、胶囊咖啡机、独立书桌',
-    },
-    {
-      id: '3',
-      roomName: '标准双床房',
-      price: 488,
-      bedType: '1.2m 双床',
-      area: 28.0,
-      stock: 22,
-      includeBreakfast: false,
-      maxPeople: 2,
-      description: '独立卫浴、免费WiFi、43寸智能电视',
-    },
-    {
-      id: '4',
-      roomName: '经典单人房',
-      price: 368,
-      bedType: '1.5m 大床',
-      area: 22.5,
-      stock: 10,
-      includeBreakfast: false,
-      maxPeople: 1,
-      description: '独立卫浴、免费WiFi、43寸智能电视、办公桌',
-    },
-    {
-      id: '5',
-      roomName: '蜜月套房',
-      price: 1588,
-      bedType: '2.0m 圆床',
-      area: 55.0,
-      stock: 3,
-      includeBreakfast: true,
-      maxPeople: 2,
-      description: '浪漫布置、独立客厅、按摩浴缸、免费WiFi、65寸智能电视、迷你吧、香槟、鲜花',
-    },
-  ]);
+  // 从后端加载房型数据
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadRooms = async () => {
+    if (!hotelId) return;
+    setLoading(true);
+    try {
+      const res = await getRoomsByHotelId(hotelId);
+      if (res.code === 200 && res.data) {
+        setRooms(res.data.map(r => ({
+          id: r.roomId?.toString() || '',
+          roomName: r.roomName || '',
+          price: r.price || 0,
+          bedType: r.bedType || '',
+          area: r.area || 0,
+          stock: r.stock || 0,
+          includeBreakfast: r.includeBreakfast === 1 || r.includeBreakfast === 'yes' || r.includeBreakfast === true,
+          maxPeople: r.maxPeople || 2,
+          description: r.description || '',
+        })));
+      }
+    } catch (err) {
+      message.error('加载房型数据失败');
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadRooms();
+  }, [hotelId]);
 
   const handleAdd = () => {
     setEditingRoom(null);
@@ -100,13 +78,26 @@ export default function RoomTypeTab({ hotelId }) {
       includeBreakfast: false,
       maxPeople: 2,
       description: '',
+      images: [],
     });
     setShowModal(true);
   };
 
-  const handleEdit = (room) => {
+  const handleEdit = async (room) => {
     setEditingRoom(room);
-    setFormData(room);
+    setFormData({ ...room, images: [] });
+    
+    // 加载房型图片
+    if (room.id) {
+      try {
+        const res = await getImagesByRoomId(room.id);
+        if (res.code === 200 && res.data) {
+          setFormData(prev => ({ ...prev, images: res.data }));
+        }
+      } catch (err) {
+        console.error('获取房型图片失败');
+      }
+    }
     setShowModal(true);
   };
 
@@ -122,29 +113,84 @@ export default function RoomTypeTab({ hotelId }) {
     setSaveConfirm(true);
   };
 
-  const confirmSave = () => {
-    if (editingRoom) {
-      // 编辑
-      setRooms(rooms.map(r => r.id === editingRoom.id ? { ...r, ...formData } : r));
-    } else {
-      // 新增
-      const newRoom = {
-        id: Date.now().toString(),
-        ...formData,
-      };
-      setRooms([...rooms, newRoom]);
+  const confirmSave = async () => {
+    const payload = {
+      hotelId: hotelId,
+      roomName: formData.roomName,
+      price: formData.price,
+      bedType: formData.bedType,
+      area: formData.area,
+      stock: formData.stock,
+      includeBreakfast: formData.includeBreakfast ? 1 : 0,
+      maxPeople: formData.maxPeople,
+      description: formData.description,
+    };
+    try {
+      let res;
+      if (editingRoom) {
+        res = await updateRoom(editingRoom.id, payload);
+      } else {
+        res = await createRoom(payload);
+      }
+      if (res.code === 200) {
+        message.success(editingRoom ? '房型修改成功' : '房型添加成功');
+        setShowModal(false);
+        loadRooms();
+      } else {
+        message.error(res.msg || '保存失败');
+      }
+    } catch (err) {
+      message.error('保存失败，请检查网络连接');
     }
-    setShowModal(false);
   };
 
-  const confirmDelete = () => {
-    setRooms(rooms.filter(r => r.id !== deleteConfirm.roomId));
+  const confirmDelete = async () => {
+    try {
+      const res = await deleteRoom(deleteConfirm.roomId);
+      if (res.code === 200) {
+        message.success('房型已删除');
+        loadRooms();
+      } else {
+        message.error(res.msg || '删除失败');
+      }
+    } catch (err) {
+      message.error('删除失败，请检查网络连接');
+    }
     setDeleteConfirm({ isOpen: false, roomId: '', roomName: '' });
-    alert('房型已删除');
   };
 
   const updateField = (field, value) => {
     setFormData({ ...formData, [field]: value });
+  };
+
+  // 处理图片上传
+  const handleImageUpload = async (file) => {
+    if (!editingRoom || !editingRoom.id) {
+      message.error('请先保存房型基本信息后再上传图片');
+      return;
+    }
+    
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('sortOrder', (formData.images?.length || 0) + 1);
+
+    const res = await uploadRoomImage(editingRoom.id, fd);
+    if (res.code === 200 && res.data) {
+      updateField('images', [...(formData.images || []), res.data]);
+    } else {
+      throw new Error(res.msg || '上传失败');
+    }
+  };
+
+  // 处理图片删除
+  const handleImageDelete = async (image) => {
+    const res = await deleteRoomImage(image.imageId);
+    if (res.code === 200) {
+      updateField('images', formData.images.filter(img => img.imageId !== image.imageId));
+      message.success('删除成功');
+    } else {
+      message.error('删除失败');
+    }
   };
 
   // 筛选和排序逻辑
@@ -640,13 +686,19 @@ export default function RoomTypeTab({ hotelId }) {
                     <div className="w-1.5 h-5 bg-cyan-600 rounded-full mr-3"></div>
                     房型图片
                   </h4>
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer group">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                      <Image className="w-8 h-8 text-blue-600" />
+                  {editingRoom ? (
+                    <ImageUploader
+                      images={formData.images}
+                      onUpload={handleImageUpload}
+                      onDelete={handleImageDelete}
+                      maxCount={5}
+                      maxSize={10}
+                    />
+                  ) : (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                      <p className="text-yellow-800 text-sm">请先保存房型基本信息后再上传图片</p>
                     </div>
-                    <p className="text-gray-700 font-medium mb-1">点击或拖拽上传房型图片</p>
-                    <p className="text-sm text-gray-500">支持 JPG、PNG 格式，建议尺寸 1200x800，最多上传 5 张</p>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -62,6 +62,23 @@ npm run dev:weapp
 
 构建产物会输出到 `dist/` 目录。
 
+### 5. 使用 Android Studio 启动
+
+构建 Web 资源：在 hotel-app-v4 目录下执行：
+
+```bash
+npm run build:h5
+```
+
+同步安卓工程：将编译好的资源推送到原生外壳：
+
+```bash
+npx cap sync android
+```
+
+打开项目：在终端运行 npx cap open android，或直接用 Android Studio 打开 hotel-app-v4/android 目录。
+运行：等待 Android Studio Gradle 构建完成后，点击上方的 “Run” (绿色三角形按钮) 即可安装到模拟器或真机。
+
 ---
 
 ## 微信开发者工具测试
@@ -109,10 +126,10 @@ YiSuHotelReservationSystem/
 
 本项目后端现已迁移至 Node.js 环境，并无缝集成 Supabase 云数据库。
 
-1.  **进入目录**：`cd YiSuServer_Node`
-2.  **安装依赖**：`npm install`
-3.  **配置环境**：根据 `.env.example` 创建 `.env` 文件，并填入你的 Supabase `URL` 和 `Key`。
-4.  **启动服务**：`node server.js`
+1. **进入目录**：`cd YiSuServer_Node`
+2. **安装依赖**：`npm install`
+3. **配置环境**：根据 `.env.example` 创建 `.env` 文件，并填入你的 Supabase `URL` 和 `Key`。
+4. **启动服务**：`node server.js`
 
 详细的 Supabase 接入流程请参考 [supabase_guide.md](./YiSuServer_Node/supabase_guide.md)。
 
@@ -122,14 +139,14 @@ YiSuHotelReservationSystem/
 
 为了让开发伙伴共同使用同一个云数据库，请按照以下步骤操作：
 
-1.  **添加协作者**：
-    - 登录 [Supabase Dashboard](https://supabase.com/dashboard)。
-    - 进入 **Project Settings -> Members**。
-    - 点击 **Invite Member**，输入伙伴的邮箱并分配相应权限。
-2.  **共享环境变量**：
-    - 将你的 `.env` 文件中的 `SUPABASE_URL` 和 `SUPABASE_KEY` 安全地共享给伙伴。建议伙伴在本地创建自己的 `.env` 文件。
-3.  **模式同步**：
-    - 如果数据库结构发生变动（例如运行了新的 SQL 脚本），请将变更后的 SQL 脚本共享给伙伴。
+1. **添加协作者**：
+   - 登录 [Supabase Dashboard](https://supabase.com/dashboard)。
+   - 进入 **Project Settings -> Members**。
+   - 点击 **Invite Member**，输入伙伴的邮箱并分配相应权限。
+2. **共享环境变量**：
+   - 将你的 `.env` 文件中的 `SUPABASE_URL` 和 `SUPABASE_KEY` 安全地共享给伙伴。建议伙伴在本地创建自己的 `.env` 文件。
+3. **模式同步**：
+   - 如果数据库结构发生变动（例如运行了新的 SQL 脚本），请将变更后的 SQL 脚本共享给伙伴。
 
 ---
 
@@ -330,17 +347,17 @@ A: 這是 Gradle 进程锁死。去 `C:\Users\你的用户名\.gradle\wrapper\di
 
 本项目采用了混合图标引入策略：
 
-1.  **底部导航栏图标 (TabBar)**：
-    - 采用 **本地图片资源** 方式引入。
-    - 采用 **本地图片资源** 方式引入。
-    - 路径：`src/assets/tab/`
-    - 命名规范：`tab-{name}.png` (未选中) 和 `tab-{name}-active.png` (选中)。
-    - 在 `src/components/TabBar/index.jsx` 中直接 `import` 使用。
+1. **底部导航栏图标 (TabBar)**：
+   - 采用 **本地图片资源** 方式引入。
+   - 采用 **本地图片资源** 方式引入。
+   - 路径：`src/assets/tab/`
+   - 命名规范：`tab-{name}.png` (未选中) 和 `tab-{name}-active.png` (选中)。
+   - 在 `src/components/TabBar/index.jsx` 中直接 `import` 使用。
 
-2.  **通用 UI 图标**：
-    - 通过 **@taroify/icons** 组件库。
-    - 引入方式：`import { IconName } from '@taroify/icons'`
-    - 注意：已移除 babel-plugin-import 配置，直接使用具名导入即可支持 Tree-shaking。
+2. **通用 UI 图标**：
+   - 通过 **@taroify/icons** 组件库。
+   - 引入方式：`import { IconName } from '@taroify/icons'`
+   - 注意：已移除 babel-plugin-import 配置，直接使用具名导入即可支持 Tree-shaking。
 
 ### 3. 可复用组件与视觉升级
 
@@ -404,6 +421,104 @@ import TabBar from "@/components/TabBar";
 <TabBar current={0} />;
 ```
 
+#### CustomTabBar (自定义底部导航栏)
+
+替代原生 TabBar，实现了带有滑动指示条和图标缩放动画的自定义导航栏。
+
+- **路径**：`src/components/CustomTabBar/index.jsx`
+- **样式**：`src/components/CustomTabBar/index.scss`
+- **状态管理**：`src/store/tabStore.js` (Zustand)
+
+**特性：**
+
+- 滑动色条动画（颜色：`#385E72`）
+- 选中图标缩放效果（1.2x）
+- 底部安全区域适配 (iPhone X 系列)
+- 使用 Zustand 管理全局激活状态
+
+**使用示例：**
+
+```jsx
+import CustomTabBar from "@/components/CustomTabBar";
+
+// 必须放在 PageFadeIn 外部，否则 fixed 定位会失效
+const Page = () => {
+  return (
+    <>
+      <PageFadeIn>
+        <View className="page-content">{/* 页面内容 */}</View>
+      </PageFadeIn>
+
+      <CustomTabBar />
+    </>
+  );
+};
+```
+
+> ⚠️ **注意**：`CustomTabBar` 必须放在 `PageFadeIn` 组件的**外部**。因为 `PageFadeIn` 使用了 `transform` 动画，会导致内部的 `position: fixed` 元素定位失效。
+
+---
+
+#### PageFadeIn (页面进场动画)
+
+为页面添加淡入上滑的进场动画效果，提升视觉体验。
+
+- **路径**：`src/components/PageFadeIn/index.jsx`
+- **样式**：`src/components/PageFadeIn/index.scss`
+
+**动画参数：**
+
+| 参数     | 值                                     |
+| -------- | -------------------------------------- |
+| 动画类型 | 淡入 + 上滑                            |
+| 位移幅度 | 40px                                   |
+| 动画时长 | 0.5s                                   |
+| 缓动函数 | `cubic-bezier(0.25, 0.46, 0.45, 0.94)` |
+| 延迟     | 0.05s                                  |
+
+**使用示例：**
+
+```jsx
+import PageFadeIn from "@/components/PageFadeIn";
+
+const Home = () => {
+  return (
+    <PageFadeIn>
+      <View className="home-page">{/* 页面内容 */}</View>
+    </PageFadeIn>
+  );
+};
+```
+
+**已集成页面：**
+
+- `pages/home/index.jsx`
+- `pages/user/index.jsx`
+- `pages/sub-main/favorites/index.jsx`
+- `pages/sub-main/messages/index.jsx`
+- `pages/sub-main/reviews/index.jsx`
+
+---
+
+#### tabStore (Tab 状态管理)
+
+使用 Zustand 管理 TabBar 的激活状态，确保页面切换时状态同步。
+
+- **路径**：`src/store/tabStore.js`
+
+**API：**
+
+```javascript
+import { useTabStore } from "@/store/tabStore";
+
+// 读取当前激活的 Tab 索引
+const { activeTab } = useTabStore();
+
+// 设置激活的 Tab 索引
+const { setActiveTab } = useTabStore();
+setActiveTab(2); // 切换到第3个 Tab
+```
+
 #### 其他组件 (开发中)
 
 - `CitySelector` (src/components/CitySelector): 城市选择器组件（结构已创建，待完善）
@@ -415,39 +530,181 @@ import TabBar from "@/components/TabBar";
 
 ### 个人中心 (User) 与 订单 (Order) 模块升级
 
-1.  **功能更新**：
-    - **新增“订单”选项卡**：在个人中心集成订单管理，支持按“全部、待入住、待评价、历史订单、退款/售后”五大维度筛选。
-    - **整合入口**：将常用入住人、个人信息与订单管理统一在四个选项卡中。
+1. **功能更新**：
+   - **新增“订单”选项卡**：在个人中心集成订单管理，支持按“全部、待入住、待评价、历史订单、退款/售后”五大维度筛选。
+   - **整合入口**：将常用入住人、个人信息与订单管理统一在四个选项卡中。
 
-2.  **视觉重构**：
-    - 重写 `pages/user/index.scss`，引入高端深蓝渐变色调。
-    - 优化 VIP 会员标识及用户头像展示。
-    - 订单列表采用全新的卡片样式，包含“联系酒店”与“再次预订”操作按钮。
+2. **视觉重构**：
+   - 重写 `pages/user/index.scss`，引入高端深蓝渐变色调。
+   - 优化 VIP 会员标识及用户头像展示。
+   - 订单列表采用全新的卡片样式，包含“联系酒店”与“再次预订”操作按钮。
 
 ### 后端架构迁移与云数据库集成
 
-1.  **Node.js 后端上线**：
-    - 新建 `YiSuServer_Node` 目录，采用 Express.js 框架重构后端逻辑。
-    - 实现了用户鉴权、酒店管理及房型查询等核心 API。
+1. **Node.js 后端上线**：
+   - 新建 `YiSuServer_Node` 目录，采用 Express.js 框架重构后端逻辑。
+   - 实现了用户鉴权、酒店管理及房型查询等核心 API。
 
 ### Search 与 HotelList 模块优化 (2026-02-04)
 
-1.  **SearchCard 组件升级**：
-    - **城市选择优化**：弃用下拉菜单，改为**输入框**模式，支持用户直接输入城市名。
-    - **动态日历交互**：
-      - 修复了日期同步 bug，现在选择日期后能正确回显。
-      - 日历底部新增**动态确认按钮**（例如：“完成（3晚）”），实时计算并显示入住晚数。
-      - 默认入住/离店日期自动设为今日/明日。
+1. **SearchCard 组件升级**：
+   - **城市选择优化**：弃用下拉菜单，改为**输入框**模式，支持用户直接输入城市名。
+   - **动态日历交互**：
+     - 修复了日期同步 bug，现在选择日期后能正确回显。
+     - 日历底部新增**动态确认按钮**（例如：“完成（3晚）”），实时计算并显示入住晚数。
+     - 默认入住/离店日期自动设为今日/明日。
 
-2.  **HotelList 筛选功能增强**：
-    - **动态筛选标签**：对接 `GET /hotels/attributes` 接口，从数据库动态拉取 `hotel_attribute` 作为筛选条件。
-    - **星级筛选**：新增“五星/四星/三星”等级过滤。
-    - **真实排序**：实现了前端基于价格（升/降序）和评分的实时排序逻辑。
-    - **URL 参数解析**：修复了中文参数（如城市、关键字）的 URL 编码/解码问题。
+2. **HotelList 筛选功能增强**：
+   - **动态筛选标签**：对接 `GET /hotels/attributes` 接口，从数据库动态拉取 `hotel_attribute` 作为筛选条件。
+   - **星级筛选**：新增“五星/四星/三星”等级过滤。
+   - **真实排序**：实现了前端基于价格（升/降序）和评分的实时排序逻辑。
+   - **URL 参数解析**：修复了中文参数（如城市、关键字）的 URL 编码/解码问题。
 
-3.  **UI/UX 视觉提升**：
-    - **HotelCard 重构**：
-      - 全新**水平 Flex 布局**（左图右文）。
-      - 价格醒目化（右上角红色大字体）。
-      - 操作便捷化（右下角深蓝圆角“查看”按钮）。
-      - 标签与评分样式美化（清爽蓝调）。
+3. **UI/UX 视觉提升**：
+   - **HotelCard 重构**：
+     - 全新**水平 Flex 布局**（左图右文）。
+     - 价格醒目化（右上角红色大字体）。
+     - 操作便捷化（右下角深蓝圆角“查看”按钮）。
+     - 标签与评分样式美化（清爽蓝调）。
+
+---
+
+## 项目更新日志 (2026-02-07)
+
+### 新增组件
+
+本次更新新增了两个全局通用的 UI 组件，用于提升用户体验和界面一致性。
+
+---
+
+#### CustomTabBar (自定义底部导航栏)
+
+替代原生 TabBar，实现了带有滑动指示条和图标缩放动画的自定义导航栏。
+
+- **路径**：`src/components/CustomTabBar/index.jsx`
+- **样式**：`src/components/CustomTabBar/index.scss`
+- **状态管理**：`src/store/tabStore.js` (Zustand)
+
+**特性：**
+
+- 滑动色条动画（颜色：`#385E72`）
+- 选中图标缩放效果（1.2x）
+- 底部安全区域适配 (iPhone X 系列)
+- 使用 Zustand 管理全局激活状态
+
+**使用示例：**
+
+```jsx
+import CustomTabBar from "@/components/CustomTabBar";
+
+// 必须放在 PageFadeIn 外部，否则 fixed 定位会失效
+const Page = () => {
+  return (
+    <>
+      <PageFadeIn>
+        <View className="page-content">{/* 页面内容 */}</View>
+      </PageFadeIn>
+
+      <CustomTabBar />
+    </>
+  );
+};
+```
+
+> ⚠️ **注意**：`CustomTabBar` 必须放在 `PageFadeIn` 组件的**外部**。因为 `PageFadeIn` 使用了 `transform` 动画，会导致内部的 `position: fixed` 元素定位失效。
+
+---
+
+#### PageFadeIn (页面进场动画)
+
+为页面添加淡入上滑的进场动画效果，提升视觉体验。
+
+- **路径**：`src/components/PageFadeIn/index.jsx`
+- **样式**：`src/components/PageFadeIn/index.scss`
+
+**动画参数：**
+
+| 参数     | 值                                     |
+| -------- | -------------------------------------- |
+| 动画类型 | 淡入 + 上滑                            |
+| 位移幅度 | 40px                                   |
+| 动画时长 | 0.5s                                   |
+| 缓动函数 | `cubic-bezier(0.25, 0.46, 0.45, 0.94)` |
+| 延迟     | 0.05s                                  |
+
+**使用示例：**
+
+```jsx
+import PageFadeIn from "@/components/PageFadeIn";
+
+const Home = () => {
+  return (
+    <PageFadeIn>
+      <View className="home-page">{/* 页面内容 */}</View>
+    </PageFadeIn>
+  );
+};
+```
+
+**已集成页面：**
+
+- `pages/home/index.jsx`
+- `pages/user/index.jsx`
+- `pages/sub-main/favorites/index.jsx`
+- `pages/sub-main/messages/index.jsx`
+- `pages/sub-main/reviews/index.jsx`
+
+---
+
+#### tabStore (Tab 状态管理)
+
+使用 Zustand 管理 TabBar 的激活状态，确保页面切换时状态同步。
+
+- **路径**：`src/store/tabStore.js`
+
+**API：**
+
+```javascript
+import { useTabStore } from "@/store/tabStore";
+
+// 读取当前激活的 Tab 索引
+const { activeTab } = useTabStore();
+
+// 设置激活的 Tab 索引
+const { setActiveTab } = useTabStore();
+setActiveTab(2); // 切换到第3个 Tab
+```
+
+**Tab 索引对照表：**
+
+| 索引 | 页面 | 路径                              |
+| ---- | ---- | --------------------------------- |
+| 0    | 首页 | `/pages/home/index`               |
+| 1    | 收藏 | `/pages/sub-main/favorites/index` |
+| 2    | 消息 | `/pages/sub-main/messages/index`  |
+| 3    | 点评 | `/pages/sub-main/reviews/index`   |
+| 4    | 我的 | `/pages/user/index`               |
+
+---
+
+## 项目更新日志 (2026-02-12)
+
+### 权限加固与角色校准
+
+1. **角色自动分类**：现在 `POST /users/register` 接口会默认将新用户注册为 `customer` 角色。
+2. **APP 访问隔离**：为了保证 APP 端的业务纯净性，后端登录接口集成了角色校验逻辑。**目前仅允许 `role = 'customer'` 的账号登录 APP**，商户与管理员登录时会返回 403 错误，系统将提示其移步至管理后台。
+
+### 核心交互与视觉重构
+
+1. **首页日期选择 (SearchCard)**：
+   - 弃用底部滑入式日历。
+   - 重构为**屏幕中央弹窗容器 (Placement: center)**，极大地优化了视觉焦点分布。
+   - 弹窗背景增加了毛玻璃质感与高级投影样式。
+   - **界面防变形优化**：针对部分设备出现的字体过大、日期重叠问题，实施了“强高度锁定”策略（容器 1000rpx，单元格 100rpx），并精简了 DOM 层级，确保在各种分辨率下均能保持匀称、不重叠。
+
+2. **个人中心 - 资料编辑 (User Profile)**：
+   - **保存按钮重排**：取消了标题栏的全局保存按钮，将其重新定位至表单卡片的**右下角**，提升单手操作的便捷性。
+   - **全量联调**：实现了 `PUT /users/profile/:id` 接口的真实对接。
+   - **状态实时同步**：修改资料并成功保存后，通过 Zustand 全局状态管理实时刷新 UI，无需重新加载页面。
+
+---

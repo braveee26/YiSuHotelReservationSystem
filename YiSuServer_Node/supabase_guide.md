@@ -187,3 +187,148 @@ async function deleteImage(path) {
 2. **全局错误处理 (Global Error Handler)**:
    - 统一捕获应用中的未处理异常。
    - 返回标准的 JSON 错误响应 `{ error: 'Internal server error', message: ... }` 并打印堆栈跟踪。
+
+## 数据库建表语句
+
+```sql
+-- 1. 用户表 (user)
+CREATE TABLE IF NOT EXISTS "user" (
+    user_id BIGSERIAL PRIMARY KEY,
+    user_name VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    salt VARCHAR(255) NOT NULL,
+    role SMALLINT NOT NULL DEFAULT 0, -- 0=商户, 1=管理员
+    avatar VARCHAR(255),
+    real_name VARCHAR(50),
+    phone VARCHAR(20) NOT NULL UNIQUE,
+    email VARCHAR(100) UNIQUE,
+    id_card VARCHAR(255),
+    create_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+-- 2. 酒店表 (hotel)
+CREATE TABLE IF NOT EXISTS "hotel" (
+    hotel_id BIGSERIAL PRIMARY KEY,
+    merchant_id BIGINT REFERENCES "user"(user_id),
+    hotel_name_cn VARCHAR(100) NOT NULL,
+    hotel_name_en VARCHAR(200) NOT NULL,
+    province VARCHAR(50) NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    district VARCHAR(50) NOT NULL,
+    detail_address VARCHAR(200) NOT NULL,
+    star_level SMALLINT NOT NULL CHECK (star_level BETWEEN 1 AND 5),
+    open_date DATE NOT NULL,
+    description TEXT,
+    nearby_attractions VARCHAR(500),
+    traffic_info VARCHAR(500),
+    mall_info VARCHAR(500),
+    online_status SMALLINT NOT NULL DEFAULT 0, -- 0=下线, 1=上线
+    audit_status SMALLINT NOT NULL DEFAULT 1, -- 0=不通过, 1=审核中, 2=通过
+    audit_info VARCHAR(500),
+    create_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+-- 3. 酒店属性表 (hotel_attribute)
+CREATE TABLE IF NOT EXISTS "hotel_attribute" (
+    attr_id BIGSERIAL PRIMARY KEY,
+    attr_name VARCHAR(50) NOT NULL UNIQUE,
+    attr_desc VARCHAR(200)
+);
+-- 4. 酒店-属性关联表 (hotel_attr_relation)
+CREATE TABLE IF NOT EXISTS "hotel_attr_relation" (
+    id BIGSERIAL PRIMARY KEY,
+    hotel_id BIGINT REFERENCES "hotel"(hotel_id) ON DELETE CASCADE,
+    attr_id BIGINT REFERENCES "hotel_attribute"(attr_id) ON DELETE CASCADE,
+    UNIQUE(hotel_id, attr_id)
+);
+-- 5. 酒店图片表 (hotel_image)
+CREATE TABLE IF NOT EXISTS "hotel_image" (
+    image_id BIGSERIAL PRIMARY KEY,
+    hotel_id BIGINT REFERENCES "hotel"(hotel_id) ON DELETE CASCADE,
+    image_url VARCHAR(500) NOT NULL,
+    sort_order SMALLINT NOT NULL DEFAULT 1,
+    image_desc VARCHAR(200)
+);
+-- 6. 房型表 (room_type)
+CREATE TABLE IF NOT EXISTS "room_type" (
+    room_id BIGSERIAL PRIMARY KEY,
+    hotel_id BIGINT REFERENCES "hotel"(hotel_id) ON DELETE CASCADE,
+    room_name VARCHAR(100) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    discount_price DECIMAL(10,2),
+    bed_type VARCHAR(50) NOT NULL,
+    area DECIMAL(5,1),
+    stock INT NOT NULL DEFAULT 0,
+    include_breakfast SMALLINT NOT NULL DEFAULT 0, -- 0=不含, 1=含
+    max_people SMALLINT NOT NULL DEFAULT 2,
+    description TEXT,
+    create_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+-- 7. 房型图片表 (room_image)
+CREATE TABLE IF NOT EXISTS "room_image" (
+    image_id BIGSERIAL PRIMARY KEY,
+    room_id BIGINT REFERENCES "room_type"(room_id) ON DELETE CASCADE,
+    image_url VARCHAR(500) NOT NULL,
+    sort_order SMALLINT NOT NULL DEFAULT 1,
+    image_desc VARCHAR(200)
+);
+-- 8. 优惠表 (discount)
+CREATE TABLE IF NOT EXISTS "discount" (
+    discount_id BIGSERIAL PRIMARY KEY,
+    discount_type SMALLINT NOT NULL, -- 0=节日折扣, 1=套餐优惠
+    target_type SMALLINT NOT NULL, -- 0=全酒店, 1=指定酒店, 2=指定房型
+    target_id BIGINT NOT NULL,
+    discount_rule VARCHAR(100) NOT NULL,
+    discount_value DECIMAL(10,2) NOT NULL,
+    start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    status SMALLINT NOT NULL DEFAULT 0, -- 0=未生效, 1=生效中, 2=已过期
+    description VARCHAR(500)
+);
+```
+
+---
+
+# 前端组件更新日志 (2026-02-07)
+
+本节记录前端 `hotel-app-v4` 项目新增的通用组件，供开发者参考。
+
+## 新增组件概览
+
+| 组件名       | 路径                           | 功能描述                     |
+| ------------ | ------------------------------ | ---------------------------- |
+| CustomTabBar | `src/components/CustomTabBar/` | 自定义底部导航栏，带滑动动画 |
+| PageFadeIn   | `src/components/PageFadeIn/`   | 页面进场淡入动画组件         |
+| tabStore     | `src/store/tabStore.js`        | Tab 状态管理 (Zustand)       |
+
+## CustomTabBar 使用说明
+
+自定义底部导航栏，替代原生 TabBar，支持：
+
+- 滑动指示条动画
+- 图标缩放动画
+- 全局状态同步 (Zustand)
+
+```jsx
+import CustomTabBar from "@/components/CustomTabBar";
+
+// ⚠️ 必须放在 PageFadeIn 外部
+<>
+  <PageFadeIn>
+    <View>{/* 页面内容 */}</View>
+  </PageFadeIn>
+  <CustomTabBar />
+</>;
+```
+
+## PageFadeIn 使用说明
+
+为页面添加进场动画（淡入 + 上滑）。
+
+```jsx
+import PageFadeIn from "@/components/PageFadeIn";
+
+<PageFadeIn>
+  <View className="page">{/* 页面内容 */}</View>
+</PageFadeIn>;
+```
+
+**动画参数**：位移 40px，时长 0.5s，延迟 0.05s。

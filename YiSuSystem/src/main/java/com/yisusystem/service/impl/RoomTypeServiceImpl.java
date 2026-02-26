@@ -7,9 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**
- * <p>
- * 存储酒店房型核心信息（关联酒店，支持价格排序） 服务实现类
- * </p>
+ * 存储酒店房型核心信息（关联酒店） 服务实现类
  *
  * @author liufuming
  * @since 2026-02-04

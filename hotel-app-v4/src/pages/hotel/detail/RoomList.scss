@@ -11,13 +11,14 @@
 }
 
 .image-box {
-  height: 280rpx;
+  height: 400rpx;
   width: 100%;
   background: #f0f0f0;
-  
+
   .room-img {
     width: 100%;
     height: 100%;
+    display: block; // 消除间隙
   }
 }
 
@@ -27,7 +28,7 @@
 
 .header {
   margin-bottom: 16rpx;
-  
+
   .name {
     font-size: 32rpx;
     font-weight: 600;
@@ -35,7 +36,7 @@
     display: block;
     margin-bottom: 8rpx;
   }
-  
+
   .tags {
     display: flex;
     flex-wrap: wrap;
@@ -43,17 +44,17 @@
     font-size: 24rpx;
     color: #666;
     margin-bottom: 12rpx;
-    
+
     .dot {
       margin: 0 8rpx;
       color: #999;
     }
   }
-  
+
   .badges {
     display: flex;
     gap: 8rpx;
-    
+
     .badge {
       font-size: 20rpx;
       padding: 0 8rpx;
@@ -66,7 +67,7 @@
   padding-top: 16rpx;
   border-top: 2rpx solid #f0f0f0;
   margin-top: 16rpx;
-  
+
   .title {
     font-size: 24rpx;
     font-weight: 500;
@@ -74,12 +75,12 @@
     display: block;
     margin-bottom: 8rpx;
   }
-  
+
   .facilities {
     display: flex;
     flex-wrap: wrap;
     gap: 8rpx;
-    
+
     .fac-item {
       font-size: 20rpx;
       background: #f3f4f6;
@@ -94,23 +95,23 @@
   display: flex;
   justify-content: flex-end;
   margin-top: 16rpx;
-  
+
   .price-box {
     text-align: right;
-    
+
     .original {
       font-size: 20rpx;
       color: #999;
       text-decoration: line-through;
       margin-right: 8rpx;
     }
-    
+
     .current-price {
       font-size: 36rpx;
       font-weight: bold;
       color: #047857;
     }
-    
+
     .suffix {
       font-size: 20rpx;
       color: #999;
@@ -123,8 +124,9 @@
   display: flex;
   gap: 16rpx;
   margin-top: 16rpx;
-  
-  .toggle-btn, .book-btn {
+
+  .toggle-btn,
+  .book-btn {
     flex: 1;
     font-size: 28rpx;
     height: 72rpx;
@@ -138,7 +140,7 @@
   margin-top: 16rpx;
   font-size: 24rpx;
   color: #666;
-  
+
   .highlight {
     font-weight: bold;
     color: #047857;

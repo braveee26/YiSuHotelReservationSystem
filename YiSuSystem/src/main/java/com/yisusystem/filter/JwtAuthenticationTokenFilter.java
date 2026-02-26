@@ -29,6 +29,7 @@ import java.io.IOException;
 
 /**
  * JWT 认证过滤器
+ * 
  * @author 代征诚
  */
 @Component
@@ -41,8 +42,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         String token = null;
         Integer userId = null;
@@ -59,9 +60,14 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             try {
                 Claims claims = JwtUtil.parseToken(token);
                 userId = Integer.parseInt(claims.getSubject());
+                System.out.println("JwtFilter: Parsed userId=" + userId + " for URI=" + request.getRequestURI());
             } catch (JwtException exception) {
-                System.err.println(exception.getMessage());
+                System.err.println("JwtFilter: Token parse failed: " + exception.getMessage());
+                exception.printStackTrace();
             }
+        } else {
+            System.out.println("JwtFilter: Auth header missing or invalid format: " + authHeader + " for URI="
+                    + request.getRequestURI());
         }
 
         if (userId != null) {

@@ -1,20 +1,101 @@
-import React, { useState } from 'react';
-import { Shield, Home, CheckSquare, Settings, Users, User, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Shield, Home, CheckSquare, Settings, Users, User, ChevronLeft, ChevronRight, LogOut, Loader } from 'lucide-react';
 import HotelAudit from './HotelAudit';
 import PropertyManagement from './PropertyManagement';
 import UserManagement from './UserManagement';
 import Profile from './Profile';
 import { useNavigate } from 'react-router';
+import { getCurrentUserInfo } from '../../api/base/userApi';
+import { getUserStatistics } from '../../api/base/userApi';
+import { getHotelStatsForAdmin } from '../../api/base/hotelApi';
+import { useUserStore } from '../../store/useUserStore';
+import { message } from 'antd';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
   const [currentUser, setCurrentUser] = useState({});
+  const [loading, setLoading] = useState(true);
+  
+  // 统计数据状态
+  const [userStats, setUserStats] = useState({
+    totalUsers: 0,
+    merchants: 0,
+    admins: 0,
+    customers: 0
+  });
+  
+  const [hotelStats, setHotelStats] = useState({
+    pending: 0,
+    rejected: 0,
+    auditing: 0,
+    approved: 0
+  });
+  
+  const [statsLoading, setStatsLoading] = useState(false);
+  
+  const { updateUserInfo, logout, isLoggedIn, getToken } = useUserStore();
 
-  // 只在客户端环境访问 localStorage
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
+  // 检查用户登录状态
+  useEffect(() => {
+    if (!isLoggedIn() || !getToken()) {
+      message.warning('请先登录');
+      navigate('/login');
+      return;
+    }
+  }, [navigate, isLoggedIn, getToken]);
+
+  // 获取当前用户信息
+  const fetchCurrentUserInfo = async () => {
+    try {
+      setLoading(true);
+      const response = await getCurrentUserInfo();
+      
+      if (response && response.code === 200) {
+        const userInfo = response.data;
+        
+        // 更新当前用户状态
+        setCurrentUser({
+          username: userInfo.userName || 'admin',
+          role: userInfo.role?.toLowerCase() || 'admin',
+          userId: userInfo.userId,
+          realName: userInfo.realName,
+          avatar: userInfo.avatar
+        });
+        
+        // 更新全局用户状态
+        updateUserInfo({
+          username: userInfo.userName,
+          role: userInfo.role?.toLowerCase(),
+          userId: userInfo.userId,
+          realName: userInfo.realName,
+          avatar: userInfo.avatar
+        });
+        
+        // 同时保存到localStorage以兼容现有逻辑
+        localStorage.setItem('currentUser', JSON.stringify({
+          username: userInfo.userName,
+          role: userInfo.role?.toLowerCase()
+        }));
+        
+      } else {
+        message.error(response?.msg || '获取用户信息失败');
+        // 如果获取失败，尝试从localStorage读取
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) {
+          try {
+            setCurrentUser(JSON.parse(storedUser));
+          } catch (error) {
+            console.error('解析用户信息失败:', error);
+            setCurrentUser({});
+          }
+        }
+      }
+    } catch (error) {
+      console.error('获取用户信息失败:', error);
+      message.error('获取用户信息失败，请稍后重试');
+      // 错误时也尝试从localStorage读取
       const storedUser = localStorage.getItem('currentUser');
       if (storedUser) {
         try {
@@ -24,8 +105,109 @@ export default function AdminLayout() {
           setCurrentUser({});
         }
       }
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  };
+
+  // 只在客户端环境访问 localStorage 并且用户已登录时才获取用户信息
+  useEffect(() => {
+    if (isLoggedIn() && getToken()) {
+      fetchCurrentUserInfo();
+    }
+  }, [isLoggedIn, getToken]);
+
+  // 获取用户统计数据
+  const fetchUserStatistics = async () => {
+    try {
+      const response = await getUserStatistics();
+      
+      if (response && response.code === 200) {
+        const stats = response.data || {};
+        setUserStats({
+          totalUsers: stats.totalUsers || 0,
+          merchants: stats.merchants || 0,
+          admins: stats.admins || 0,
+          customers: stats.customers || 0
+        });
+      } else {
+        console.warn('获取用户统计数据失败:', response?.msg);
+        // 使用默认值
+        setUserStats({
+          totalUsers: 0,
+          merchants: 0,
+          admins: 0,
+          customers: 0
+        });
+      }
+    } catch (error) {
+      console.error('获取用户统计数据失败:', error);
+      // 使用默认值
+      setUserStats({
+        totalUsers: 0,
+        merchants: 0,
+        admins: 0,
+        customers: 0
+      });
+    }
+  };
+
+  // 获取酒店统计数据
+  const fetchHotelStatistics = async () => {
+    try {
+      const response = await getHotelStatsForAdmin();
+      
+      if (response && response.code === 200) {
+        const stats = response.data || {};
+        setHotelStats({
+          pending: stats.pending || 0,
+          rejected: stats.rejected || 0,
+          auditing: stats.auditing || 0,
+          approved: stats.approved || 0
+        });
+      } else {
+        console.warn('获取酒店统计数据失败:', response?.msg);
+        // 使用默认值
+        setHotelStats({
+          pending: 0,
+          rejected: 0,
+          auditing: 0,
+          approved: 0
+        });
+      }
+    } catch (error) {
+      console.error('获取酒店统计数据失败:', error);
+      // 使用默认值
+      setHotelStats({
+        pending: 0,
+        rejected: 0,
+        auditing: 0,
+        approved: 0
+      });
+    }
+  };
+
+  // 获取所有统计数据
+  const fetchAllStatistics = async () => {
+    setStatsLoading(true);
+    try {
+      await Promise.all([
+        fetchUserStatistics(),
+        fetchHotelStatistics()
+      ]);
+    } catch (error) {
+      console.error('获取统计数据失败:', error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  // 在用户信息获取完成后获取统计数据
+  useEffect(() => {
+    if (isLoggedIn() && getToken() && Object.keys(currentUser).length > 0) {
+      fetchAllStatistics();
+    }
+  }, [isLoggedIn, getToken, currentUser]);
 
   const menuItems = [
     { id: 'home', icon: Home, label: '首页' },
@@ -63,48 +245,79 @@ export default function AdminLayout() {
       case 'home':
         return (
           <div className="space-y-6">
+            {/* Welcome Banner */}
             <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-xl p-8 text-white">
-              <h2 className="text-3xl font-bold mb-2">欢迎回来，{currentUser.username}</h2>
+              <h2 className="text-3xl font-bold mb-2">
+                欢迎回来，{currentUser.realName || currentUser.username || '管理员'}
+              </h2>
               <p className="text-indigo-100">管理平台数据，审核酒店信息</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              {/* 待审核酒店 */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <CheckSquare className="w-6 h-6 text-blue-600" />
                   </div>
-                  <span className="text-2xl font-semibold text-gray-800">8</span>
+                  <span className="text-2xl font-semibold text-gray-800">
+                    {statsLoading ? (
+                      <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      hotelStats.pending
+                    )}
+                  </span>
                 </div>
                 <div className="text-gray-600">待审核</div>
               </div>
 
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              {/* 已通过酒店 */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <CheckSquare className="w-6 h-6 text-green-600" />
                   </div>
-                  <span className="text-2xl font-semibold text-gray-800">156</span>
+                  <span className="text-2xl font-semibold text-gray-800">
+                    {statsLoading ? (
+                      <div className="w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      hotelStats.approved
+                    )}
+                  </span>
                 </div>
                 <div className="text-gray-600">已通过</div>
               </div>
 
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              {/* 已驳回酒店 */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
                     <CheckSquare className="w-6 h-6 text-red-600" />
                   </div>
-                  <span className="text-2xl font-semibold text-gray-800">12</span>
+                  <span className="text-2xl font-semibold text-gray-800">
+                    {statsLoading ? (
+                      <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      hotelStats.rejected
+                    )}
+                  </span>
                 </div>
                 <div className="text-gray-600">已驳回</div>
               </div>
 
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              {/* 商户总数 */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <Users className="w-6 h-6 text-purple-600" />
                   </div>
-                  <span className="text-2xl font-semibold text-gray-800">89</span>
+                  <span className="text-2xl font-semibold text-gray-800">
+                    {statsLoading ? (
+                      <div className="w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      userStats.merchants
+                    )}
+                  </span>
                 </div>
                 <div className="text-gray-600">商户总数</div>
               </div>
@@ -121,11 +334,25 @@ export default function AdminLayout() {
                   <div className="text-sm text-gray-600">查看待审核的酒店信息</div>
                 </button>
                 <button
-                  onClick={() => setCurrentPage('property')}
+                  onClick={() => {
+                    setCurrentPage('audit');
+                    // 使用setTimeout确保页面切换完成后再触发设施管理
+                    setTimeout(() => {
+                      // 查找包含"设施管理"文本的按钮
+                      const buttons = document.querySelectorAll('button');
+                      const facilityBtn = Array.from(buttons).find(btn => 
+                        btn.textContent.trim() === '设施管理' && 
+                        btn.classList.contains('btn-primary')
+                      );
+                      if (facilityBtn) {
+                        facilityBtn.click();
+                      }
+                    }, 150);
+                  }}
                   className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-600 hover:bg-indigo-50 transition-all text-left"
                 >
                   <div className="font-bold text-gray-800 mb-1">属性管理</div>
-                  <div className="text-sm text-gray-600">管理城市和酒店属性</div>
+                  <div className="text-sm text-gray-600">管理酒店设施属性</div>
                 </button>
                 <button
                   onClick={() => setCurrentPage('users')}
@@ -227,6 +454,10 @@ export default function AdminLayout() {
             onClick={() => {
               // 清除用户信息
               localStorage.removeItem('currentUser');
+              // 清除全局状态
+              logout();
+              // 显示退出成功消息
+              message.success('退出登录成功');
               // 跳转到登录页
               navigate('/login');
             }}
@@ -245,14 +476,16 @@ export default function AdminLayout() {
           {renderBreadcrumb()}
           <div className="flex items-center space-x-4">
             <div className="text-right">
-              <div className="text-base font-bold text-gray-800">{currentUser.username}</div>
+              <div className="text-base font-bold text-gray-800">
+                {currentUser.realName || currentUser.username || '管理员'}
+              </div>
               <div className="text-xs text-gray-500">管理员</div>
             </div>
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-auto p-8">
+        <div className="flex-1 p-6 overflow-auto">
           {renderContent()}
         </div>
       </div>

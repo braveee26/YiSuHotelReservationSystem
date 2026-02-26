@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, Save, MapPin, Building2, Star, Calendar, Globe } from 'lucide-react';
+import { message } from 'antd';
 import ConfirmModal from './ConfirmModal';
 import AreaSelector from './AreaSelector';
+import { getHotelById, createHotel, updateHotel } from '../../api/base/hotelApi';
+import { getAllAttributes } from '../../api/base/hotelAttributeApi';
+import { uploadHotelImage, deleteHotelImage, getImagesByHotelId } from '../../api/base/hotelImageApi';
+import ImageUploader from '../common/ImageUploader';
 
 export default function HotelInfoTab({ hotelId, onSaveSuccess }) {
   const [currentStep, setCurrentStep] = useState(1);
@@ -24,22 +29,40 @@ export default function HotelInfoTab({ hotelId, onSaveSuccess }) {
 
   useEffect(() => {
     if (hotelId) {
-      // 模拟加载现有酒店数据
-      setFormData({
-        hotelNameCn: '北京王府井大酒店',
-        hotelNameEn: 'Beijing Wangfujing Hotel',
-        province: '北京市',
-        city: '北京市',
-        district: '东城区',
-        detailAddress: '王府井大街100号',
-        starLevel: 5,
-        openDate: '2020-01-15',
-        description: '位于北京市中心的豪华酒店，毗邻王府井步行街',
-        nearbyAttractions: '故宫、天安门广场、王府井步行街',
-        trafficInfo: '地铁1号线王府井站A口步行5分钟',
-        mallInfo: '北京apm购物中心,王府中环',
-        facilities: ['免费WiFi', '健身房', '游泳池', '餐厅'],
-        images: [],
+      // 加载酒店基本信息
+      getHotelById(hotelId).then(res => {
+        if (res.code === 200 && res.data) {
+          const h = res.data;
+          setFormData(prev => ({
+            ...prev,
+            hotelNameCn: h.hotelNameCn || '',
+            hotelNameEn: h.hotelNameEn || '',
+            province: h.province || '',
+            city: h.city || '',
+            district: h.district || '',
+            detailAddress: h.detailAddress || '',
+            starLevel: h.starLevel ? (typeof h.starLevel === 'object' ? h.starLevel.value : h.starLevel) : 3,
+            openDate: h.openDate || '',
+            description: h.description || '',
+            nearbyAttractions: h.nearbyAttractions || '',
+            trafficInfo: h.trafficInfo || '',
+            mallInfo: h.mallInfo || '',
+            facilities: [],
+          }));
+        } else {
+          message.error(res.msg || '获取酒店信息失败');
+        }
+      }).catch(() => {
+        message.error('获取酒店信息失败');
+      });
+
+      // 加载酒店图片
+      getImagesByHotelId(hotelId).then(res => {
+        if (res.code === 200 && res.data) {
+          updateField('images', res.data);
+        }
+      }).catch(() => {
+        console.error('获取酒店图片失败');
       });
     }
   }, [hotelId]);
@@ -56,20 +79,80 @@ export default function HotelInfoTab({ hotelId, onSaveSuccess }) {
     }
   };
 
+  // 处理图片上传
+  const handleImageUpload = async (file) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('sortOrder', (formData.images?.length || 0) + 1);
+
+    const res = await uploadHotelImage(hotelId, fd);
+    if (res.code === 200 && res.data) {
+      updateField('images', [...(formData.images || []), res.data]);
+    } else {
+      throw new Error(res.msg || '上传失败');
+    }
+  };
+
+  // 处理图片删除
+  const handleImageDelete = async (image) => {
+    const res = await deleteHotelImage(image.imageId);
+    if (res.code === 200) {
+      updateField('images', formData.images.filter(img => img.imageId !== image.imageId));
+      message.success('删除成功');
+    } else {
+      message.error('删除失败');
+    }
+  };
+
   const handleSubmit = () => {
     setShowSaveConfirm(true);
   };
 
-  const confirmSave = () => {
-    console.log('Saving hotel data:', formData);
-    alert('酒店信息保存成功！');
-    onSaveSuccess();
+  const confirmSave = async () => {
+    try {
+      const payload = {
+        hotelNameCn: formData.hotelNameCn,
+        hotelNameEn: formData.hotelNameEn,
+        province: formData.province,
+        city: formData.city,
+        district: formData.district,
+        detailAddress: formData.detailAddress,
+        starLevel: formData.starLevel,
+        openDate: formData.openDate,
+        description: formData.description,
+        nearbyAttractions: formData.nearbyAttractions,
+        trafficInfo: formData.trafficInfo,
+        mallInfo: formData.mallInfo,
+      };
+      let res;
+      if (hotelId) {
+        res = await updateHotel(hotelId, payload);
+      } else {
+        res = await createHotel(payload);
+      }
+      if (res.code === 200) {
+        message.success('酒店信息保存成功！');
+        onSaveSuccess();
+      } else {
+        message.error(res.msg || '保存失败');
+      }
+    } catch (err) {
+      message.error('保存失败，请检查网络连接');
+    }
+    setShowSaveConfirm(false);
   };
 
-  const facilityOptions = [
-    '免费WiFi', '停车场', '健身房', '游泳池', '餐厅', '会议室',
-    '商务中心', '洗衣服务', '接送服务', '儿童乐园', 'SPA', '酒吧'
-  ];
+  const [facilityOptions, setFacilityOptions] = useState([]);
+
+  useEffect(() => {
+    getAllAttributes().then(res => {
+      if (res.code === 200 && res.data) {
+        setFacilityOptions(res.data.map(attr => attr.attrName));
+      }
+    }).catch(() => {
+      console.error('获取设施列表失败');
+    });
+  }, []);
 
   const steps = [
     { number: 1, title: '基本信息' },
@@ -201,11 +284,19 @@ export default function HotelInfoTab({ hotelId, onSaveSuccess }) {
 
             <div>
               <label className="text-sm text-gray-700 mb-2 block">酒店图片</label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-600 hover:bg-blue-50 transition-all cursor-pointer">
-                <Upload className="w-12 h-12 text-blue-600 mx-auto mb-3" />
-                <p className="text-gray-600 mb-1">点击或拖拽上传图片</p>
-                <p className="text-sm text-gray-400">支持 JPG、PNG 格式，最多上传10张</p>
-              </div>
+              {hotelId ? (
+                <ImageUploader
+                  images={formData.images}
+                  onUpload={handleImageUpload}
+                  onDelete={handleImageDelete}
+                  maxCount={10}
+                  maxSize={10}
+                />
+              ) : (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                  <p className="text-yellow-800 text-sm">请先保存酒店基本信息后再上传图片</p>
+                </div>
+              )}
             </div>
           </div>
         )}

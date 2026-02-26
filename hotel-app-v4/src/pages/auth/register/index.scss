@@ -1,41 +1,203 @@
-.register-page {
+@charset "UTF-8";
+
+.login-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #fa2c19 0%, #ff6034 100%);
-  padding: 80rpx 40rpx;
+  position: relative;
+  overflow: hidden;
 }
 
-.logo-area {
+.bg-image {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.bg-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 100%);
+  z-index: 1;
+}
+
+.content-container {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 60rpx 40rpx 40rpx;
+}
+
+/* 优化后的顶部logo区域 */
+.logo-section {
+  text-align: left;
+  padding: 120rpx 0 40rpx;
+}
+
+.logo-box {
+  width: 100rpx;
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 16rpx;
+
+  .logo-img {
+    width: 100%;
+    height: 100%;
+    filter: brightness(0) invert(1);
+  }
+}
+
+.app-name {
+  display: block;
+  font-size: 52rpx;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 2rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+.app-slogan {
+  display: block;
+  font-size: 26rpx;
+  color: #ffffff !important;
+  /* 确保纯白 */
+  margin-top: 12rpx;
+  letter-spacing: 1rpx;
+  opacity: 1 !important;
+  /* 移除透明度 */
+}
+
+/* 优化后的表单区域 */
+.register-content {
+  background: #ffffff;
+  border-radius: 32rpx;
+  padding: 56rpx 40rpx;
+  box-shadow: 0 12rpx 48rpx rgba(0, 0, 0, 0.2);
+}
+
+.form-title {
+  display: block;
+  font-size: 52rpx;
+  font-weight: 800;
+  color: #d4af37;
+  /* 金色 */
+  margin-bottom: 48rpx;
+  letter-spacing: 2rpx;
+}
+
+/* 修复输入框样式 - 去除两端竖线并缩小占位符 */
+.input-wrapper {
+  margin-bottom: 28rpx;
+
+  .custom-input {
+    background: #f8fafc;
+    border-radius: 16rpx;
+    /* 去除左右竖线：只保留底部边框或完全去除边框 */
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 2rpx solid #e2e8f0;
+    transition: all 0.3s ease;
+    padding: 0 8rpx;
+    height: 100rpx;
+    display: flex;
+    align-items: center;
+
+    /* 穿透修改内部 input */
+    input {
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      width: 100%;
+      height: 100%;
+      font-size: 28rpx;
+    }
+
+    /* 针对 Taro 占位符样式 */
+    .placeholder-class {
+      font-size: 24rpx !important;
+      color: #94a3b8;
+    }
+
+    &:focus-within {
+      border-bottom-color: #d4af37;
+      background: #fff;
+    }
+  }
+}
+
+/* 验证码区域 */
+.code-wrapper {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 28rpx;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.code-btn {
+  width: 200rpx;
+  height: 96rpx !important;
+  border-radius: 16rpx;
+  background: #385e72 !important;
+  color: #fff !important;
+  font-size: 28rpx !important;
+  font-weight: 600;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.code-btn[disabled] {
+  background: #94a3b8 !important;
+  opacity: 0.7;
+}
+
+/* 注册按钮 */
+.register-btn {
+  height: 104rpx !important;
+  background: #385e72 !important;
+  color: #fff !important;
+  font-size: 34rpx !important;
+  font-weight: 800;
+  border-radius: 52rpx;
+  margin-top: 48rpx;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(56, 94, 114, 0.3);
+}
+
+/* 底部链接 */
+.footer-links {
   text-align: center;
-  padding: 120rpx 0 80rpx;
-  
-  .app-name {
-    display: block;
-    font-size: 64rpx;
-    font-weight: bold;
-    color: #fff;
-  }
-  
-  .app-slogan {
-    display: block;
-    font-size: 28rpx;
-    color: rgba(255, 255, 255, 0.8);
-    margin-top: 16rpx;
-  }
+  margin-top: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
 }
 
-.register-form {
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 40rpx;
-  
-  .btn-area {
-    margin-top: 60rpx;
-  }
-  
-  .login-link {
-    text-align: center;
-    margin-top: 40rpx;
-    color: #fa2c19;
-    font-size: 28rpx;
-  }
+.footer-text {
+  color: #64748b;
+  font-size: 28rpx;
+}
+
+.link-text {
+  color: #385e72;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.bottom-spacer {
+  padding: 40rpx 0;
 }

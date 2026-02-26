@@ -1,7 +1,8 @@
 import Taro from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
 import { Button } from '@taroify/core'
-import TabBar from '../../../components/TabBar'
+import CustomTabBar from '../../../components/CustomTabBar'
+import PageFadeIn from '../../../components/PageFadeIn'
 import './index.scss'
 
 export default function Favorites() {
@@ -33,9 +34,10 @@ export default function Favorites() {
   }
 
   return (
+    <>
+    <PageFadeIn>
     <View className="favorites-page">
       <View className="page-header">
-        <Text className="back-btn" onClick={() => Taro.navigateBack()}>‹</Text>
         <Text className="title">我的收藏</Text>
       </View>
       
@@ -81,7 +83,12 @@ export default function Favorites() {
         )}
       </View>
       
-      <TabBar current={1} />
+      {/* Spacer for CustomTabBar */}
+      <View style={{ height: '120px' }}></View>
     </View>
+    </PageFadeIn>
+
+    <CustomTabBar />
+    </>
   )
 }

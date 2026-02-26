@@ -11,21 +11,21 @@ router.get('/', async (req, res) => {
             hotel_image(image_url, sort_order),
             room_type(price)
         `)
-        .eq('online_status', 1)
-        .eq('audit_status', 2)
+        .eq('online_status', 'online')
+        .eq('audit_status', 'approved')
         .order('hotel_id', { ascending: false });
 
     if (error) return res.status(400).json({ error: error.message });
-    
+
     // Transform data to include min_price and primary image
     const transformedData = data.map(hotel => ({
         ...hotel,
-        min_price: hotel.room_type?.length > 0 
-            ? Math.min(...hotel.room_type.map(r => Number(r.price))) 
+        min_price: hotel.room_type?.length > 0
+            ? Math.min(...hotel.room_type.map(r => Number(r.price)))
             : null,
         primary_image: hotel.hotel_image?.sort((a, b) => a.sort_order - b.sort_order)[0]?.image_url || null
     }));
-    
+
     res.json(transformedData);
 });
 
@@ -40,10 +40,46 @@ router.get('/attributes', async (req, res) => {
     res.json(data);
 });
 
-// Search hotels
+// Get 5 random recommended hotels
+router.get('/recommend', async (req, res) => {
+    try {
+        // Fetch a pool of active hotels
+        const { data, error } = await supabase
+            .from('hotel')
+            .select(`
+                *,
+                hotel_image(image_url, sort_order),
+            room_type(price)
+        `)
+            .eq('online_status', 'online')
+            .eq('audit_status', 'approved');
+
+        if (error) throw error;
+
+        // Randomly shuffle and take 5
+        const shuffled = data.sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 5);
+
+        // Transform data
+        const transformedData = selected.map(hotel => ({
+            ...hotel,
+            min_price: hotel.room_type?.length > 0
+                ? Math.min(...hotel.room_type.map(r => Number(r.price)))
+                : null,
+            primary_image: hotel.hotel_image?.sort((a, b) => a.sort_order - b.sort_order)[0]?.image_url || null
+        }));
+
+        res.json(transformedData);
+    } catch (error) {
+        console.error('[Recommend API] Error:', error.message);
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Search hotels with advanced filters (stars, tags, etc.)
 router.get('/search', async (req, res) => {
-    const { keyword, city } = req.query;
-    
+    const { keyword, city, stars, tags } = req.query;
+
     let query = supabase
         .from('hotel')
         .select(`
@@ -51,33 +87,122 @@ router.get('/search', async (req, res) => {
             hotel_image(image_url, sort_order),
             room_type(price)
         `)
-        .eq('online_status', 1)
-        .eq('audit_status', 2);
-    
-    // Filter by city if provided
+        .eq('online_status', 'online')
+        .eq('audit_status', 'approved');
+
+    // Filter by city
     if (city) {
         query = query.eq('city', city);
     }
-    
-    // Filter by keyword (search in hotel name)
-    if (keyword) {
-        query = query.or(`hotel_name_cn.ilike.%${keyword}%,hotel_name_en.ilike.%${keyword}%`);
+
+    // Filter by stars
+    if (stars) {
+        query = query.eq('star_level', Number(stars));
     }
-    
+
+    // Filter by tags (multiple attributes) — 通过关联表查询
+    if (tags) {
+        const tagList = Array.isArray(tags) ? tags : tags.split(',');
+
+        // 1. 根据标签名查出 attr_id
+        const { data: attrData } = await supabase
+            .from('hotel_attribute')
+            .select('attr_id')
+            .in('attr_name', tagList);
+
+        if (attrData && attrData.length > 0) {
+            const attrIds = attrData.map(a => a.attr_id);
+
+            // 2. 从关联表查出拥有这些标签的 hotel_id
+            const { data: relationData } = await supabase
+                .from('hotel_attr_relation')
+                .select('hotel_id')
+                .in('attr_id', attrIds);
+
+            if (relationData && relationData.length > 0) {
+                const hotelIds = [...new Set(relationData.map(r => r.hotel_id))];
+                // 3. 在主查询中限定范围
+                query = query.in('hotel_id', hotelIds);
+            } else {
+                // 没有酒店拥有这些标签，直接返回空数组
+                return res.json([]);
+            }
+        } else {
+            // 标签名不存在，直接返回空数组
+            return res.json([]);
+        }
+    }
+
+    // Filter by keyword (search in hotel name, attractions, and mall info)
+    if (keyword) {
+        query = query.or(`hotel_name_cn.ilike.%${keyword}%,nearby_attractions.ilike.%${keyword}%,mall_info.ilike.%${keyword}%`);
+    }
+
     const { data, error } = await query.order('hotel_id', { ascending: false });
-    
+
     if (error) return res.status(400).json({ error: error.message });
-    
+
     // Transform data
     const transformedData = data.map(hotel => ({
         ...hotel,
-        min_price: hotel.room_type?.length > 0 
-            ? Math.min(...hotel.room_type.map(r => Number(r.price))) 
+        min_price: hotel.room_type?.length > 0
+            ? Math.min(...hotel.room_type.map(r => Number(r.price)))
             : null,
         primary_image: hotel.hotel_image?.sort((a, b) => a.sort_order - b.sort_order)[0]?.image_url || null
     }));
-    
+
     res.json(transformedData);
+});
+
+// Get search suggestions (Smart search for hotels, attractions, malls)
+router.get('/search/suggestions', async (req, res) => {
+    const { keyword } = req.query;
+    if (!keyword) return res.json([]);
+
+    try {
+        const { data, error } = await supabase
+            .from('hotel')
+            .select('hotel_name_cn, nearby_attractions, mall_info, city, detail_address')
+            .or(`hotel_name_cn.ilike.%${keyword}%,nearby_attractions.ilike.%${keyword}%,mall_info.ilike.%${keyword}%`)
+            .limit(20);
+
+        if (error) throw error;
+
+        const results = [];
+        const seen = new Set();
+
+        data.forEach(item => {
+            // Check hotel name
+            if (item.hotel_name_cn?.toLowerCase().includes(keyword.toLowerCase()) && !seen.has(`h-${item.hotel_name_cn}`)) {
+                results.push({ name: item.hotel_name_cn, type: '酒店', subText: item.detail_address });
+                seen.add(`h-${item.hotel_name_cn}`);
+            }
+            // Check attractions
+            if (item.nearby_attractions) {
+                item.nearby_attractions.split(/[，,;；]/).forEach(attr => {
+                    const trimmed = attr.trim();
+                    if (trimmed.toLowerCase().includes(keyword.toLowerCase()) && !seen.has(`a-${trimmed}`)) {
+                        results.push({ name: trimmed, type: '景点', subText: `${item.city}周边` });
+                        seen.add(`a-${trimmed}`);
+                    }
+                });
+            }
+            // Check mall info
+            if (item.mall_info) {
+                item.mall_info.split(/[，,;；]/).forEach(mall => {
+                    const trimmed = mall.trim();
+                    if (trimmed.toLowerCase().includes(keyword.toLowerCase()) && !seen.has(`m-${trimmed}`)) {
+                        results.push({ name: trimmed, type: '商场', subText: `${item.city}周边` });
+                        seen.add(`m-${trimmed}`);
+                    }
+                });
+            }
+        });
+
+        res.json(results.slice(0, 15));
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 });
 
 // Get hotel by ID

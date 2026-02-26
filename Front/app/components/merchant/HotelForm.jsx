@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Upload, X, Save, MapPin, Building2, Star, Calendar, Globe } from 'lucide-react';
+import { message } from 'antd';
+import { createHotel, updateHotel } from '../../api/base/hotelApi';
+import { uploadHotelImage, deleteHotelImage, getImagesByHotelId } from '../../api/base/hotelImageApi';
+import ImageUploader from '../common/ImageUploader';
 
 export default function HotelForm({ hotelId, onBack }) {
   const [currentStep, setCurrentStep] = useState(1);
@@ -22,22 +26,11 @@ export default function HotelForm({ hotelId, onBack }) {
 
   useEffect(() => {
     if (hotelId) {
-      // 模拟加载现有酒店数据
-      setFormData({
-        hotelNameCn: '北京王府井大酒店',
-        hotelNameEn: 'Beijing Wangfujing Hotel',
-        province: '北京市',
-        city: '北京市',
-        district: '东城区',
-        detailAddress: '王府井大街100号',
-        starLevel: 5,
-        openDate: '2020-01-15',
-        description: '位于北京市中心的豪华酒店，毗邻王府井步行街',
-        nearbyAttractions: '故宫、天安门广场、王府井步行街',
-        trafficInfo: '地铁1号线王府井站A口步行5分钟',
-        mallInfo: '北京apm购物中心,王府中环',
-        facilities: ['免费WiFi', '健身房', '游泳池', '餐厅'],
-        images: [],
+      // 加载现有酒店图片
+      getImagesByHotelId(hotelId).then(res => {
+        if (res.code === 200 && res.data) {
+          updateField('images', res.data);
+        }
       });
     }
   }, [hotelId]);
@@ -54,11 +47,67 @@ export default function HotelForm({ hotelId, onBack }) {
     }
   };
 
-  const handleSubmit = () => {
-    console.log('Saving hotel data:', formData);
-    // 模拟保存成功
-    alert('酒店信息保存成功！');
-    onBack();
+  const handleSubmit = async () => {
+    try {
+      // 验证必填字段
+      if (!formData.hotelNameCn || !formData.province || !formData.city || !formData.district || !formData.detailAddress || !formData.openDate) {
+        message.error('请填写所有必填字段');
+        return;
+      }
+
+      const hotelData = {
+        hotelNameCn: formData.hotelNameCn,
+        hotelNameEn: formData.hotelNameEn,
+        province: formData.province,
+        city: formData.city,
+        district: formData.district,
+        detailAddress: formData.detailAddress,
+        starLevel: formData.starLevel,
+        openDate: formData.openDate,
+        description: formData.description,
+        nearbyAttractions: formData.nearbyAttractions,
+        trafficInfo: formData.trafficInfo,
+        mallInfo: formData.mallInfo,
+      };
+
+      const res = hotelId 
+        ? await updateHotel(hotelId, hotelData)
+        : await createHotel(hotelData);
+
+      if (res.code === 200) {
+        message.success(hotelId ? '酒店信息更新成功' : '酒店创建成功');
+        onBack();
+      } else {
+        message.error(res.msg || '保存失败');
+      }
+    } catch (error) {
+      message.error('保存失败: ' + error.message);
+    }
+  };
+
+  // 处理图片上传
+  const handleImageUpload = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('sortOrder', (formData.images?.length || 0) + 1);
+
+    const res = await uploadHotelImage(hotelId, formData);
+    if (res.code === 200 && res.data) {
+      updateField('images', [...(formData.images || []), res.data]);
+    } else {
+      throw new Error(res.msg || '上传失败');
+    }
+  };
+
+  // 处理图片删除
+  const handleImageDelete = async (image) => {
+    const res = await deleteHotelImage(image.imageId);
+    if (res.code === 200) {
+      updateField('images', formData.images.filter(img => img.imageId !== image.imageId));
+      message.success('删除成功');
+    } else {
+      message.error('删除失败');
+    }
   };
 
   const facilityOptions = [
@@ -216,11 +265,19 @@ export default function HotelForm({ hotelId, onBack }) {
 
             <div>
               <label className="text-sm text-gray-700 mb-2 block">酒店图片</label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-600 hover:bg-blue-50 transition-all cursor-pointer">
-                <Upload className="w-12 h-12 text-blue-600 mx-auto mb-3" />
-                <p className="text-gray-600 mb-1">点击或拖拽上传图片</p>
-                <p className="text-sm text-gray-400">支持 JPG、PNG 格式，最多上传10张</p>
-              </div>
+              {hotelId ? (
+                <ImageUploader
+                  images={formData.images}
+                  onUpload={handleImageUpload}
+                  onDelete={handleImageDelete}
+                  maxCount={10}
+                  maxSize={10}
+                />
+              ) : (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                  <p className="text-yellow-800 text-sm">请先保存酒店基本信息后再上传图片</p>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -21,9 +21,16 @@ public class UserRegisterReq {
 
     /** 电子邮箱 */
     @NotBlank
+    private String email;
+
+    /** 手机号码 */
+    @NotBlank
     private String phone;
 
     /** 用户角色/类型 */
     @NotNull(message = "role 不能为空")
     private User.UserRoleEnum role;
+
+    /** 是否激活 */
+    private Boolean isActive = true;
 }

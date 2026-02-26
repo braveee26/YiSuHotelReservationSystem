@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Search, User, Building2, Mail, Phone, MoreVertical, Shield, Ban, CheckCircle } from 'lucide-react';
-import { Pagination } from 'antd';
+import { Pagination, message } from 'antd';
 import ConfirmModal from '../../components/merchant/ConfirmModal';
+import { getAllUsers, updateUserStatus, getUserStatistics } from '../../api/base/userApi';
 
 export default function UserManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,192 +16,114 @@ export default function UserManagement() {
   
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10); // 用户管理每页显示10条数据
-
-  // 模拟用户数据
-  const users = [
-    {
-      id: '1',
-      username: 'merchant_001',
-      email: 'merchant001@yisu.com',
-      phone: '13800138000',
-      role: 'merchant',
-      company: '北京易宿酒店管理有限公司',
-      hotelCount: 5,
-      status: 'active',
-      registerDate: '2023-06-15',
-    },
-    {
-      id: '2',
-      username: 'merchant_002',
-      email: 'merchant002@yisu.com',
-      phone: '13800138001',
-      role: 'merchant',
-      company: '上海外滩酒店集团',
-      hotelCount: 8,
-      status: 'active',
-      registerDate: '2023-08-20',
-    },
-    {
-      id: '3',
-      username: 'admin_001',
-      email: 'admin001@yisu.com',
-      phone: '13800138002',
-      role: 'admin',
-      company: '易宿平台',
-      hotelCount: 0,
-      status: 'active',
-      registerDate: '2023-01-10',
-    },
-    {
-      id: '4',
-      username: 'merchant_003',
-      email: 'merchant003@yisu.com',
-      phone: '13800138003',
-      role: 'merchant',
-      company: '深圳商旅酒店有限公司',
-      hotelCount: 3,
-      status: 'inactive',
-      registerDate: '2023-11-05',
-    },
-    // 添加更多用户数据用于分页测试
-    {
-      id: '5',
-      username: 'merchant_004',
-      email: 'merchant004@gzht.com',
-      phone: '13800138004',
-      role: 'merchant',
-      company: '广州华天酒店集团',
-      hotelCount: 12,
-      status: 'active',
-      registerDate: '2023-09-12',
-    },
-    {
-      id: '6',
-      username: 'merchant_005',
-      email: 'merchant005@cdwh.com',
-      phone: '13800138005',
-      role: 'merchant',
-      company: '成都文旅酒店管理有限公司',
-      hotelCount: 7,
-      status: 'active',
-      registerDate: '2023-10-18',
-    },
-    {
-      id: '7',
-      username: 'admin_002',
-      email: 'admin002@yisu.com',
-      phone: '13800138006',
-      role: 'admin',
-      company: '易宿平台',
-      hotelCount: 0,
-      status: 'active',
-      registerDate: '2023-02-20',
-    },
-    {
-      id: '8',
-      username: 'merchant_006',
-      email: 'merchant006@xals.com',
-      phone: '13800138007',
-      role: 'merchant',
-      company: '西安历史文化旅游发展有限公司',
-      hotelCount: 4,
-      status: 'inactive',
-      registerDate: '2023-12-01',
-    },
-    {
-      id: '9',
-      username: 'merchant_007',
-      email: 'merchant007@hzwl.com',
-      phone: '13800138008',
-      role: 'merchant',
-      company: '杭州文旅集团',
-      hotelCount: 9,
-      status: 'active',
-      registerDate: '2023-07-25',
-    },
-    {
-      id: '10',
-      username: 'merchant_008',
-      email: 'merchant008@syhd.com',
-      phone: '13800138009',
-      role: 'merchant',
-      company: '三亚海棠湾度假村有限公司',
-      hotelCount: 15,
-      status: 'active',
-      registerDate: '2023-05-30',
-    },
-    {
-      id: '11',
-      username: 'admin_003',
-      email: 'admin003@yisu.com',
-      phone: '13800138010',
-      role: 'admin',
-      company: '易宿平台技术部',
-      hotelCount: 0,
-      status: 'active',
-      registerDate: '2023-03-15',
-    },
-    {
-      id: '12',
-      username: 'merchant_009',
-      email: 'merchant009@cqlb.com',
-      phone: '13800138011',
-      role: 'merchant',
-      company: '重庆解放碑商业酒店集团',
-      hotelCount: 6,
-      status: 'inactive',
-      registerDate: '2023-11-20',
-    },
-    {
-      id: '13',
-      username: 'merchant_010',
-      email: 'merchant010@xmgl.com',
-      phone: '13800138012',
-      role: 'merchant',
-      company: '厦门鼓浪屿旅游发展有限公司',
-      hotelCount: 11,
-      status: 'active',
-      registerDate: '2023-08-05',
-    },
-    {
-      id: '14',
-      username: 'merchant_011',
-      email: 'merchant011@qdhw.com',
-      phone: '13800138013',
-      role: 'merchant',
-      company: '青岛海滨酒店管理集团',
-      hotelCount: 8,
-      status: 'active',
-      registerDate: '2023-09-30',
-    },
-    {
-      id: '15',
-      username: 'admin_004',
-      email: 'admin004@yisu.com',
-      phone: '13800138014',
-      role: 'admin',
-      company: '易宿平台运营部',
-      hotelCount: 0,
-      status: 'active',
-      registerDate: '2023-04-10',
-    },
-  ];
-
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.company.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-    return matchesSearch && matchesRole;
+  const [pageSize, setPageSize] = useState(10);
+  
+  // 数据状态
+  const [users, setUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState([]); // 存储所有用户数据
+  const [statistics, setStatistics] = useState({
+    totalUsers: 0,
+    merchants: 0,
+    admins: 0,
+    customers: 0
   });
+  const [loading, setLoading] = useState(false);
 
-  // 计算当前页显示的数据
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  // 模糊搜索防抖
+  const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
+
+  // 前端模糊搜索
+  const filteredUsers = useMemo(() => {
+    if (!searchTerm && roleFilter === 'all') {
+      return allUsers;
+    }
+    
+    return allUsers.filter(user => {
+      const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+      if (!matchesRole) return false;
+      
+      if (!searchTerm) return true;
+      
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        user.username.toLowerCase().includes(searchLower) ||
+        user.email.toLowerCase().includes(searchLower) ||
+        user.company.toLowerCase().includes(searchLower) ||
+        user.phone.includes(searchTerm)
+      );
+    });
+  }, [allUsers, searchTerm, roleFilter]);
+
+  // 获取用户统计数据
+  const fetchStatistics = async () => {
+    try {
+      const res = await getUserStatistics();
+      if (res.code === 200 && res.data) {
+        setStatistics({
+          totalUsers: res.data.totalUsers || 0,
+          merchants: res.data.merchants || 0,
+          admins: res.data.admins || 0,
+          customers: res.data.customers || 0
+        });
+      }
+    } catch (error) {
+      console.error('获取统计失败:', error);
+    }
+  };
+
+  // 获取所有用户数据（只在初始化时调用）
+  const fetchAllUsers = async () => {
+    setLoading(true);
+    try {
+      let roleParam = null;
+      if (roleFilter !== 'all') {
+        roleParam = roleFilter;
+      }
+      
+      const res = await getAllUsers(roleParam);
+      if (res.code === 200 && res.data) {
+        const processedUsers = res.data.map(user => ({
+          id: user.userId,
+          username: user.userName,
+          email: user.email || '',
+          phone: user.phone || '',
+          role: user.role || 'customer',
+          company: user.realName ? `${user.realName}(个人)` : '未设置',
+          hotelCount: 0,
+          status: user.isActive ? 'active' : 'inactive',
+          registerDate: user.createTime ? user.createTime.split('T')[0] : ''
+        }));
+        
+        setAllUsers(processedUsers);
+      }
+    } catch (error) {
+      console.error('获取用户列表失败:', error);
+      message.error('获取用户列表失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 初始化数据
+  useEffect(() => {
+    fetchStatistics();
+    fetchAllUsers();
+  }, []);
+
+  // 角色筛选变化时重新获取数据
+  useEffect(() => {
+    fetchAllUsers();
+  }, [roleFilter]);
 
   const getStatusBadge = (status) => {
     return status === 'active' ? (
@@ -217,7 +140,6 @@ export default function UserManagement() {
   };
 
   const getRoleBadge = (role) => {
-    // 客户
     if (role === 'customer') {
       return (
         <span className="flex items-center space-x-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
@@ -253,10 +175,27 @@ export default function UserManagement() {
     });
   };
 
-  const confirmToggleStatus = () => {
-    const action = statusConfirm.currentStatus === 'active' ? '禁用' : '启用';
-    if (confirm(`确定要${action}用户 ${statusConfirm.username} 吗？`)) {
-      alert(`用户 ${statusConfirm.username} 已${action}`);
+  const confirmToggleStatus = async () => {
+    try {
+      setLoading(true);
+      const newStatus = statusConfirm.currentStatus === 'active' ? false : true;
+      const response = await updateUserStatus(statusConfirm.userId, newStatus);
+      
+      if (response.code === 200) {
+        const action = statusConfirm.currentStatus === 'active' ? '禁用' : '启用';
+        message.success(`用户 ${statusConfirm.username} 已${action}成功`);
+        
+        // 重新获取用户列表以更新状态
+        await fetchAllUsers();
+        await fetchStatistics();
+      } else {
+        message.error('操作失败：' + (response.msg || '未知错误'));
+      }
+    } catch (error) {
+      console.error('更新用户状态失败:', error);
+      message.error('操作失败，请稍后重试');
+    } finally {
+      setLoading(false);
       setStatusConfirm({
         isOpen: false,
         userId: '',
@@ -284,7 +223,7 @@ export default function UserManagement() {
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <User className="w-6 h-6 text-blue-600" />
             </div>
-            <span className="text-2xl font-semibold text-gray-800">{users.length}</span>
+            <span className="text-2xl font-semibold text-gray-800">{statistics.totalUsers}</span>
           </div>
           <div className="text-gray-600">总用户数</div>
         </div>
@@ -295,7 +234,7 @@ export default function UserManagement() {
               <Building2 className="w-6 h-6 text-indigo-600" />
             </div>
             <span className="text-2xl font-semibold text-gray-800">
-              {users.filter(u => u.role === 'merchant').length}
+              {statistics.merchants}
             </span>
           </div>
           <div className="text-gray-600">商户</div>
@@ -307,7 +246,7 @@ export default function UserManagement() {
               <Shield className="w-6 h-6 text-purple-600" />
             </div>
             <span className="text-2xl font-semibold text-gray-800">
-              {users.filter(u => u.role === 'admin').length}
+              {statistics.admins}
             </span>
           </div>
           <div className="text-gray-600">管理员</div>
@@ -316,13 +255,13 @@ export default function UserManagement() {
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-2">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+              <User className="w-6 h-6 text-green-600" />
             </div>
             <span className="text-2xl font-semibold text-gray-800">
-              {users.filter(u => u.status === 'active').length}
+              {statistics.customers}
             </span>
           </div>
-          <div className="text-gray-600">活跃用户</div>
+          <div className="text-gray-600">客户</div>
         </div>
       </div>
 
@@ -332,13 +271,13 @@ export default function UserManagement() {
           {/* Search */}
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="搜索用户名、邮箱或企业..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="搜索用户名、邮箱、电话或姓名..."
+                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
               />
             </div>
           </div>
@@ -367,11 +306,9 @@ export default function UserManagement() {
 
       {/* Users Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        {/* 固定表头的表格容器 */}
         <div className="overflow-hidden">
           <div className="overflow-y-auto" style={{ maxHeight: '500px' }}>
             <table className="w-full">
-              {/* 固定表头 */}
               <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[200px]">用户信息</th>
@@ -384,9 +321,11 @@ export default function UserManagement() {
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-700 min-w-[130px]">操作</th>
                 </tr>
               </thead>
-              {/* 滚动的内容 */}
               <tbody className="divide-y divide-gray-200">
-                {paginatedUsers.map((user) => (
+                {filteredUsers.slice(
+                  (currentPage - 1) * pageSize,
+                  currentPage * pageSize
+                ).map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 align-top">
                       <div className="flex items-center space-x-3">
@@ -403,11 +342,11 @@ export default function UserManagement() {
                       <div className="space-y-1">
                         <div className="flex items-center text-body">
                           <Mail className="w-3 h-3 mr-2 text-gray-400 flex-shrink-0" />
-                          <span className="truncate max-w-[180px]" title={user.email}>{user.email}</span>
+                          <span className="truncate max-w-[180px]" title={user.email}>{user.email || '未设置'}</span>
                         </div>
                         <div className="flex items-center text-body">
                           <Phone className="w-3 h-3 mr-2 text-gray-400 flex-shrink-0" />
-                          <span>{user.phone}</span>
+                          <span>{user.phone || '未设置'}</span>
                         </div>
                       </div>
                     </td>
@@ -430,13 +369,22 @@ export default function UserManagement() {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => handleToggleStatus(user.id, user.status, user.username)}
-                          className={`btn-outline btn-sm ${
-                            user.status === 'active'
-                              ? 'btn-secondary'
-                              : 'btn-secondary'
-                          }`}
+                          className={user.status === 'active' ? 'btn-status-disable btn-sm' : 'btn-status-enable btn-sm'}
+                          style={{ padding: '5px 6px' }}
+                          title={user.status === 'active' ? '禁用用户' : '启用用户'}
+                          disabled={loading}
                         >
-                          {user.status === 'active' ? '禁用' : '启用'}
+                          {user.status === 'active' ? (
+                            <>
+                              <Ban className="w-3 h-3 inline mr-1" />
+                              禁用
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="w-3 h-3 inline mr-1" />
+                              启用
+                            </>
+                          )}
                         </button>
                       </div>
                     </td>
@@ -447,11 +395,21 @@ export default function UserManagement() {
           </div>
           
           {/* 空状态 */}
-          {filteredUsers.length === 0 && (
+          {filteredUsers.length === 0 && !loading && (
             <div className="text-center py-12">
               <User className="mx-auto w-12 h-12 text-gray-300 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">暂无符合条件的用户</h3>
               <p className="text-gray-500">请调整筛选条件</p>
+            </div>
+          )}
+          
+          {/* 简约加载状态 */}
+          {loading && (
+            <div className="fixed inset-0 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-4 shadow-lg flex items-center space-x-3">
+                <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-gray-600 text-sm">加载中...</span>
+              </div>
             </div>
           )}
         </div>
@@ -466,10 +424,6 @@ export default function UserManagement() {
               onChange={(page, size) => {
                 setCurrentPage(page);
                 setPageSize(size);
-                // 筛选条件改变时重置到第一页
-                if (page !== currentPage) {
-                  setCurrentPage(1);
-                }
               }}
               showSizeChanger
               showQuickJumper

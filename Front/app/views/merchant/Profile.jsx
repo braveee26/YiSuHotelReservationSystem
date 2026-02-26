@@ -1,24 +1,119 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, Mail, Phone, Building2, Calendar, Save, Camera, Shield, CreditCard, Hotel, CheckCircle, Clock, XCircle, Award, TrendingUp } from 'lucide-react';
+import { User, Mail, Phone, Building2, Calendar, Save, Camera, Shield, CreditCard, Hotel, CheckCircle, Clock, XCircle, Award, TrendingUp, Loader } from 'lucide-react';
 import ConfirmModal from '../../components/merchant/ConfirmModal';
+import { getCurrentUserInfo } from '../../api/base/userApi';
+import { getMerchantHotelStats } from '../../api/base/hotelApi';
+import { useUserStore } from '../../store/useUserStore';
+import { message } from 'antd';
 
 export default function Profile() {
   const [currentUser, setCurrentUser] = useState({});
+  const [loading, setLoading] = useState(true);
   const fileInputRef = useRef(null);
+  const { updateUserInfo } = useUserStore();
 
   // 模拟从数据库获取的用户数据
   const [userData, setUserData] = useState({
-    user_id: '100001',
+    user_id: '',
     user_name: '',
-    role: 'merchant', // 'merchant' or 'admin'
-    avatar: '', // 用户头像 URL
-    real_name: '张晓明',
-    phone: '13800138000',
-    email: 'zhangxm@yisu.com',
-    id_card: '110101199001011234', // 身份证号（脱敏显示）
-    create_time: '2023-06-15 10:30:00',
-    update_time: '2024-02-04 14:20:00',
+    role: 'merchant',
+    avatar: '',
+    real_name: '',
+    phone: '',
+    email: '',
+    id_card: '',
+    create_time: '',
+    update_time: '',
   });
+
+  // 获取当前用户信息
+  const fetchCurrentUserInfo = async () => {
+    try {
+      setLoading(true);
+      const response = await getCurrentUserInfo();
+      
+      if (response && response.code === 200) {
+        const userInfo = response.data;
+        
+        // 更新用户数据
+        setUserData({
+          user_id: userInfo.userId || '',
+          user_name: userInfo.userName || '',
+          role: userInfo.role?.toLowerCase() || 'merchant',
+          avatar: userInfo.avatar || '',
+          real_name: userInfo.realName || '',
+          phone: userInfo.phone || '',
+          email: userInfo.email || '',
+          id_card: userInfo.idCard || '',
+          create_time: userInfo.createTime || '',
+          update_time: userInfo.updateTime || '',
+        });
+        
+        // 更新全局用户状态
+        updateUserInfo({
+          username: userInfo.userName,
+          role: userInfo.role?.toLowerCase(),
+          userId: userInfo.userId,
+          realName: userInfo.realName,
+          avatar: userInfo.avatar
+        });
+        
+        // 如果是商户角色，获取酒店统计数据
+        if (userInfo.role?.toLowerCase() === 'merchant' && userInfo.userId) {
+          fetchHotelStats(userInfo.userId);
+        }
+        
+      } else {
+        message.error(response?.msg || '获取用户信息失败');
+      }
+    } catch (error) {
+      console.error('获取用户信息失败:', error);
+      message.error('获取用户信息失败，请稍后重试');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 获取商户酒店统计数据
+  const fetchHotelStats = async (merchantId) => {
+    try {
+      setStatsLoading(true);
+      const response = await getMerchantHotelStats(merchantId);
+      
+      if (response && response.code === 200) {
+        const stats = response.data || {};
+        setHotelStats({
+          total: stats.total || 0,
+          approved: stats.approved || 0,
+          auditing: stats.auditing || 0,
+          rejected: stats.rejected || 0,
+          online: stats.online || 0,
+        });
+      } else {
+        console.warn('获取酒店统计数据失败:', response?.msg);
+        // 使用默认值
+        setHotelStats({
+          total: 0,
+          approved: 0,
+          auditing: 0,
+          rejected: 0,
+          online: 0,
+        });
+      }
+    } catch (error) {
+      console.error('获取酒店统计数据失败:', error);
+      // 使用默认值
+      setHotelStats({
+        total: 0,
+        approved: 0,
+        auditing: 0,
+        rejected: 0,
+        online: 0,
+      });
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
   // 只在客户端环境访问 localStorage
   useEffect(() => {
@@ -28,31 +123,39 @@ export default function Profile() {
         try {
           const user = JSON.parse(storedUser);
           setCurrentUser(user);
-          setUserData(prev => ({
-            ...prev,
-            user_name: user.username || 'merchant001',
-            role: user.role || 'merchant'
-          }));
         } catch (error) {
           console.error('解析用户信息失败:', error);
         }
       }
     }
+    
+    // 获取当前用户信息
+    fetchCurrentUserInfo();
   }, []);
 
   // 商户的酒店统计数据（仅商户角色显示）
   const [hotelStats, setHotelStats] = useState({
-    total: 12,
-    approved: 8,
-    auditing: 2,
-    rejected: 1,
-    online: 6,
+    total: 0,
+    approved: 0,
+    auditing: 0,
+    rejected: 0,
+    online: 0,
   });
+  const [statsLoading, setStatsLoading] = useState(false);
 
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState(userData.avatar);
+  const [avatarPreview, setAvatarPreview] = useState('');
 
   const updateField = (field, value) => {
+    // 对身份证号进行特殊处理，只允许数字和X
+    if (field === 'id_card') {
+      // 只允许输入数字和X，且长度不超过18位
+      const cleanedValue = value.replace(/[^0-9Xx]/g, '').toUpperCase();
+      if (cleanedValue.length <= 18) {
+        setUserData({ ...userData, [field]: cleanedValue });
+      }
+      return;
+    }
     setUserData({ ...userData, [field]: value });
   };
 
@@ -81,13 +184,15 @@ export default function Profile() {
     if (avatarPreview) {
       setUserData({ ...userData, avatar: avatarPreview });
     }
-    alert('个人信息更新成功！');
-  };
-
-  // 脱敏身份证号
-  const maskIdCard = (idCard) => {
-    if (!idCard || idCard.length < 18) return idCard;
-    return idCard.substring(0, 6) + '********' + idCard.substring(14);
+    
+    // 验证身份证号格式
+    if (userData.id_card && userData.id_card.length !== 18) {
+      message.error('请输入完整的18位身份证号码');
+      return;
+    }
+    
+    message.success('个人信息更新成功！');
+    setShowSaveConfirm(false);
   };
 
   const getRoleName = (role) => {
@@ -101,6 +206,18 @@ export default function Profile() {
   const getRoleBadgeColor = (role) => {
     return role === 'merchant' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700';
   };
+
+  // 加载状态显示
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <Loader className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">正在加载用户信息...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -164,7 +281,13 @@ export default function Profile() {
             <div className="flex items-center justify-between mb-2">
               <Hotel className="w-8 h-8 text-blue-600" />
             </div>
-            <div className="text-3xl font-bold text-blue-700 mb-1">{hotelStats.total}</div>
+            <div className="text-3xl font-bold text-blue-700 mb-1">
+              {statsLoading ? (
+                <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                hotelStats.total
+              )}
+            </div>
             <div className="text-sm text-blue-600 font-medium">酒店总数</div>
           </div>
 
@@ -172,7 +295,13 @@ export default function Profile() {
             <div className="flex items-center justify-between mb-2">
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
-            <div className="text-3xl font-bold text-green-700 mb-1">{hotelStats.approved}</div>
+            <div className="text-3xl font-bold text-green-700 mb-1">
+              {statsLoading ? (
+                <div className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                hotelStats.approved
+              )}
+            </div>
             <div className="text-sm text-green-600 font-medium">已通过</div>
           </div>
 
@@ -180,7 +309,13 @@ export default function Profile() {
             <div className="flex items-center justify-between mb-2">
               <Clock className="w-8 h-8 text-orange-600" />
             </div>
-            <div className="text-3xl font-bold text-orange-700 mb-1">{hotelStats.auditing}</div>
+            <div className="text-3xl font-bold text-orange-700 mb-1">
+              {statsLoading ? (
+                <div className="w-8 h-8 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                hotelStats.auditing
+              )}
+            </div>
             <div className="text-sm text-orange-600 font-medium">审核中</div>
           </div>
 
@@ -188,7 +323,13 @@ export default function Profile() {
             <div className="flex items-center justify-between mb-2">
               <XCircle className="w-8 h-8 text-red-600" />
             </div>
-            <div className="text-3xl font-bold text-red-700 mb-1">{hotelStats.rejected}</div>
+            <div className="text-3xl font-bold text-red-700 mb-1">
+              {statsLoading ? (
+                <div className="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                hotelStats.rejected
+              )}
+            </div>
             <div className="text-sm text-red-600 font-medium">已驳回</div>
           </div>
 
@@ -196,7 +337,13 @@ export default function Profile() {
             <div className="flex items-center justify-between mb-2">
               <TrendingUp className="w-8 h-8 text-cyan-600" />
             </div>
-            <div className="text-3xl font-bold text-cyan-700 mb-1">{hotelStats.online}</div>
+            <div className="text-3xl font-bold text-cyan-700 mb-1">
+              {statsLoading ? (
+                <div className="w-8 h-8 border-2 border-cyan-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                hotelStats.online
+              )}
+            </div>
             <div className="text-sm text-cyan-600 font-medium">已上线</div>
           </div>
         </div>
@@ -308,10 +455,20 @@ export default function Profile() {
                 </label>
                 <input
                   type="text"
-                  value={maskIdCard(userData.id_card)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
-                  disabled
+                  value={userData.id_card}
+                  onChange={(e) => updateField('id_card', e.target.value)}
+                  placeholder="请输入18位身份证号码"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                 />
+                {userData.id_card && (
+                  <div className="mt-1 text-xs text-gray-500">
+                    {userData.id_card.length === 18 ? (
+                      <span className="text-green-600">✓ 格式正确</span>
+                    ) : (
+                      <span className="text-orange-600">请输入完整的18位身份证号码</span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

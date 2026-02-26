@@ -9,6 +9,30 @@ export default defineConfig({
       '/user': {
         target: 'http://localhost:8080',
         changeOrigin: true,
+      },
+      '/hotel': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/room-type': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/hotel-image': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/hotel-attribute': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/hotel-attr-relation': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      '/room-image': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
       }
     }
   }

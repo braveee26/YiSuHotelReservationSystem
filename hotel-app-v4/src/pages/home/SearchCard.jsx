@@ -1,262 +1,283 @@
-import Taro from '@tarojs/taro'
-import { useState } from 'react'
-import { View, Text, Input } from '@tarojs/components'
-import { Button, Popup, Calendar } from '@taroify/core'
-import { LocationOutlined, ArrowRight, ArrowDown } from '@taroify/icons'
-import useSearchStore from '../../store/search'
-import './SearchCard.scss'
+import Taro from "@tarojs/taro";
+import { useState, useMemo } from "react";
+import { View, Text } from "@tarojs/components";
+import { Button, Popup, Calendar, Cascader } from "@taroify/core";
+import { Search, Aim, ArrowDown } from "@taroify/icons";
+import useSearchStore from "../../store/search";
+import { regions } from "../../data/regions";
+import "./SearchCard.scss";
 
-export default function SearchCard({ onSearch }) {
-  const { searchParams, updateSearchParam } = useSearchStore()
-  const [showGuestPicker, setShowGuestPicker] = useState(false)
-  const [showCalendar, setShowCalendar] = useState(false)
-  const [showCityPicker, setShowCityPicker] = useState(false)
-  const [calendarSelection, setCalendarSelection] = useState([new Date(searchParams.checkIn), new Date(searchParams.checkOut)])
-  
-  // Common cities list
-  const cityList = ['北京', '上海', '广州', '深圳', '杭州', '成都', '重庆', '武汉', '西安', '南京', '苏州', '天津', '大阪', '东京']
-  
-  // Date helpers
-  const formatDate = (dateStr) => {
-    const date = new Date(dateStr)
-    return `${date.getMonth() + 1}月${date.getDate()}日`
-  }
-  
-  const getDayOfWeek = (dateStr) => {
-    const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-    const day = new Date(dateStr).getDay()
-    return days[isNaN(day) ? 0 : day]
-  }
+export default function SearchCard({ onSearch = () => { } }) {
+  const { searchParams, setSearchParams, updateSearchParam } = useSearchStore();
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [showCityPicker, setShowCityPicker] = useState(false);
+  const [showStarPicker, setShowStarPicker] = useState(false);
 
-  const handleDateChange = () => {
-    // Initialize calendar selection with current params when opening
-    if (searchParams.checkIn && searchParams.checkOut) {
-      setCalendarSelection([new Date(searchParams.checkIn), new Date(searchParams.checkOut)])
+  // 临时状态，用于日历弹窗内的选择
+  const [tempDateRange, setTempDateRange] = useState([
+    new Date(searchParams.checkIn.replace(/-/g, '/')),
+    new Date(searchParams.checkOut.replace(/-/g, '/')),
+  ]);
+
+  const quickFilterTags = [
+    "洗衣机", "免费WIFI", "免费停车", "SPA", "泳池", "送餐机器人",
+  ];
+
+  const starOptions = [
+    { label: "不限星级", value: "" },
+    { label: "五星级", value: "5" },
+    { label: "四星级", value: "4" },
+    { label: "三星级", value: "3" },
+    { label: "二星级", value: "2" },
+    { label: "一星级", value: "1" },
+  ];
+
+  // 100% 规避时区偏移的显示逻辑：直接字符串切割
+  const formatDateDisplay = (dateStr) => {
+    if (!dateStr || typeof dateStr !== 'string') return "";
+    const parts = dateStr.split("-"); // yyyy-mm-dd
+    if (parts.length < 3) return dateStr;
+    return `${parts[1]}月${parts[2]}日`;
+  };
+
+  const getDayOfWeekShort = (dateStr) => {
+    if (!dateStr || typeof dateStr !== 'string') return "";
+    const date = new Date(dateStr.replace(/-/g, '/'));
+    if (isNaN(date.getTime())) return "";
+    const days = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+    return days[date.getDay()];
+  };
+
+
+
+
+  const handleCalendarConfirm = (dateRange) => {
+    if (!dateRange || dateRange.length < 2) return
+    const [start, end] = dateRange
+
+    const formatToYMD = (date) => {
+      const d = new Date(date);
+      const y = d.getFullYear();
+      const m = (d.getMonth() + 1).toString().padStart(2, '0');
+      const day = d.getDate().toString().padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+
+    const checkInStr = formatToYMD(start);
+    const checkOutStr = formatToYMD(end);
+    const nights = Math.max(
+      1,
+      Math.round((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)),
+    );
+
+    setSearchParams({
+      checkIn: checkInStr,
+      checkOut: checkOutStr,
+      nights: nights
+    });
+
+    Taro.showToast({ title: '修改日期成功', icon: 'success' });
+    setShowCalendar(false);
+  };
+
+  const handleCitySelect = (values) => {
+    if (values && values.length > 0) {
+      const selectedCity = values[values.length - 1];
+      updateSearchParam("city", selectedCity);
+      if (values.length >= 2) {
+        setShowCityPicker(false);
+        Taro.showToast({ title: `已选: ${selectedCity}`, icon: "none" });
+      }
     }
-    setShowCalendar(true)
-  }
+  };
 
-  const onCalendarSelect = (value) => {
-    if (value) {
-      setCalendarSelection(value)
-    }
-  }
+  const handleLocationClick = () => {
+    Taro.showLoading({ title: "识别位置中...", mask: true });
+    Taro.getLocation({
+      success: () => {
+        setTimeout(() => {
+          Taro.hideLoading();
+          updateSearchParam("city", "南京市");
+          Taro.showToast({ title: "自动识别: 南京", icon: "success" });
+        }, 800);
+      },
+      fail: () => {
+        setTimeout(() => {
+          Taro.hideLoading();
+          updateSearchParam("city", "南京市");
+          Taro.showToast({ title: "环境受限，已推荐南京", icon: "none" });
+        }, 1000);
+      }
+    });
+  };
 
-  const handleCalendarConfirm = () => {
-    onCalendarConfirm(calendarSelection)
-  }
-
-  const onCalendarConfirm = (value) => {
-    console.log('Calendar value:', value)
-    if (value && value.length === 2 && value[0] && value[1]) {
-      const [start, end] = value
-      const checkIn = new Date(start)
-      const checkOut = new Date(end)
-      const nights = Math.max(1, Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24)))
-      
-      const checkInStr = checkIn.toISOString().split('T')[0]
-      const checkOutStr = checkOut.toISOString().split('T')[0]
-      
-      updateSearchParam('checkIn', checkInStr)
-      updateSearchParam('checkOut', checkOutStr)
-      updateSearchParam('nights', nights)
-    }
-    setShowCalendar(false)
-  }
-  
-  const handleCitySelect = (city) => {
-    updateSearchParam('city', city)
-    setShowCityPicker(false)
-  }
-  
-  // Calculate nights for button text
-  const getNightsText = () => {
-    if (calendarSelection && calendarSelection.length === 2 && calendarSelection[0] && calendarSelection[1]) {
-      const start = new Date(calendarSelection[0])
-      const end = new Date(calendarSelection[1])
-      const nights = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)))
-      return `完成（${nights}晚）`
-    }
-    return '完成'
-  }
+  const navigateToSearch = () => {
+    // 携带核心参数跳转，支持推荐逻辑
+    const query = new URLSearchParams({
+      city: searchParams.city || "",
+      checkIn: searchParams.checkIn,
+      checkOut: searchParams.checkOut,
+      nights: searchParams.nights,
+      keyword: searchParams.keyword || ""
+    }).toString();
+    Taro.navigateTo({ url: `/pages/hotel/list/index?${query}` });
+  };
 
   return (
-    <View className="search-card">
-      {/* Business Type Tabs */}
-      <View className="business-tabs">
-        {['国内', '海外', '钟点房', '民宿'].map((type) => (
-          <View 
-            key={type}
-            className={`tab-item ${searchParams.businessType === type ? 'active' : ''}`}
-            onClick={() => updateSearchParam('businessType', type)}
+    <View className="search-card-upgraded">
+      <View className="search-top-row">
+        <View className="city-selector" onClick={() => setShowCityPicker(true)}>
+          <Text className="city-name">{searchParams.city || "选择城市"}</Text>
+          <ArrowDown size="12" color="#64748b" style={{ marginLeft: "4rpx" }} />
+        </View>
+        <View className="divider-v" />
+        <View className="star-trigger" onClick={() => setShowStarPicker(true)}>
+          <Text className="label">选择星级</Text>
+          <View className="val-box">
+            <Text className="val">{searchParams.stars ? `${searchParams.stars}星` : "不限"}</Text>
+            <ArrowDown size="10" color="#94a3b8" />
+          </View>
+        </View>
+        <View className="divider-v" />
+        <View className="keyword-entry" onClick={navigateToSearch}>
+          <Search size="16" color="#666" />
+          <Text className="placeholder">{searchParams.keyword || "关键字/酒店/地标"}</Text>
+        </View>
+        <View className="location-action" onClick={handleLocationClick}>
+          <Aim size="20" color="#385e72" />
+        </View>
+      </View>
+
+      <View className="date-row" onClick={() => {
+        setTempDateRange([
+          new Date(searchParams.checkIn.replace(/-/g, '/')),
+          new Date(searchParams.checkOut.replace(/-/g, '/'))
+        ]);
+        setShowCalendar(true);
+      }}>
+        <View className="date-box left">
+          <Text className="label">入住日期</Text>
+          <View className="date-val">
+            <Text className="num">{formatDateDisplay(searchParams.checkIn)}</Text>
+            <Text className="week">{getDayOfWeekShort(searchParams.checkIn)}</Text>
+          </View>
+        </View>
+        <View className="night-info">
+          <View className="badge">{searchParams.nights}晚</View>
+        </View>
+        <View className="date-box right">
+          <Text className="label">离店日期</Text>
+          <View className="date-val">
+            <Text className="num">{formatDateDisplay(searchParams.checkOut)}</Text>
+            <Text className="week">{getDayOfWeekShort(searchParams.checkOut)}</Text>
+          </View>
+        </View>
+      </View>
+
+      <View className="tags-row">
+        {quickFilterTags.map((tag) => (
+          <View
+            key={tag}
+            className={`tag-item ${(searchParams.tags || []).includes(tag) ? "active" : ""}`}
+            onClick={() => {
+              const currentTags = searchParams.tags || [];
+              const newTags = currentTags.includes(tag)
+                ? currentTags.filter((t) => t !== tag)
+                : [...currentTags, tag];
+              updateSearchParam("tags", newTags);
+            }}
           >
-            <Text className="text">{type}</Text>
+            {tag}
           </View>
         ))}
       </View>
 
-      {/* City & Location */}
-      <View className="location-section">
-        <View className="city-box">
-          <LocationOutlined />
-          <Input 
-            className="city-input"
-            placeholder="输入城市名称"
-            value={searchParams.city}
-            onInput={(e) => updateSearchParam('city', e.detail.value)}
-            style={{ flex: 1, marginLeft: '8px' }}
-          />
-        </View>
-        <View className="input-box">
-           <Input 
-             className="search-input"
-             placeholder="搜索酒店名称/地址"
-             value={searchParams.keyword}
-             onInput={(e) => updateSearchParam('keyword', e.detail.value)}
-           />
-        </View>
+      <View className="search-btn-container">
+        <Button
+          color="#385e72"
+          className="search-btn-main"
+          onClick={navigateToSearch}
+        >
+          立即预订
+        </Button>
       </View>
 
-      {/* Date Selection */}
-      <View className="date-section border-bottom" onClick={handleDateChange}>
-        <View className="date-item">
-          <Text className="label">入住</Text>
-          <View className="date-val">
-            <Text className="date">{formatDate(searchParams.checkIn)}</Text>
-            <Text className="week">{getDayOfWeek(searchParams.checkIn)}</Text>
-          </View>
-        </View>
-        <View className="nights">
-          <Text className="text">共{searchParams.nights}晚</Text>
-        </View>
-        <View className="date-item">
-          <Text className="label">离店</Text>
-          <View className="date-val">
-             <Text className="date">{formatDate(searchParams.checkOut)}</Text>
-             <Text className="week">{getDayOfWeek(searchParams.checkOut)}</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Guests */}
-      <View className="guest-section border-bottom" onClick={() => setShowGuestPicker(true)}>
-        <Text className="val">
-          {searchParams.rooms}间 · {searchParams.adults}成人 · {searchParams.children}儿童
-        </Text>
-        <ArrowRight color="#999" />
-      </View>
-
-      {/* Search Button */}
-      <Button 
-        block 
-        color="#385e72" 
-        className="search-btn"
-        onClick={() => onSearch && onSearch(searchParams)}
-      >
-        搜索酒店
-      </Button>
-
-      {/* City Picker Popup */}
-      <Popup 
-        open={showCityPicker} 
-        rounded 
-        placement="bottom" 
-        onClose={() => setShowCityPicker(false)}
-      >
-        <Popup.Close />
-        <View className="picker-content">
-          <View className="picker-header">选择城市</View>
-          <View style={{ display: 'flex', flexWrap: 'wrap', padding: '10px' }}>
-            {cityList.map(city => (
-              <View 
-                key={city} 
-                style={{ 
-                  padding: '8px 16px', 
-                  margin: '5px', 
-                  backgroundColor: searchParams.city === city ? '#385e72' : '#f5f5f5',
-                  color: searchParams.city === city ? '#fff' : '#333',
-                  borderRadius: '20px',
-                  fontSize: '14px'
-                }}
-                onClick={() => handleCitySelect(city)}
-              >
-                {city}
-              </View>
-            ))}
-          </View>
+      <Popup open={showCityPicker} rounded placement="bottom" onClose={() => setShowCityPicker(false)}>
+        <View className="cascader-wrap">
+          <Cascader placeholder="请选择城市" onSelect={handleCitySelect} options={regions}>
+            <Cascader.Header>选择城市</Cascader.Header>
+          </Cascader>
         </View>
       </Popup>
 
-      {/* Calendar Popup */}
-      <Popup 
-        open={showCalendar} 
-        rounded 
-        placement="bottom" 
-        style={{ height: '80vh' }}
-        onClose={() => setShowCalendar(false)}
-      >
-        <Popup.Close />
-        <View className="calendar-popup">
-          <View className="calendar-header">
-            <Text className="calendar-title">选择入住日期</Text>
+      <Popup open={showStarPicker} rounded placement="bottom" onClose={() => setShowStarPicker(false)}>
+        <View className="star-picker-content">
+          <View className="picker-header">
+            <Text className="title">选择星级</Text>
+            <Text className="close-btn" onClick={() => setShowStarPicker(false)}>✕</Text>
           </View>
-          <Calendar 
-            type="range"
-            minDate={new Date()}
-            maxDate={new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)}
-            defaultValue={[new Date(searchParams.checkIn), new Date(searchParams.checkOut)]}
-            onSelect={onCalendarSelect}
-            onConfirm={onCalendarConfirm} // Keep default confirm for potential internal logic
-          >
-             <Calendar.Footer>
-              <View style={{ padding: '10px 16px' }}>
-                <Button 
-                  block 
-                  color="#1989fa" 
-                  shape="round"
-                  onClick={handleCalendarConfirm}
+          <View className="star-options-list">
+            {starOptions.map((opt) => {
+              const isActive = searchParams.stars === opt.value;
+              return (
+                <View
+                  key={opt.value}
+                  className={`star-option-item ${isActive ? 'active' : ''}`}
+                  onClick={() => {
+                    updateSearchParam("stars", opt.value);
+                    setTimeout(() => setShowStarPicker(false), 200);
+                  }}
                 >
-                  {getNightsText()}
-                </Button>
-              </View>
-             </Calendar.Footer>
-          </Calendar>
+                  <View className="option-left">
+                    {opt.value ? (
+                      <Text className="stars-icon">{'★'.repeat(Number(opt.value))}</Text>
+                    ) : null}
+                    <Text className="label">{opt.label}</Text>
+                  </View>
+                  {isActive && <Text className="check-icon">✓</Text>}
+                </View>
+              );
+            })}
+          </View>
         </View>
       </Popup>
 
-      {/* Guest Picker Popup */}
-      <Popup 
-        open={showGuestPicker} 
-        rounded 
-        placement="bottom" 
-        onClose={() => setShowGuestPicker(false)}
+      <Calendar
+        type="range"
+        poppable
+        showPopup={showCalendar}
+        showConfirm={false}
+        onClose={() => setShowCalendar(false)}
+        value={tempDateRange}
+        onChange={(val) => setTempDateRange(val)}
+        onConfirm={handleCalendarConfirm}
+        minDate={new Date()}
+        activeColor="#385e72"
+        rowHeight={56}
+        formatter={(day) => {
+    if (day.type === 'start' || day.type === 'end') {
+      day.bottomInfo = ''; 
+    }
+    return day;
+  }}
+        style={{
+        "--calendar-day-font-size": "14px",           // 日期数字字体大小
+        "--calendar-header-title-font-size": "16px",  // 月份标题字体大小
+        "--calendar-week-day-font-size": "12px",      // 周几标题字体大小
+        "--van-calendar-day-height": "56px",           // 日期高度
+        "--calendar-day-height": "56px",
+        "--calendar-month-title-font-size": "14px",
+        "--calendar-bottom-info-font-size": "10px",
+          }}
       >
-        <Popup.Close />
-        <View className="picker-content">
-           <View className="picker-header">选择人数</View>
-           {['rooms', 'adults', 'children'].map(key => (
-             <View key={key} className="counter-row">
-               <Text className="label">
-                 {key === 'rooms' ? '房间数' : key === 'adults' ? '成人' : '儿童'}
-               </Text>
-               <View className="stepper">
-                 <Button 
-                   size="small" 
-                   disabled={searchParams[key] <= 0}
-                   onClick={() => updateSearchParam(key, Math.max(0, searchParams[key] - 1))}
-                 >-</Button>
-                 <Text className="count">{searchParams[key]}</Text>
-                 <Button 
-                   size="small" 
-                   onClick={() => updateSearchParam(key, searchParams[key] + 1)}
-                 >+</Button>
-               </View>
-             </View>
-           ))}
-           <Button block color="#385e72" onClick={() => setShowGuestPicker(false)} className="confirm-btn">确定</Button>
+        {/* 自定义头部 */}
+    <Calendar.Header>
+        <View style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px" }}>
+            <Text style={{ fontSize: "16px", fontWeight: "bold" }}>选择日期</Text>
+            <Text style={{ color: "#385e72", fontSize: "14px" }} onClick={() => handleCalendarConfirm(tempDateRange)}>确定</Text>
         </View>
-      </Popup>
+    </Calendar.Header>
+      </Calendar>
     </View>
-  )
+  );
 }
-

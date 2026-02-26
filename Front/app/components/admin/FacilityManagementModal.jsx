@@ -1,19 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Edit, Trash2, Save, Tag } from 'lucide-react';
-import { Pagination } from 'antd';
+import { Pagination, message } from 'antd';
 import ConfirmModal from '../../components/merchant/ConfirmModal';
+import { getAllAttributes, createAttribute, updateAttribute, deleteAttribute } from '../../api/base/hotelAttributeApi';
 
 export default function FacilityManagementModal({ isOpen, onClose }) {
-  const [facilities, setFacilities] = useState([
-    { id: 1, name: '免费WiFi', description: '提供免费无线网络服务' },
-    { id: 2, name: '免费停车场', description: '提供免费停车服务' },
-    { id: 3, name: '健身房', description: '配备完善的健身设施' },
-    { id: 4, name: '游泳池', description: '室内外游泳池设施' },
-    { id: 5, name: '餐厅', description: '酒店内设有多家餐厅' },
-    { id: 6, name: '会议室', description: '提供商务会议场地' },
-    { id: 7, name: '洗衣服务', description: '提供洗衣和干洗服务' },
-    { id: 8, name: '行李寄存', description: '提供行李寄存服务' },
-  ]);
+  const [facilities, setFacilities] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // 从后端加载设施数据
+  const loadFacilities = async () => {
+    setLoading(true);
+    try {
+      const res = await getAllAttributes();
+      if (res.code === 200 && res.data) {
+        setFacilities(res.data.map(attr => ({
+          id: attr.attrId,
+          name: attr.attrName || '',
+          description: attr.attrDesc || '',
+        })));
+      }
+    } catch (err) {
+      message.error('加载设施列表失败');
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      loadFacilities();
+    }
+  }, [isOpen]);
   
   const [editingId, setEditingId] = useState(null);
   const [newFacility, setNewFacility] = useState({ name: '', description: '' });
@@ -49,20 +66,23 @@ export default function FacilityManagementModal({ isOpen, onClose }) {
   };
   
   // 确认添加设施
-  const confirmAddFacility = () => {
-    const facility = {
-      id: Date.now(),
-      name: addConfirm.facilityName,
-      description: addConfirm.facilityDescription
-    };
-    
-    setFacilities([...facilities, facility]);
-    setNewFacility({ name: '', description: '' });
-    setAddConfirm({
-      isOpen: false,
-      facilityName: '',
-      facilityDescription: ''
-    });
+  const confirmAddFacility = async () => {
+    try {
+      const res = await createAttribute({
+        attrName: addConfirm.facilityName,
+        attrDesc: addConfirm.facilityDescription,
+      });
+      if (res.code === 200) {
+        message.success('设施添加成功');
+        setNewFacility({ name: '', description: '' });
+        setAddConfirm({ isOpen: false, facilityName: '', facilityDescription: '' });
+        loadFacilities();
+      } else {
+        message.error(res.msg || '添加失败');
+      }
+    } catch (err) {
+      message.error('添加失败，请检查网络连接');
+    }
   };
   
   // 取消添加设施
@@ -84,20 +104,27 @@ export default function FacilityManagementModal({ isOpen, onClose }) {
   };
 
   // 保存编辑
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     if (!editData.name.trim()) {
-      alert('请输入设施名称');
+      message.warning('请输入设施名称');
       return;
     }
-    
-    setFacilities(facilities.map(facility => 
-      facility.id === editingId 
-        ? { ...facility, name: editData.name.trim(), description: editData.description.trim() }
-        : facility
-    ));
-    
-    setEditingId(null);
-    setEditData({ name: '', description: '' });
+    try {
+      const res = await updateAttribute(editingId, {
+        attrName: editData.name.trim(),
+        attrDesc: editData.description.trim(),
+      });
+      if (res.code === 200) {
+        message.success('设施修改成功');
+        setEditingId(null);
+        setEditData({ name: '', description: '' });
+        loadFacilities();
+      } else {
+        message.error(res.msg || '修改失败');
+      }
+    } catch (err) {
+      message.error('修改失败，请检查网络连接');
+    }
   };
 
   // 取消编辑
@@ -116,13 +143,19 @@ export default function FacilityManagementModal({ isOpen, onClose }) {
   };
 
   // 确认删除
-  const confirmDelete = () => {
-    setFacilities(facilities.filter(facility => facility.id !== deleteConfirm.facilityId));
-    setDeleteConfirm({
-      isOpen: false,
-      facilityId: '',
-      facilityName: '',
-    });
+  const confirmDelete = async () => {
+    try {
+      const res = await deleteAttribute(deleteConfirm.facilityId);
+      if (res.code === 200) {
+        message.success('设施已删除');
+        loadFacilities();
+      } else {
+        message.error(res.msg || '删除失败');
+      }
+    } catch (err) {
+      message.error('删除失败，请检查网络连接');
+    }
+    setDeleteConfirm({ isOpen: false, facilityId: '', facilityName: '' });
   };
 
   // 取消删除

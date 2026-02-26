@@ -1,0 +1,52 @@
+.custom-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #fff;
+    padding-top: env(safe-area-inset-top);
+    height: calc(88rpx + env(safe-area-inset-top));
+    width: 100vw;
+    box-sizing: border-box;
+
+    &.transparent {
+        background: transparent;
+    }
+
+    .navbar-inner {
+        height: 88rpx;
+        display: flex;
+        align-items: center;
+        padding: 0 32rpx;
+        position: relative;
+    }
+
+    .back-btn {
+        width: 60rpx;
+        height: 60rpx;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        position: absolute;
+        left: 24rpx;
+        z-index: 10;
+    }
+
+    .title-box {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        .title {
+            font-size: 32rpx;
+            font-weight: 600;
+            color: #333;
+        }
+    }
+
+    .placeholder {
+        width: 60rpx;
+    }
+}

@@ -1,72 +1,173 @@
-import React, { useState } from 'react'
-import { View, Text } from '@tarojs/components'
-import { Button, Field, Cell } from '@taroify/core'
 import Taro from '@tarojs/taro'
+import { useState } from 'react'
+import { View, Text, Image } from '@tarojs/components'
+import { Button, Input } from '@taroify/core'
+import { PhoneOutlined, LockOutlined, CommentOutlined } from '@taroify/icons'
+import logoSvg from '../../../assets/login/logo.svg'
+import { register } from '../../../services/api'
+import CustomNavBar from '../../../components/CustomNavBar'
 import './index.scss'
 
-const Register = () => {
+export default function Register() {
   const [phone, setPhone] = useState('')
-  const [code, setCode] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [code, setCode] = useState('')
+  const [countdown, setCountdown] = useState(0)
 
-  const handleRegister = () => {
-    if (!phone || !code || !password) {
-      Taro.showToast({ title: '请填写完整信息', icon: 'none' })
-      return
+  const handleSendCode = () => {
+    if (phone.length === 11) {
+      setCountdown(60)
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+      Taro.showToast({ title: '验证码已发送 (123456)', icon: 'none' })
+    } else {
+      Taro.showToast({ title: '请输入正确的手机号', icon: 'none' })
     }
-    Taro.showToast({ title: '注册成功', icon: 'success' })
-    setTimeout(() => {
-      Taro.navigateBack()
-    }, 1500)
   }
 
-  const goToLogin = () => {
-    Taro.navigateBack()
+  const handleRegister = async () => {
+    if (!phone || phone.length !== 11) {
+      return Taro.showToast({ title: '手机号格式错误', icon: 'none' })
+    }
+    if (!password || password.length < 6) {
+      return Taro.showToast({ title: '密码至少6位', icon: 'none' })
+    }
+    if (password !== confirmPassword) {
+      return Taro.showToast({ title: '两次输入的密码不一致', icon: 'none' })
+    }
+    if (code !== '123456') {
+      return Taro.showToast({ title: '验证码错误', icon: 'none' })
+    }
+
+    Taro.showLoading({ title: '建立您的账户...' })
+    try {
+      const res = await register({ phone, password })
+      Taro.hideLoading()
+      Taro.showToast({ title: '注册成功', icon: 'success' })
+      setTimeout(() => {
+        Taro.navigateBack()
+      }, 1500)
+    } catch (error) {
+      Taro.hideLoading()
+      const errorMsg = error.response?.data?.error || error.message || '注册失败'
+      Taro.showToast({ title: errorMsg, icon: 'none' })
+    }
   }
 
   return (
-    <View className="register-page">
-      <View className="logo-area">
-        <Text className="app-name">🏨 Hotel App</Text>
-        <Text className="app-slogan">创建您的账号</Text>
-      </View>
-      
-      <View className="register-form">
-        <Cell.Group>
-          <Field 
-            label="手机号" 
-            placeholder="请输入手机号" 
-            type="number"
-            value={phone}
-            onChange={(e) => setPhone(e.detail.value)}
-          />
-          <Field 
-            label="验证码" 
-            placeholder="请输入验证码"
-            value={code}
-            onChange={(e) => setCode(e.detail.value)}
+    <View className="login-page">
+      <CustomNavBar title="注册" transparent />
+      <Image
+        className="bg-image"
+        src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80"
+        mode="aspectFill"
+      />
+      <View className="bg-overlay" />
+
+      <View className="content-container">
+        {/* 优化后的顶部区域 */}
+        <View className="logo-section">
+          <View className="logo-box">
+            <Image src={logoSvg} className="logo-img" mode="aspectFit" />
+          </View>
+          <Text className="app-name">易宿酒店预订平台</Text>
+          <Text className="app-slogan">尊享品质住宿体验</Text>
+        </View>
+
+        {/* 优化后的表单区域 */}
+        <View className="register-content">
+          <Text className="form-title">加入易宿会员</Text>
+
+          {/* 手机号输入 */}
+          <View className="input-wrapper">
+            <Input
+              className="custom-input"
+              type="number"
+              placeholder="手机号码"
+              placeholderClass="placeholder-class"
+              value={phone}
+              onInput={(e) => setPhone(e.detail.value)}
+            />
+          </View>
+
+          {/* 验证码输入 */}
+          <View className="code-wrapper">
+            <View className="input-wrapper flex-1">
+              <Input
+                className="custom-input"
+                type="number"
+                placeholder="验证码 (123456)"
+                placeholderClass="placeholder-class"
+                value={code}
+                onInput={(e) => setCode(e.detail.value)}
+              />
+            </View>
+            <Button
+              size="small"
+              disabled={countdown > 0}
+              onClick={handleSendCode}
+              className="code-btn"
+            >
+              {countdown > 0 ? `${countdown}s` : '获取验证码'}
+            </Button>
+          </View>
+
+          {/* 密码输入 */}
+          <View className="input-wrapper">
+            <Input
+              className="custom-input"
+              password
+              placeholder="设置登录密码 (≥6位)"
+              placeholderClass="placeholder-class"
+              value={password}
+              onInput={(e) => setPassword(e.detail.value)}
+            />
+          </View>
+
+          {/* 确认密码输入 */}
+          <View className="input-wrapper">
+            <Input
+              className="custom-input"
+              password
+              placeholder="确认登录密码"
+              placeholderClass="placeholder-class"
+              value={confirmPassword}
+              onInput={(e) => setConfirmPassword(e.detail.value)}
+            />
+          </View>
+
+          {/* 注册按钮 */}
+          <Button
+            block
+            shape="round"
+            onClick={handleRegister}
+            className="register-btn"
           >
-            <Button size="small" type="primary">获取验证码</Button>
-          </Field>
-          <Field 
-            label="密码" 
-            placeholder="请设置密码" 
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.detail.value)}
-          />
-        </Cell.Group>
-        
-        <View className="btn-area">
-          <Button block type="primary" onClick={handleRegister}>注册</Button>
+            完成注册
+          </Button>
+
+          {/* 底部链接 */}
+          <View className="footer-links">
+            <Text className="footer-text">已经有账户?</Text>
+            <Text
+              className="link-text"
+              onClick={() => Taro.navigateBack()}
+            >
+              去登录
+            </Text>
+          </View>
         </View>
-        
-        <View className="login-link" onClick={goToLogin}>
-          <Text>已有账号？立即登录</Text>
-        </View>
+
+        <View className="bottom-spacer" />
       </View>
     </View>
   )
 }
-
-export default Register

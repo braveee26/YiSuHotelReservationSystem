@@ -1,57 +1,58 @@
-import React, { useState } from 'react';
-import { Search, Plus, Edit, Bed, Users, DollarSign, Image } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Plus, Edit, Bed, Users, DollarSign, Image, Loader2 } from 'lucide-react';
+import { getHotelsByMerchantId } from '../../api/base/hotelApi';
+import { getRoomsByHotelId } from '../../api/base/roomTypeApi';
+import { useUserStore } from '../../store/useUserStore';
+import { message } from 'antd';
 
 export default function RoomManagement() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const user = useUserStore((s) => s.user);
 
-  // 模拟房型数据
-  const rooms = [
-    {
-      id: '1',
-      hotel_name: '北京王府井大酒店',
-      room_name: '豪华大床房',
-      price: 680,
-      capacity: 2,
-      size: 35,
-      total: 20,
-      available: 15,
-    },
-    {
-      id: '2',
-      hotel_name: '北京王府井大酒店',
-      room_name: '行政套房',
-      price: 1280,
-      capacity: 3,
-      size: 60,
-      total: 10,
-      available: 8,
-    },
-    {
-      id: '3',
-      hotel_name: '上海外滩精品酒店',
-      room_name: '标准双床房',
-      price: 480,
-      capacity: 2,
-      size: 28,
-      total: 30,
-      available: 22,
-    },
-    {
-      id: '4',
-      hotel_name: '上海外滩精品酒店',
-      room_name: '江景套房',
-      price: 1680,
-      capacity: 4,
-      size: 80,
-      total: 5,
-      available: 3,
-    },
-  ];
+  // 加载商户所有酒店的房型
+  useEffect(() => {
+    const merchantId = user?.userId || user?.user_id;
+    if (!merchantId) return;
 
-  const filteredRooms = rooms.filter((room) =>
-    room.room_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    room.hotel_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    setLoading(true);
+    getHotelsByMerchantId(merchantId)
+      .then(async (res) => {
+        if (res.code === 200 && res.data) {
+          const hotels = res.data;
+          // 对每个酒店并行获取房型
+          const roomPromises = hotels.map((hotel) =>
+            getRoomsByHotelId(hotel.hotelId || hotel.id)
+              .then((roomRes) => {
+                if (roomRes.code === 200 && roomRes.data) {
+                  return roomRes.data.map((room) => ({
+                    ...room,
+                    hotel_name: hotel.hotelNameCn || hotel.hotel_name_cn || '',
+                  }));
+                }
+                return [];
+              })
+              .catch(() => [])
+          );
+          const allRooms = (await Promise.all(roomPromises)).flat();
+          setRooms(allRooms);
+        } else {
+          message.error(res.msg || '获取酒店列表失败');
+        }
+      })
+      .catch(() => message.error('获取房型数据失败'))
+      .finally(() => setLoading(false));
+  }, [user]);
+
+  const filteredRooms = rooms.filter((room) => {
+    const roomName = room.roomName || room.room_name || '';
+    const hotelName = room.hotel_name || '';
+    return (
+      roomName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      hotelName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   return (
     <div className="space-y-6">
@@ -78,7 +79,15 @@ export default function RoomManagement() {
         </div>
       </div>
 
+      {/* Loading */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+        </div>
+      )}
+
       {/* Rooms Table */}
+      {!loading && (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -95,38 +104,46 @@ export default function RoomManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredRooms.map((room) => (
-                <tr key={room.id} className="hover:bg-gray-50 transition-colors">
+              {filteredRooms.map((room) => {
+                const roomName = room.roomName || room.room_name || '';
+                const price = room.price ?? room.basePrice ?? '-';
+                const size = room.roomSize || room.size || '-';
+                const capacity = room.maxPeople || room.capacity || '-';
+                const total = room.totalRooms || room.total || '-';
+                const available = room.availableRooms || room.available || '-';
+
+                return (
+                <tr key={room.roomTypeId || room.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-800">{room.hotel_name}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
                       <Bed className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm font-medium text-gray-800">{room.room_name}</span>
+                      <span className="text-sm font-medium text-gray-800">{roomName}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-1 text-sm font-medium text-green-600">
                       <DollarSign className="w-4 h-4" />
-                      <span>{room.price}</span>
+                      <span>{price}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm text-gray-600">{room.size}m²</span>
+                    <span className="text-sm text-gray-600">{size}m²</span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-1 text-sm text-gray-600">
                       <Users className="w-4 h-4" />
-                      <span>{room.capacity}人</span>
+                      <span>{capacity}人</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm text-gray-800">{room.total}</span>
+                    <span className="text-sm text-gray-800">{total}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`text-sm font-medium ${room.available > 5 ? 'text-green-600' : 'text-orange-600'}`}>
-                      {room.available}
+                    <span className={`text-sm font-medium ${Number(available) > 5 ? 'text-green-600' : 'text-orange-600'}`}>
+                      {available}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -140,13 +157,15 @@ export default function RoomManagement() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
+      )}
 
-      {filteredRooms.length === 0 && (
+      {!loading && filteredRooms.length === 0 && (
         <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
           <Bed className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <p className="text-gray-500">暂无房型数据</p>

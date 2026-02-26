@@ -5,8 +5,10 @@
 }
 
 .scroll-content {
-  padding-bottom: constant(safe-area-inset-bottom); /* iOS 11.0 */
-  padding-bottom: env(safe-area-inset-bottom); /* iOS 11.2 */
+  padding-bottom: constant(safe-area-inset-bottom);
+  /* iOS 11.0 */
+  padding-bottom: env(safe-area-inset-bottom);
+  /* iOS 11.2 */
 }
 
 .section-container {
@@ -18,16 +20,44 @@
   display: flex;
   align-items: center;
   margin-bottom: 24rpx;
-  
+
+  &.jb {
+    justify-content: space-between;
+  }
+
   .icon {
     font-size: 40rpx;
     margin-right: 16rpx;
   }
-  
+
   .title {
     font-size: 34rpx;
     font-weight: 600;
     color: #333;
+  }
+
+  .refresh-box {
+    display: flex;
+    align-items: center;
+    padding: 8rpx 16rpx;
+    background: #ecf3f7;
+    border-radius: 24rpx;
+
+    .refresh-icon {
+      font-size: 28rpx;
+      color: #385e72;
+      margin-right: 8rpx;
+    }
+
+    .refresh-text {
+      font-size: 24rpx;
+      color: #385e72;
+      font-weight: 500;
+    }
+
+    &:active {
+      opacity: 0.7;
+    }
   }
 }
 
@@ -35,7 +65,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 16rpx;
-  
+
   .hot-tag {
     padding: 12rpx 24rpx;
     background: #fff;
@@ -44,11 +74,11 @@
     border-radius: 32rpx;
     font-size: 24rpx;
     transition: all 0.2s ease;
-    
+
     &:active {
       background: #d9e4ec;
     }
-    
+
     &.active {
       background: #385e72;
       color: #fff;
@@ -60,4 +90,24 @@
 .hotel-list {
   display: flex;
   flex-direction: column;
+}
+
+.taroify-calendar__day__bottom {
+    font-size: 30px !important;
+    margin-top: 8px !important;
+} 
+
+// 城市选择 Cascader 字体大小
+.taroify-cascader__option {
+    font-size: 30px !important;  // 选项文字大小
+}
+
+.taroify-cascader__header {
+    font-size: 50px !important;  // 头部"切换城市"标题大小
+}
+
+.taroify-tabs__tab {
+    font-size: 30px !important;  // Tab 标签页（省/市层级）大小
+    padding: 0 32px !important;  // 加宽每个标签的水平内边距
+    min-width: 120px !important; // 最小宽度
 }
