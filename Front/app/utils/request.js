@@ -3,8 +3,8 @@ import { message } from "antd";
 import { useUserStore } from "../store/useUserStore";
 
 // 根据环境设置API基础URL
-// 生产环境：在 Cloudflare Pages 构建设置中配置 VITE_API_TARGET=https://your-java-api.onrender.com
-const apiBaseUrl = import.meta.env.VITE_API_TARGET || "";
+// 生产环境 API 地址（Render 部署的 Java 后端）
+const apiBaseUrl = import.meta.env.VITE_API_TARGET || "https://yisu-java-api.onrender.com";
 
 const service = axios.create({
   baseURL: apiBaseUrl,
