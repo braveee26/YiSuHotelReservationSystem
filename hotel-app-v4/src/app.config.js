@@ -71,5 +71,8 @@ export default {
     'scope.userLocation': {
       desc: '您的位置信息将用于自动填充城市和为您推荐附近酒店'
     }
-  }
+  },
+  requiredPrivateInfos: [
+    'getLocation'
+  ]
 }

@@ -93,20 +93,47 @@ export default function SearchCard({ onSearch = () => { } }) {
 
   const handleLocationClick = () => {
     Taro.showLoading({ title: "识别位置中...", mask: true });
+    console.log("[Location] 开始调用 Taro.getLocation...");
+    
     Taro.getLocation({
-      success: () => {
-        setTimeout(() => {
-          Taro.hideLoading();
-          updateSearchParam("city", "南京市");
-          Taro.showToast({ title: "自动识别: 南京", icon: "success" });
-        }, 800);
+      type: 'gcj02', // Tencent maps use GCJ02 coordinate system
+      success: (res) => {
+        console.log("[Location] Taro.getLocation 成功返回:", res);
+        
+        // Use Tencent Map WebService API for reverse geocoding
+        Taro.request({
+          url: `https://apis.map.qq.com/ws/geocoder/v1/?location=${res.latitude},${res.longitude}&key=RP7BZ-FH66I-RLCG5-UG3FM-IOYM6-BPBRV`,
+          success: (mapRes) => {
+            console.log("[Location] 腾讯地图 API 返回:", mapRes.data);
+            Taro.hideLoading();
+            
+            if (mapRes.data && mapRes.data.status === 0) {
+              const adInfo = mapRes.data.result.ad_info;
+              let cityName = adInfo.city || mapRes.data.result.address_component.city;
+              
+              if (cityName) {
+                console.log("[Location] 解析到的城市:", cityName);
+                updateSearchParam("city", cityName);
+                Taro.showToast({ title: `已定位: ${cityName}`, icon: "success" });
+              } else {
+                Taro.showToast({ title: "未能解析到城市", icon: "none" });
+              }
+            } else {
+              Taro.showToast({ title: "逆地址解析失败", icon: "none" });
+            }
+          },
+          fail: (err) => {
+            console.error("[Location] 腾讯地图请求失败:", err);
+            Taro.hideLoading();
+            Taro.showToast({ title: "网络请求失败", icon: "none" });
+          }
+        });
       },
-      fail: () => {
-        setTimeout(() => {
-          Taro.hideLoading();
-          updateSearchParam("city", "南京市");
-          Taro.showToast({ title: "环境受限，已推荐南京", icon: "none" });
-        }, 1000);
+      fail: (err) => {
+        console.error("[Location] Taro.getLocation 失败返回:", err);
+        Taro.hideLoading();
+        updateSearchParam("city", "南京市");
+        Taro.showToast({ title: "环境受限，已推荐南京", icon: "none" });
       }
     });
   };

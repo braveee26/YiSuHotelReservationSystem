@@ -204,12 +204,20 @@
       padding: 24rpx 32rpx !important;
     }
   }
+
+  /* Ensure the city picker popup has sufficient height */
+  :global(.popup-content),
+  .popup-content {
+    height: 80vh;
+    overflow-y: auto;
+  }
 }
 
 // 星级选择
 .star-picker-content {
   background: #fff;
   min-height: 80vh;
+  overflow-y: auto;
   padding-bottom: env(safe-area-inset-bottom);
 
   .picker-header {
